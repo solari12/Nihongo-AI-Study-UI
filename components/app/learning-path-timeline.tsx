@@ -1,9 +1,10 @@
 "use client"
 
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Circle, PlayCircle, Clock } from "lucide-react"
+import { CheckCircle2, Circle, PlayCircle, Clock, Lightbulb } from "lucide-react"
 
 interface LearningStep {
   id: string
@@ -12,6 +13,7 @@ interface LearningStep {
   status: "completed" | "current" | "upcoming"
   reason?: string
   estimatedTime?: string
+  targetUrl?: string
 }
 
 interface LearningPathTimelineProps {
@@ -90,8 +92,9 @@ export function LearningPathTimeline({
                     </Badge>
                   </div>
                   {step.reason && (
-                    <p className="text-sm text-muted-foreground">
-                      💡 {step.reason}
+                    <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                      <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                      <span>{step.reason}</span>
                     </p>
                   )}
                   {step.estimatedTime && (
@@ -103,12 +106,18 @@ export function LearningPathTimeline({
                 </div>
 
                 {isCurrent && (
-                  <Button
-                    size="sm"
-                    onClick={() => onStartStep?.(step.id)}
-                  >
-                    Bắt đầu học
-                  </Button>
+                  step.targetUrl ? (
+                    <Button size="sm" asChild>
+                      <Link href={step.targetUrl}>Bắt đầu học</Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => onStartStep?.(step.id)}
+                    >
+                      Bắt đầu học
+                    </Button>
+                  )
                 )}
               </div>
             </div>

@@ -4,7 +4,7 @@ import { LearningPathTimeline } from "@/components/app/learning-path-timeline"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Target, Clock, TrendingUp, BookOpen, FileText, HelpCircle, RefreshCw } from "lucide-react"
+import { Target, Clock, TrendingUp, BookOpen, FileText, HelpCircle, RefreshCw, Brain, Gauge, ListChecks } from "lucide-react"
 import {
   RadarChart,
   PolarGrid,
@@ -25,6 +25,7 @@ const learningSteps = [
     status: "completed" as const,
     reason: "Đã lâu không ôn tập chủ đề này",
     estimatedTime: "10 phút",
+    targetUrl: "/vocabulary",
   },
   {
     id: "2",
@@ -33,6 +34,7 @@ const learningSteps = [
     status: "completed" as const,
     reason: "Tiếp theo trong lộ trình N5",
     estimatedTime: "15 phút",
+    targetUrl: "/grammar",
   },
   {
     id: "3",
@@ -41,6 +43,7 @@ const learningSteps = [
     status: "current" as const,
     reason: "Phù hợp với tiến độ hiện tại",
     estimatedTime: "20 phút",
+    targetUrl: "/vocabulary",
   },
   {
     id: "4",
@@ -49,6 +52,7 @@ const learningSteps = [
     status: "upcoming" as const,
     reason: "Kiểm tra kiến thức đã học",
     estimatedTime: "10 phút",
+    targetUrl: "/quiz",
   },
   {
     id: "5",
@@ -57,6 +61,7 @@ const learningSteps = [
     status: "upcoming" as const,
     reason: "Chuẩn bị cho bài tiếp theo",
     estimatedTime: "20 phút",
+    targetUrl: "/grammar",
   },
   {
     id: "6",
@@ -65,6 +70,7 @@ const learningSteps = [
     status: "upcoming" as const,
     reason: "Củng cố kiến thức tuần này",
     estimatedTime: "25 phút",
+    targetUrl: "/vocabulary",
   },
 ]
 
@@ -132,7 +138,9 @@ export default function LearningPathPage() {
     status: index === 0 ? "current" as const : "upcoming" as const,
     reason: `${recommendation.reason} Ưu tiên ${recommendation.priority}/100.`,
     estimatedTime: recommendation.estimatedTime,
+    targetUrl: recommendation.targetUrl,
   }))
+  const topRecommendation = recommendations[0]
 
   return (
     <div className="space-y-6">
@@ -155,6 +163,50 @@ export default function LearningPathPage() {
         </div>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Brain className="h-5 w-5 text-primary" />
+              Thuật toán
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <p>BKT ước lượng mức nắm kiến thức từ điểm quiz.</p>
+            <p>SM-2 ưu tiên nội dung cần ôn để giảm quên.</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Gauge className="h-5 w-5 text-amber-600" />
+              Ưu tiên cao nhất
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-medium">{topRecommendation?.title || "Làm quiz đầu tiên để tạo dữ liệu"}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {topRecommendation
+                ? `${topRecommendation.priority}/100 điểm ưu tiên`
+                : "Hệ thống sẽ cập nhật sau khi có activity log."}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ListChecks className="h-5 w-5 text-success" />
+              Dữ liệu đầu vào
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 text-sm text-muted-foreground">
+            <p>{stats.learnedVocabulary}/{totalVocabulary} từ đã học</p>
+            <p>{completedGrammar}/{totalGrammar} mẫu ngữ pháp hoàn thành</p>
+            <p>{stats.quizAttempts} lượt quiz đã ghi nhận</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main timeline */}
         <div className="lg:col-span-2 space-y-6">
@@ -165,7 +217,7 @@ export default function LearningPathPage() {
                 Kế hoạch học hôm nay
               </CardTitle>
               <CardDescription>
-                Các bước học được đề xuất dựa trên phân tích AI
+                Các bước học được sắp xếp theo điểm ưu tiên từ hệ khuyến nghị
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -270,7 +322,7 @@ export default function LearningPathPage() {
           {/* Strengths */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base text-success">💪 Điểm mạnh</CardTitle>
+              <CardTitle className="text-base text-success">Điểm mạnh</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -287,7 +339,7 @@ export default function LearningPathPage() {
           {/* Weaknesses */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base text-accent">📌 Cần cải thiện</CardTitle>
+              <CardTitle className="text-base text-accent">Cần cải thiện</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">

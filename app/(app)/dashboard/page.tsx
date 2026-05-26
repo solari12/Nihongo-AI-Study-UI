@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { StatsCard } from "@/components/app/stats-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,10 @@ import {
   PlayCircle,
   AlertCircle,
   Clock,
+  Route,
+  Settings2,
+  Database,
+  ArrowRight,
 } from "lucide-react"
 import {
   AreaChart,
@@ -52,8 +57,29 @@ const weakTopics = [
 ]
 
 const recommendedLessons = [
-  { title: "Từ vựng: Đồ vật trong nhà", type: "vocabulary", duration: "15 phút" },
-  { title: "Ngữ pháp: N じゃありません", type: "grammar", duration: "20 phút" },
+  { title: "Từ vựng: Đồ vật trong nhà", type: "vocabulary", duration: "15 phút", targetUrl: "/vocabulary" },
+  { title: "Ngữ pháp: N じゃありません", type: "grammar", duration: "20 phút", targetUrl: "/grammar" },
+]
+
+const demoSteps = [
+  {
+    title: "Nhập dữ liệu N5",
+    description: "Admin thêm từ vựng, ngữ pháp, quiz hoặc import JSON.",
+    href: "/admin",
+    icon: Settings2,
+  },
+  {
+    title: "Học và làm quiz",
+    description: "Người học đánh dấu tiến độ, làm quiz và tạo activity log.",
+    href: "/quiz",
+    icon: HelpCircle,
+  },
+  {
+    title: "Xem AI gợi ý",
+    description: "BKT + SM-2 xếp hạng nội dung cần học tiếp theo.",
+    href: "/learning-path",
+    icon: Route,
+  },
 ]
 
 export default function DashboardPage() {
@@ -63,9 +89,11 @@ export default function DashboardPage() {
   const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
   const totalGrammar = content.grammar.length || stats.totalGrammar
   const completedGrammar = content.grammar.filter((item) => item.status === "Đã hoàn thành").length
+  const safeVocabularyTotal = Math.max(totalVocabulary, 1)
+  const safeGrammarTotal = Math.max(totalGrammar, 1)
   const n5Progress = Math.round(
-    ((stats.learnedVocabulary / totalVocabulary) * 0.45 +
-      (completedGrammar / totalGrammar) * 0.35 +
+    ((stats.learnedVocabulary / safeVocabularyTotal) * 0.45 +
+      (completedGrammar / safeGrammarTotal) * 0.35 +
       (stats.latestQuizScore / 100) * 0.2) *
       100
   )
@@ -73,17 +101,49 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Greeting */}
-      <div className="flex items-center justify-between">
+      <div className="rounded-lg border bg-card p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Xin chào, Tuấn! 👋</h1>
-          <p className="text-muted-foreground">
-            Hôm nay bạn muốn học gì?
+            <Badge variant="outline" className="mb-3">
+              Demo dashboard học N5
+            </Badge>
+            <h1 className="text-2xl font-bold">Xin chào, Tuấn!</h1>
+            <p className="max-w-2xl text-muted-foreground">
+              Đây là màn hình tổng hợp tiến độ, lịch sử học và gợi ý AI. Khi thuyết trình,
+              có thể đi theo luồng: Admin nhập dữ liệu, người học làm quiz, sau đó hệ thống đề xuất lộ trình.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2">
-          <span className="text-4xl font-bold text-primary">{n5Progress}%</span>
-          <span className="text-sm text-muted-foreground">Tiến độ N5</span>
+          <div className="grid min-w-[260px] gap-2 rounded-lg border bg-background p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Tiến độ N5 tổng hợp</span>
+              <span className="text-2xl font-bold text-primary">{n5Progress}%</span>
+            </div>
+            <Progress value={n5Progress} className="h-2" />
+            <p className="text-xs text-muted-foreground">Từ vựng 45% · Ngữ pháp 35% · Quiz 20%</p>
+          </div>
         </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {demoSteps.map((step) => (
+          <Card key={step.title} className="shadow-sm">
+            <CardContent className="flex h-full flex-col gap-4 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <step.icon className="h-5 w-5" />
+                </div>
+                <p className="font-semibold">{step.title}</p>
+              </div>
+              <p className="flex-1 text-sm leading-6 text-muted-foreground">{step.description}</p>
+              <Button variant="outline" className="justify-between" asChild>
+                <Link href={step.href}>
+                  Mở bước này
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Stats Cards */}
@@ -187,8 +247,10 @@ export default function DashboardPage() {
                 <Progress value={topic.accuracy} className="h-2" />
               </div>
             ))}
-            <Button variant="outline" className="w-full mt-4">
+            <Button variant="outline" className="w-full mt-4" asChild>
+              <Link href="/vocabulary">
               Ôn tập ngay
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -228,7 +290,9 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
-                <Button size="sm">Học ngay</Button>
+                <Button size="sm" asChild>
+                  <Link href={"targetUrl" in lesson ? lesson.targetUrl : "/learning-path"}>Học ngay</Link>
+                </Button>
               </div>
             ))}
           </CardContent>
@@ -280,6 +344,31 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            Checklist demo nhanh
+          </CardTitle>
+          <CardDescription>Luồng này giúp người xem hiểu rõ dữ liệu đi qua toàn hệ thống.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-4">
+          {[
+            "Admin thêm một từ mới",
+            "Mở Vocabulary và đánh dấu đã học",
+            "Làm một bài Quiz",
+            "Mở Learning Path để xem AI gợi ý",
+          ].map((item, index) => (
+            <div key={item} className="rounded-lg border bg-muted/30 p-4">
+              <div className="mb-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                {index + 1}
+              </div>
+              <p className="text-sm font-medium">{item}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   )
 }
