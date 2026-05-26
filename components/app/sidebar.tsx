@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X,
+  ClipboardCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,7 @@ import type { DemoRole } from "@/hooks/use-demo-auth"
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/onboarding", label: "Hồ sơ học", icon: ClipboardCheck },
   { href: "/vocabulary", label: "Từ vựng", icon: BookOpen },
   { href: "/grammar", label: "Ngữ pháp", icon: FileText },
   { href: "/quiz", label: "Quiz", icon: HelpCircle },

@@ -30,7 +30,7 @@ export default function RegisterPage() {
       email: email || "learner@nihongo.local",
       goal,
     })
-    router.push("/dashboard")
+    router.push("/onboarding")
   }
 
   return (

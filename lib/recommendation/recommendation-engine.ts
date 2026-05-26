@@ -1,5 +1,6 @@
 import type { LearningActivity } from "@/hooks/use-activity-log"
 import type { AdminContent } from "@/hooks/use-admin-content"
+import type { LearnerProfile, PlacementResult } from "@/hooks/use-learner-profile"
 
 export type RecommendationType = "vocabulary" | "grammar" | "quiz" | "review"
 
@@ -67,10 +68,14 @@ export function generateRecommendations({
   content,
   progress,
   activities,
+  profile,
+  placement,
 }: {
   content: AdminContent
   progress: ProgressSnapshot
   activities: LearningActivity[]
+  profile?: LearnerProfile
+  placement?: PlacementResult
 }): Recommendation[] {
   const latestActivity = activities[0]
   const daysFromLatestActivity = latestActivity ? daysSince(latestActivity.createdAt) : 7
@@ -93,6 +98,70 @@ export function generateRecommendations({
   const nextGrammar = content.grammar.find((item) => item.status !== "Đã hoàn thành")
 
   const recommendations: Recommendation[] = []
+
+  if (!profile?.completedOnboarding) {
+    recommendations.push({
+      id: "onboarding-create-profile",
+      type: "review",
+      title: "Khởi tạo hồ sơ học tập",
+      reason: "Người mới cần cung cấp mục tiêu, trình độ kana và thời gian học để hệ thống tạo lộ trình phù hợp.",
+      priority: 100,
+      estimatedTime: "3 phút",
+      targetUrl: "/onboarding",
+      explanation: buildExplanation([
+        { label: "Chưa có hồ sơ người học", contribution: 60 },
+        { label: "Cần dữ liệu đầu vào cho recommendation", contribution: 40 },
+      ]),
+    })
+  }
+
+  if (profile?.completedOnboarding && !placement?.completed) {
+    recommendations.push({
+      id: "placement-test-first",
+      type: "quiz",
+      title: "Làm kiểm tra đầu vào",
+      reason: "Placement test giúp xác định bạn nên bắt đầu từ kana, từ vựng nền tảng hay ôn tập N5.",
+      priority: 98,
+      estimatedTime: "5 phút",
+      targetUrl: "/placement-test",
+      explanation: buildExplanation([
+        { label: "Đã có hồ sơ nhưng chưa có level ban đầu", contribution: 58 },
+        { label: "Cần phân loại điểm yếu", contribution: 40 },
+      ]),
+    })
+  }
+
+  if (placement?.completed && placement.recommendedStart === "kana-basics") {
+    recommendations.push({
+      id: "placement-kana-basics",
+      type: "vocabulary",
+      title: "Bắt đầu với kana và từ vựng nền tảng",
+      reason: "Kết quả đầu vào cho thấy kana là điểm cần xử lý trước khi học nhiều từ N5.",
+      priority: 94,
+      estimatedTime: `${Math.min(profile?.dailyMinutes ?? 20, 20)} phút`,
+      targetUrl: "/vocabulary",
+      explanation: buildExplanation([
+        { label: "Placement test yếu kana", contribution: 45 },
+        { label: "Mục tiêu xây nền tảng trước", contribution: 35 },
+      ]),
+    })
+  }
+
+  if (placement?.completed && placement.weakAreas.includes("grammar")) {
+    recommendations.push({
+      id: "placement-grammar-foundation",
+      type: "grammar",
+      title: "Củng cố ngữ pháp câu danh từ",
+      reason: "Placement test phát hiện ngữ pháp nền tảng còn yếu, nên học lại mẫu câu cơ bản trước.",
+      priority: 88,
+      estimatedTime: `${Math.min(profile?.dailyMinutes ?? 20, 20)} phút`,
+      targetUrl: "/grammar",
+      explanation: buildExplanation([
+        { label: "Điểm yếu ngữ pháp", contribution: 45 },
+        { label: "Phù hợp lộ trình N5 đầu vào", contribution: 30 },
+      ]),
+    })
+  }
 
   if (progress.reviewVocabularyIds.length > 0) {
     const recencyBoost = Math.min(30, daysFromLatestActivity * 8)
