@@ -1,4 +1,11 @@
-import { grammarData, quizQuestions, vocabularyData } from "@/lib/data/nihongo-study"
+import {
+  grammarData,
+  quizQuestions,
+  vocabularyData,
+  type GrammarItem,
+  type QuizQuestionItem,
+  type VocabularyItem,
+} from "@/lib/data/nihongo-study"
 
 export type RagSource = {
   id: string
@@ -35,12 +42,23 @@ function scoreSource(queryTokens: string[], searchableText: string) {
   }, 0)
 }
 
-export function retrieveSources(query: string, limit = 5): RagSource[] {
+export function retrieveSources(
+  query: string,
+  limit = 5,
+  content: {
+    vocabulary?: VocabularyItem[]
+    grammar?: GrammarItem[]
+    quiz?: QuizQuestionItem[]
+  } = {}
+): RagSource[] {
   const queryTokens = tokenize(query)
   if (!queryTokens.length) return []
+  const vocabularyItems = content.vocabulary ?? vocabularyData
+  const grammarItems = content.grammar ?? grammarData
+  const quizItems = content.quiz ?? quizQuestions
 
   const sources: RagSource[] = [
-    ...vocabularyData.map((item) => {
+    ...vocabularyItems.map((item) => {
       const content = [
         `Từ vựng: ${item.japanese}`,
         `Hiragana: ${item.hiragana}`,
@@ -59,7 +77,7 @@ export function retrieveSources(query: string, limit = 5): RagSource[] {
         score: scoreSource(queryTokens, content),
       }
     }),
-    ...grammarData.map((item) => {
+    ...grammarItems.map((item) => {
       const content = [
         `Ngữ pháp: ${item.pattern}`,
         `Ý nghĩa: ${item.meaning}`,
@@ -77,7 +95,7 @@ export function retrieveSources(query: string, limit = 5): RagSource[] {
         score: scoreSource(queryTokens, content),
       }
     }),
-    ...quizQuestions.map((item) => {
+    ...quizItems.map((item) => {
       const content = [
         `Quiz: ${item.question}`,
         `Chủ đề: ${item.topic}`,

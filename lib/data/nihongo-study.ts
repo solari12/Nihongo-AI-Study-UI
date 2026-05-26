@@ -158,6 +158,19 @@ export const vocabularyData: VocabularyItem[] = [
       vietnamese: "Bố tôi là nhân viên công ty.",
     },
   },
+  {
+    id: 9,
+    japanese: "電話",
+    hiragana: "でんわ",
+    romaji: "denwa",
+    vietnamese: "điện thoại; cuộc gọi điện thoại",
+    type: "Danh từ",
+    topic: "Đồ vật",
+    example: {
+      japanese: "電話をします。",
+      vietnamese: "Tôi gọi điện thoại.",
+    },
+  },
 ]
 
 export const grammarFilters = ["Tất cả", "Chưa học", "Đang học", "Đã hoàn thành"]

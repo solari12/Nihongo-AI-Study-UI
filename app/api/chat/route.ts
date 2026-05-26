@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { buildChatPrompt, nihongoTutorSystemPrompt } from "@/lib/rag/chat-prompt"
 import { buildFallbackAnswer, retrieveSources } from "@/lib/rag/retriever"
+import type { AdminContent } from "@/hooks/use-admin-content"
 
 type ChatRequest = {
   message?: string
+  content?: Partial<AdminContent>
 }
 
 type OpenRouterResponse = {
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const sources = retrieveSources(message)
+  const sources = retrieveSources(message, 5, body.content)
   const prompt = buildChatPrompt(message, sources)
 
   let answer: string | null = null
