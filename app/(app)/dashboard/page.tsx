@@ -24,6 +24,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
+import { useStudyProgress } from "@/hooks/use-study-progress"
+import { useAdminContent } from "@/hooks/use-admin-content"
+import { useRecommendations } from "@/hooks/use-recommendations"
 
 const weeklyData = [
   { day: "T2", minutes: 45 },
@@ -54,6 +57,19 @@ const recommendedLessons = [
 ]
 
 export default function DashboardPage() {
+  const { stats } = useStudyProgress()
+  const { content } = useAdminContent()
+  const { recommendations, activities } = useRecommendations()
+  const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
+  const totalGrammar = content.grammar.length || stats.totalGrammar
+  const completedGrammar = content.grammar.filter((item) => item.status === "Đã hoàn thành").length
+  const n5Progress = Math.round(
+    ((stats.learnedVocabulary / totalVocabulary) * 0.45 +
+      (completedGrammar / totalGrammar) * 0.35 +
+      (stats.latestQuizScore / 100) * 0.2) *
+      100
+  )
+
   return (
     <div className="space-y-6">
       {/* Greeting */}
@@ -65,7 +81,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2">
-          <span className="text-4xl font-bold text-primary">68%</span>
+          <span className="text-4xl font-bold text-primary">{n5Progress}%</span>
           <span className="text-sm text-muted-foreground">Tiến độ N5</span>
         </div>
       </div>
@@ -74,27 +90,27 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="Từ vựng đã học"
-          value="342"
-          subtitle="/ 500 từ N5"
+          value={stats.learnedVocabulary}
+          subtitle={`/ ${totalVocabulary} từ N5`}
           icon={<BookOpen className="h-5 w-5" />}
           trend={{ value: 12, label: "tuần này", positive: true }}
         />
         <StatsCard
           title="Ngữ pháp đã học"
-          value="28"
-          subtitle="/ 45 mẫu N5"
+          value={completedGrammar}
+          subtitle={`/ ${totalGrammar} mẫu N5`}
           icon={<FileText className="h-5 w-5" />}
           trend={{ value: 8, label: "tuần này", positive: true }}
         />
         <StatsCard
           title="Quiz đã làm"
-          value="45"
+          value={stats.quizAttempts}
           subtitle="bài kiểm tra"
           icon={<HelpCircle className="h-5 w-5" />}
         />
         <StatsCard
           title="Điểm trung bình"
-          value="82%"
+          value={`${stats.averageQuizScore}%`}
           subtitle="tất cả quiz"
           icon={<TrendingUp className="h-5 w-5" />}
           trend={{ value: 5, label: "so với tuần trước", positive: true }}
@@ -188,9 +204,9 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {recommendedLessons.map((lesson, index) => (
+            {(recommendations.length ? recommendations.slice(0, 2) : recommendedLessons).map((lesson, index) => (
               <div
-                key={index}
+                key={"id" in lesson ? lesson.id : index}
                 className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
               >
                 <div className="flex items-center gap-3">
@@ -205,8 +221,11 @@ export default function DashboardPage() {
                     <p className="font-medium">{lesson.title}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      {lesson.duration}
+                      {"estimatedTime" in lesson ? lesson.estimatedTime : lesson.duration}
                     </div>
+                    {"reason" in lesson && (
+                      <p className="mt-1 text-xs text-muted-foreground">{lesson.reason}</p>
+                    )}
                   </div>
                 </div>
                 <Button size="sm">Học ngay</Button>
@@ -225,8 +244,8 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3">
+              {(activities.length ? activities.slice(0, 4) : recentActivities).map((activity, index) => (
+                <div key={"id" in activity ? activity.id : index} className="flex items-start gap-3">
                   <div className="mt-0.5">
                     <Badge
                       variant="outline"
@@ -251,7 +270,9 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm">{activity.content}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {"createdAt" in activity ? new Date(activity.createdAt).toLocaleString("vi-VN") : activity.time}
+                    </p>
                   </div>
                 </div>
               ))}

@@ -13,6 +13,9 @@ import {
   Radar,
   ResponsiveContainer,
 } from "recharts"
+import { useStudyProgress } from "@/hooks/use-study-progress"
+import { useAdminContent } from "@/hooks/use-admin-content"
+import { useRecommendations } from "@/hooks/use-recommendations"
 
 const learningSteps = [
   {
@@ -86,6 +89,51 @@ const weaknesses = [
 ]
 
 export default function LearningPathPage() {
+  const { stats } = useStudyProgress()
+  const { content } = useAdminContent()
+  const { recommendations } = useRecommendations()
+  const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
+  const totalGrammar = content.grammar.length || stats.totalGrammar
+  const completedGrammar = content.grammar.filter((item) => item.status === "Đã hoàn thành").length
+  const vocabularyProgress = Math.round((stats.learnedVocabulary / totalVocabulary) * 100)
+  const grammarProgress = Math.round((completedGrammar / totalGrammar) * 100)
+  const personalizedSteps = learningSteps.map((step) => {
+    if (step.id === "3") {
+      return {
+        ...step,
+        title: `Từ vựng mới: ${totalVocabulary - stats.learnedVocabulary} từ chưa học`,
+        reason: "Dựa trên số từ bạn đã đánh dấu hoàn thành",
+      }
+    }
+
+    if (step.id === "4") {
+      return {
+        ...step,
+        title: `Quiz: củng cố kiến thức N5 (${stats.latestQuizScore || "chưa có"}%)`,
+        reason: stats.quizAttempts
+          ? "Dựa trên kết quả quiz gần nhất"
+          : "Làm quiz đầu tiên để hệ thống có dữ liệu gợi ý",
+      }
+    }
+
+    return step
+  })
+  const skillSnapshot = [
+    { subject: "Từ vựng", A: vocabularyProgress, fullMark: 100 },
+    { subject: "Ngữ pháp", A: grammarProgress, fullMark: 100 },
+    { subject: "Đọc hiểu", A: 60, fullMark: 100 },
+    { subject: "Ghi nhớ", A: Math.max(50, vocabularyProgress), fullMark: 100 },
+    { subject: "Quiz", A: stats.averageQuizScore || 50, fullMark: 100 },
+  ]
+  const recommendationSteps = recommendations.slice(0, 6).map((recommendation, index) => ({
+    id: recommendation.id,
+    title: recommendation.title,
+    type: recommendation.type,
+    status: index === 0 ? "current" as const : "upcoming" as const,
+    reason: `${recommendation.reason} Ưu tiên ${recommendation.priority}/100.`,
+    estimatedTime: recommendation.estimatedTime,
+  }))
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -121,7 +169,7 @@ export default function LearningPathPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <LearningPathTimeline steps={learningSteps} />
+              <LearningPathTimeline steps={recommendationSteps.length ? recommendationSteps : personalizedSteps} />
             </CardContent>
           </Card>
 
@@ -140,8 +188,10 @@ export default function LearningPathPage() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Học thêm 30 từ mới về chủ đề Thời gian và Số đếm
                   </p>
-                  <Progress value={40} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">12/30 từ</p>
+                  <Progress value={vocabularyProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.learnedVocabulary}/{totalVocabulary} từ
+                  </p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -151,8 +201,10 @@ export default function LearningPathPage() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Hoàn thành 3 mẫu ngữ pháp về thể ます
                   </p>
-                  <Progress value={33} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">1/3 mẫu</p>
+                  <Progress value={grammarProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {completedGrammar}/{totalGrammar} mẫu
+                  </p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -162,8 +214,10 @@ export default function LearningPathPage() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Làm 5 bài quiz để củng cố kiến thức
                   </p>
-                  <Progress value={60} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">3/5 bài</p>
+                  <Progress value={stats.averageQuizScore || 0} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.quizAttempts} bài đã làm
+                  </p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -173,8 +227,10 @@ export default function LearningPathPage() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Ôn lại 50 từ vựng và 5 mẫu ngữ pháp cũ
                   </p>
-                  <Progress value={20} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">10/50 từ</p>
+                  <Progress value={Math.min(100, stats.reviewVocabulary * 20)} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.reviewVocabulary} từ cần ôn
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -194,7 +250,7 @@ export default function LearningPathPage() {
             <CardContent>
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={skillData}>
+                  <RadarChart data={skillSnapshot}>
                     <PolarGrid />
                     <PolarAngleAxis dataKey="subject" className="text-xs" />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} />
