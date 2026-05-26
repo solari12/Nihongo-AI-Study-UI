@@ -1,6 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,8 +15,24 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Target, GraduationCap, Rocket } from "lucide-react"
+import { useDemoAuth } from "@/hooks/use-demo-auth"
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const { registerLearner } = useDemoAuth()
+  const [fullName, setFullName] = useState("Nguyễn Văn Tuấn")
+  const [email, setEmail] = useState("learner@nihongo.local")
+  const [goal, setGoal] = useState("Thi JLPT N5")
+
+  const handleRegister = () => {
+    registerLearner({
+      name: fullName || "Người học N5",
+      email: email || "learner@nihongo.local",
+      goal,
+    })
+    router.push("/dashboard")
+  }
+
   return (
     <div className="flex min-h-screen">
       {/* Left side - Illustration */}
@@ -64,6 +82,8 @@ export default function RegisterPage() {
               <Input
                 id="fullName"
                 placeholder="Nguyễn Văn A"
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -72,6 +92,8 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 placeholder="email@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -92,25 +114,25 @@ export default function RegisterPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="goal">Mục tiêu học tập</Label>
-              <Select>
+              <Select value={goal} onValueChange={setGoal}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn mục tiêu của bạn" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Giao tiếp cơ bản</SelectItem>
-                  <SelectItem value="jlpt">Thi JLPT N5</SelectItem>
-                  <SelectItem value="beginner">Học từ đầu</SelectItem>
+                  <SelectItem value="Giao tiếp cơ bản">Giao tiếp cơ bản</SelectItem>
+                  <SelectItem value="Thi JLPT N5">Thi JLPT N5</SelectItem>
+                  <SelectItem value="Học từ đầu">Học từ đầu</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full" size="lg" asChild>
-              <Link href="/dashboard">Tạo tài khoản</Link>
+            <Button className="w-full" size="lg" onClick={handleRegister}>
+              Tạo tài khoản
             </Button>
           </CardContent>
           <CardFooter>
             <p className="w-full text-center text-sm text-muted-foreground">
               Đã có tài khoản?{" "}
-              <Link href="/" className="text-primary hover:underline">
+              <Link href="/login" className="text-primary hover:underline">
                 Đăng nhập
               </Link>
             </p>

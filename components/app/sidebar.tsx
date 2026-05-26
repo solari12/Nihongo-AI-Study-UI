@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import type { DemoRole } from "@/hooks/use-demo-auth"
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -38,14 +39,17 @@ const navItems = [
 interface SidebarProps {
   collapsed?: boolean
   onCollapsedChange?: (collapsed: boolean) => void
+  role?: DemoRole
 }
 
 function SidebarContent({ 
   collapsed = false, 
   onCollapsedChange,
-  isMobile = false 
+  isMobile = false,
+  role = "learner",
 }: SidebarProps & { isMobile?: boolean }) {
   const pathname = usePathname()
+  const visibleNavItems = navItems.filter((item) => role === "admin" || item.href !== "/admin")
 
   return (
     <div className="flex h-full flex-col">
@@ -83,7 +87,7 @@ function SidebarContent({
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3">
         <ul className="space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = pathname === item.href
             return (
               <li key={item.href}>
@@ -146,7 +150,7 @@ function SidebarContent({
   )
 }
 
-export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) {
+export function Sidebar({ collapsed = false, onCollapsedChange, role = "learner" }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
@@ -158,7 +162,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
           collapsed ? "w-16" : "w-64"
         )}
       >
-        <SidebarContent collapsed={collapsed} onCollapsedChange={onCollapsedChange} />
+        <SidebarContent collapsed={collapsed} onCollapsedChange={onCollapsedChange} role={role} />
       </aside>
 
       {/* Mobile sidebar trigger */}
@@ -170,7 +174,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) 
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
-            <SidebarContent isMobile onCollapsedChange={() => setMobileOpen(false)} />
+            <SidebarContent isMobile onCollapsedChange={() => setMobileOpen(false)} role={role} />
           </SheetContent>
         </Sheet>
       </div>

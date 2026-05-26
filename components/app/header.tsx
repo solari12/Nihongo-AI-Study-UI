@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search, Flame } from "lucide-react"
+import { Bell, Search, Flame, LogOut, ShieldCheck, UserRound } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,18 +14,33 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import type { DemoRole } from "@/hooks/use-demo-auth"
+import { useDemoAuth } from "@/hooks/use-demo-auth"
 
 interface HeaderProps {
   userName?: string
+  userEmail?: string
+  userRole?: DemoRole
   userAvatar?: string
   learningStreak?: number
 }
 
 export function Header({ 
   userName = "Nguyễn Văn Tuấn", 
+  userEmail = "learner@nihongo.local",
+  userRole = "learner",
   userAvatar,
   learningStreak = 7 
 }: HeaderProps) {
+  const router = useRouter()
+  const { logout } = useDemoAuth()
+
+  const handleLogout = () => {
+    logout()
+    router.push("/")
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-6">
       {/* Search */}
@@ -47,6 +62,11 @@ export function Header({
             {learningStreak} ngày streak
           </span>
         </div>
+
+        <Badge variant={userRole === "admin" ? "default" : "outline"} className="hidden gap-1 sm:flex">
+          {userRole === "admin" ? <ShieldCheck className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
+          {userRole === "admin" ? "Admin" : "Người học"}
+        </Badge>
 
         {/* Notifications */}
         <DropdownMenu>
@@ -97,6 +117,7 @@ export function Header({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
+            <div className="px-2 pb-2 text-xs text-muted-foreground">{userEmail}</div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/profile">Hồ sơ cá nhân</Link>
@@ -108,8 +129,9 @@ export function Header({
               <Link href="/learning-path">Lộ trình học</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="text-destructive">
-              <Link href="/">Đăng xuất</Link>
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Đăng xuất
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

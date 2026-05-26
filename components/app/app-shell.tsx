@@ -4,6 +4,7 @@ import { useState, createContext, useContext } from "react"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
 import { cn } from "@/lib/utils"
+import { useDemoAuth } from "@/hooks/use-demo-auth"
 
 interface SidebarContextType {
   collapsed: boolean
@@ -23,11 +24,16 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const { activeUser } = useDemoAuth()
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
       <div className="min-h-screen bg-background">
-        <Sidebar collapsed={collapsed} onCollapsedChange={setCollapsed} />
+        <Sidebar
+          collapsed={collapsed}
+          onCollapsedChange={setCollapsed}
+          role={activeUser.role}
+        />
         <div 
           className={cn(
             "flex min-h-screen flex-col transition-all duration-300",
@@ -35,7 +41,11 @@ export function AppShell({ children }: AppShellProps) {
             "max-lg:ml-0"
           )}
         >
-          <Header />
+          <Header
+            userName={activeUser.name}
+            userEmail={activeUser.email}
+            userRole={activeUser.role}
+          />
           <main className="flex-1 p-6">{children}</main>
         </div>
       </div>

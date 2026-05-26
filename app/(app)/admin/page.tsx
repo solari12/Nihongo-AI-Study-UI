@@ -1,6 +1,7 @@
 "use client"
 
 import { ChangeEvent, FormEvent, useRef, useState } from "react"
+import Link from "next/link"
 import { StatsCard } from "@/components/app/stats-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -25,9 +26,11 @@ import {
   Plus,
   RotateCcw,
   Settings,
+  ShieldAlert,
   Trash2,
 } from "lucide-react"
 import { isAdminContent, useAdminContent } from "@/hooks/use-admin-content"
+import { useDemoAuth } from "@/hooks/use-demo-auth"
 import type { GrammarItem, QuizQuestionItem, VocabularyItem } from "@/lib/data/nihongo-study"
 
 const emptyVocabulary: Omit<VocabularyItem, "id"> = {
@@ -74,6 +77,7 @@ const emptyQuiz: Omit<QuizQuestionItem, "id"> = {
 type EditorMode = "create" | "edit"
 
 export default function AdminPage() {
+  const { activeUser, loginAs } = useDemoAuth()
   const {
     content,
     addVocabulary,
@@ -97,6 +101,30 @@ export default function AdminPage() {
   const [grammarForm, setGrammarForm] = useState<GrammarItem | Omit<GrammarItem, "id">>(emptyGrammar)
   const [quizForm, setQuizForm] = useState<QuizQuestionItem | Omit<QuizQuestionItem, "id">>(emptyQuiz)
   const [importMessage, setImportMessage] = useState("")
+
+  if (activeUser.role !== "admin") {
+    return (
+      <div className="space-y-6">
+        <Card className="border-amber-200 bg-amber-50/60">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600" />
+              Cần quyền admin
+            </CardTitle>
+            <CardDescription>
+              Trang này dùng để thêm, sửa, xóa và import/export dữ liệu học N5. Người học không có quyền chỉnh nội dung.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
+            <Button onClick={() => loginAs("admin")}>Chuyển sang tài khoản admin demo</Button>
+            <Button variant="outline" asChild>
+              <Link href="/dashboard">Quay lại dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const openNewVocabulary = () => {
     setEditorMode("create")
