@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -31,145 +32,132 @@ import {
   LineChart,
   Line,
 } from "recharts"
+import { useActivityLog, type ActivityType, type LearningActivity } from "@/hooks/use-activity-log"
 
-const activityHistory = [
-  {
-    id: 1,
-    date: "26/05/2026",
-    type: "vocabulary",
-    content: "Học 15 từ vựng - Chủ đề: Đồ vật",
-    result: "Hoàn thành",
-    duration: "25 phút",
-  },
-  {
-    id: 2,
-    date: "26/05/2026",
-    type: "quiz",
-    content: "Quiz từ vựng bài 3",
-    result: "85%",
-    duration: "12 phút",
-  },
-  {
-    id: 3,
-    date: "25/05/2026",
-    type: "grammar",
-    content: "Học mẫu câu: N じゃありません",
-    result: "Hoàn thành",
-    duration: "20 phút",
-  },
-  {
-    id: 4,
-    date: "25/05/2026",
-    type: "review",
-    content: "Ôn tập 20 từ vựng cũ",
-    result: "18/20 nhớ",
-    duration: "15 phút",
-  },
-  {
-    id: 5,
-    date: "24/05/2026",
-    type: "vocabulary",
-    content: "Học 10 từ vựng - Chủ đề: Gia đình",
-    result: "Hoàn thành",
-    duration: "18 phút",
-  },
-  {
-    id: 6,
-    date: "24/05/2026",
-    type: "quiz",
-    content: "Quiz tổng hợp tuần 3",
-    result: "78%",
-    duration: "20 phút",
-  },
-  {
-    id: 7,
-    date: "23/05/2026",
-    type: "grammar",
-    content: "Học mẫu câu: これ/それ/あれ",
-    result: "Hoàn thành",
-    duration: "25 phút",
-  },
-  {
-    id: 8,
-    date: "22/05/2026",
-    type: "vocabulary",
-    content: "Học 12 từ vựng - Chủ đề: Trường học",
-    result: "Hoàn thành",
-    duration: "22 phút",
-  },
-]
-
-const dailyMinutesData = [
-  { date: "20/05", minutes: 45 },
-  { date: "21/05", minutes: 30 },
-  { date: "22/05", minutes: 55 },
-  { date: "23/05", minutes: 40 },
-  { date: "24/05", minutes: 38 },
-  { date: "25/05", minutes: 35 },
-  { date: "26/05", minutes: 50 },
-]
-
-const quizScoreData = [
-  { date: "Tuần 1", score: 72 },
-  { date: "Tuần 2", score: 75 },
-  { date: "Tuần 3", score: 78 },
-  { date: "Tuần 4", score: 82 },
-  { date: "Tuần 5", score: 80 },
-  { date: "Tuần 6", score: 85 },
-]
-
-const vocabByWeekData = [
-  { week: "T1", count: 35 },
-  { week: "T2", count: 42 },
-  { week: "T3", count: 38 },
-  { week: "T4", count: 50 },
-  { week: "T5", count: 45 },
-  { week: "T6", count: 52 },
-]
-
-const typeIcons: Record<string, React.ReactNode> = {
+const typeIcons: Record<ActivityType, React.ReactNode> = {
   vocabulary: <BookOpen className="h-4 w-4 text-primary" />,
   grammar: <FileText className="h-4 w-4 text-success" />,
   quiz: <HelpCircle className="h-4 w-4 text-accent" />,
   review: <RefreshCw className="h-4 w-4 text-purple-500" />,
 }
 
-const typeLabels: Record<string, string> = {
+const typeLabels: Record<ActivityType, string> = {
   vocabulary: "Từ vựng",
   grammar: "Ngữ pháp",
   quiz: "Quiz",
   review: "Ôn tập",
 }
 
-const typeBadgeColors: Record<string, string> = {
+const typeBadgeColors: Record<ActivityType, string> = {
   vocabulary: "bg-blue-100 text-blue-700",
   grammar: "bg-green-100 text-green-700",
   quiz: "bg-orange-100 text-orange-700",
   review: "bg-purple-100 text-purple-700",
 }
 
+function isWithinRange(activity: LearningActivity, range: string) {
+  if (range === "all") return true
+
+  const days = range === "30days" ? 30 : 7
+  const createdAt = new Date(activity.createdAt).getTime()
+  const boundary = Date.now() - days * 24 * 60 * 60 * 1000
+  return createdAt >= boundary
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+  })
+}
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+function buildLastSevenDays() {
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (6 - index))
+    return {
+      key: date.toISOString().slice(0, 10),
+      date: formatDate(date.toISOString()),
+      minutes: 0,
+      vocabulary: 0,
+    }
+  })
+}
+
 export default function HistoryPage() {
+  const { activities } = useActivityLog()
+  const [typeFilter, setTypeFilter] = useState<"all" | ActivityType>("all")
+  const [timeFilter, setTimeFilter] = useState("7days")
+
+  const filteredActivities = useMemo(() => {
+    return activities.filter((activity) => {
+      const matchesType = typeFilter === "all" || activity.type === typeFilter
+      return matchesType && isWithinRange(activity, timeFilter)
+    })
+  }, [activities, timeFilter, typeFilter])
+
+  const dailyMinutesData = useMemo(() => {
+    const days = buildLastSevenDays()
+    const dayMap = new Map(days.map((day) => [day.key, day]))
+
+    activities.forEach((activity) => {
+      const key = activity.createdAt.slice(0, 10)
+      const day = dayMap.get(key)
+      if (!day) return
+
+      day.minutes += activity.durationMinutes ?? 0
+      if (activity.type === "vocabulary") {
+        day.vocabulary += 1
+      }
+    })
+
+    return days
+  }, [activities])
+
+  const quizScoreData = useMemo(() => {
+    return activities
+      .filter((activity) => activity.type === "quiz" && typeof activity.score === "number")
+      .slice()
+      .reverse()
+      .map((activity, index) => ({
+        date: `Lần ${index + 1}`,
+        score: activity.score ?? 0,
+      }))
+  }, [activities])
+
+  const vocabByDayData = dailyMinutesData.map((item) => ({
+    date: item.date,
+    count: item.vocabulary,
+  }))
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <History className="h-6 w-6 text-primary" />
           Lịch sử học tập
         </h1>
         <p className="text-muted-foreground">
-          Theo dõi tiến độ và hoạt động học tập của bạn
+          Theo dõi tiến độ và hoạt động học tập thực tế của bạn
         </p>
       </div>
 
-      {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Daily learning time */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
-              Thời gian học hàng ngày
+              Thời gian học hằng ngày
             </CardTitle>
             <CardDescription>7 ngày gần nhất (phút)</CardDescription>
           </CardHeader>
@@ -207,14 +195,13 @@ export default function HistoryPage() {
           </CardContent>
         </Card>
 
-        {/* Quiz score trend */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-success" />
-              Điểm quiz theo tuần
+              Điểm quiz
             </CardTitle>
-            <CardDescription>Xu hướng điểm số (%)</CardDescription>
+            <CardDescription>Xu hướng điểm theo từng lần làm quiz</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
@@ -222,7 +209,7 @@ export default function HistoryPage() {
                 <LineChart data={quizScoreData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="date" className="text-xs" />
-                  <YAxis domain={[60, 100]} className="text-xs" />
+                  <YAxis domain={[0, 100]} className="text-xs" />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
@@ -244,21 +231,20 @@ export default function HistoryPage() {
           </CardContent>
         </Card>
 
-        {/* Vocabulary learned by week */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-accent" />
-              Từ vựng học theo tuần
+              Từ vựng học theo ngày
             </CardTitle>
-            <CardDescription>Số từ mới học được</CardDescription>
+            <CardDescription>Số hoạt động học từ mới</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={vocabByWeekData}>
+                <BarChart data={vocabByDayData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="week" className="text-xs" />
+                  <XAxis dataKey="date" className="text-xs" />
                   <YAxis className="text-xs" />
                   <Tooltip
                     contentStyle={{
@@ -280,16 +266,15 @@ export default function HistoryPage() {
         </Card>
       </div>
 
-      {/* Activity history table */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Lịch sử hoạt động</CardTitle>
-              <CardDescription>Chi tiết các hoạt động học tập gần đây</CardDescription>
+              <CardDescription>Chi tiết các hoạt động học tập được ghi nhận từ app</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Select defaultValue="all">
+              <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as "all" | ActivityType)}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Loại hoạt động" />
                 </SelectTrigger>
@@ -301,7 +286,7 @@ export default function HistoryPage() {
                   <SelectItem value="review">Ôn tập</SelectItem>
                 </SelectContent>
               </Select>
-              <Select defaultValue="7days">
+              <Select value={timeFilter} onValueChange={setTimeFilter}>
                 <SelectTrigger className="w-[130px]">
                   <SelectValue placeholder="Thời gian" />
                 </SelectTrigger>
@@ -327,9 +312,9 @@ export default function HistoryPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {activityHistory.map((activity) => (
+                {filteredActivities.map((activity) => (
                   <TableRow key={activity.id}>
-                    <TableCell className="font-medium">{activity.date}</TableCell>
+                    <TableCell className="font-medium">{formatDateTime(activity.createdAt)}</TableCell>
                     <TableCell>
                       <Badge className={typeBadgeColors[activity.type]}>
                         <span className="mr-1">{typeIcons[activity.type]}</span>
@@ -339,20 +324,27 @@ export default function HistoryPage() {
                     <TableCell>{activity.content}</TableCell>
                     <TableCell>
                       <span className={
-                        activity.result.includes("%") 
-                          ? parseInt(activity.result) >= 80 
-                            ? "text-success font-medium" 
+                        typeof activity.score === "number"
+                          ? activity.score >= 80
+                            ? "text-success font-medium"
                             : "text-accent font-medium"
                           : "text-foreground"
                       }>
-                        {activity.result}
+                        {activity.result ?? "-"}
                       </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {activity.duration}
+                      {activity.durationMinutes ? `${activity.durationMinutes} phút` : "-"}
                     </TableCell>
                   </TableRow>
                 ))}
+                {filteredActivities.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                      Chưa có hoạt động phù hợp. Hãy học từ vựng hoặc làm quiz để tạo lịch sử.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
