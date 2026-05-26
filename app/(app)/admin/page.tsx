@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useRef, useState } from "react"
 import { StatsCard } from "@/components/app/stats-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -27,7 +27,7 @@ import {
   Settings,
   Trash2,
 } from "lucide-react"
-import { useAdminContent } from "@/hooks/use-admin-content"
+import { isAdminContent, useAdminContent } from "@/hooks/use-admin-content"
 import type { GrammarItem, QuizQuestionItem, VocabularyItem } from "@/lib/data/nihongo-study"
 
 const emptyVocabulary: Omit<VocabularyItem, "id"> = {
@@ -86,7 +86,9 @@ export default function AdminPage() {
     updateQuizQuestion,
     deleteQuizQuestion,
     resetContent,
+    replaceContent,
   } = useAdminContent()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [vocabularyDialogOpen, setVocabularyDialogOpen] = useState(false)
   const [grammarDialogOpen, setGrammarDialogOpen] = useState(false)
   const [quizDialogOpen, setQuizDialogOpen] = useState(false)
@@ -94,6 +96,7 @@ export default function AdminPage() {
   const [vocabularyForm, setVocabularyForm] = useState<VocabularyItem | Omit<VocabularyItem, "id">>(emptyVocabulary)
   const [grammarForm, setGrammarForm] = useState<GrammarItem | Omit<GrammarItem, "id">>(emptyGrammar)
   const [quizForm, setQuizForm] = useState<QuizQuestionItem | Omit<QuizQuestionItem, "id">>(emptyQuiz)
+  const [importMessage, setImportMessage] = useState("")
 
   const openNewVocabulary = () => {
     setEditorMode("create")
@@ -161,6 +164,43 @@ export default function AdminPage() {
     setQuizDialogOpen(false)
   }
 
+  const exportContent = () => {
+    const blob = new Blob([JSON.stringify(content, null, 2)], {
+      type: "application/json",
+    })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = `nihongo-n5-content-${new Date().toISOString().slice(0, 10)}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    setImportMessage("Đã xuất dữ liệu nội dung N5.")
+  }
+
+  const importContent = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const parsed = JSON.parse(text)
+
+      if (!isAdminContent(parsed)) {
+        setImportMessage("File không đúng định dạng. Cần có vocabulary, grammar và quiz.")
+        return
+      }
+
+      replaceContent(parsed)
+      setImportMessage(
+        `Đã nhập ${parsed.vocabulary.length} từ vựng, ${parsed.grammar.length} ngữ pháp, ${parsed.quiz.length} câu quiz.`
+      )
+    } catch {
+      setImportMessage("Không đọc được file JSON. Hãy kiểm tra lại nội dung file.")
+    } finally {
+      event.target.value = ""
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -173,11 +213,34 @@ export default function AdminPage() {
             Thêm và chỉnh sửa dữ liệu học tập. Dữ liệu được lưu trên trình duyệt của bạn.
           </p>
         </div>
-        <Button variant="outline" onClick={resetContent}>
-          <RotateCcw className="mr-2 h-4 w-4" />
-          Khôi phục dữ liệu mẫu
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={importContent}
+          />
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+            Nhập JSON
+          </Button>
+          <Button variant="outline" onClick={exportContent}>
+            Xuất JSON
+          </Button>
+          <Button variant="outline" onClick={resetContent}>
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Khôi phục dữ liệu mẫu
+          </Button>
+        </div>
       </div>
+
+      {importMessage && (
+        <Card>
+          <CardContent className="py-3 text-sm text-muted-foreground">
+            {importMessage}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatsCard

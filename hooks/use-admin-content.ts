@@ -44,6 +44,13 @@ function nextId<T extends { id: number }>(items: T[]) {
   return Math.max(0, ...items.map((item) => item.id)) + 1
 }
 
+export function isAdminContent(value: unknown): value is AdminContent {
+  if (!value || typeof value !== "object") return false
+
+  const content = value as Partial<AdminContent>
+  return Array.isArray(content.vocabulary) && Array.isArray(content.grammar) && Array.isArray(content.quiz)
+}
+
 export function useAdminContent() {
   const [content, setContent] = useState<AdminContent>(defaultContent)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -130,6 +137,10 @@ export function useAdminContent() {
     setContent(defaultContent)
   }
 
+  const replaceContent = (nextContent: AdminContent) => {
+    setContent(nextContent)
+  }
+
   return {
     content,
     topics,
@@ -143,5 +154,6 @@ export function useAdminContent() {
     updateQuizQuestion,
     deleteQuizQuestion,
     resetContent,
+    replaceContent,
   }
 }
