@@ -8,109 +8,134 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Sparkles, BookOpen, FileText, HelpCircle } from "lucide-react"
 
+type ChatSource = {
+  id: string
+  title: string
+  type: string
+  score: number
+}
+
+type ChatMessageItem = {
+  role: "user" | "assistant"
+  content: string
+  timestamp: string
+  sources?: ChatSource[]
+}
+
+type ChatResponse = {
+  answer: string
+  provider: "openrouter" | "fallback"
+  sources: ChatSource[]
+}
+
 const suggestedQuestions = [
   "Giải thích mẫu câu N は N です",
   "Cho tôi 5 ví dụ với từ 学生",
-  "Phân biệt は và が ở mức sơ cấp",
-  "Tạo quiz nhanh về từ vựng bài 1",
-  "Tôi sai nhiều phần động từ, nên ôn gì?",
+  "Phân biệt これ và それ ở mức sơ cấp",
+  "水 nghĩa là gì?",
+  "Tôi sai nhiều phần trợ từ, nên ôn gì?",
 ]
 
-const ragSources = [
-  { title: "Minna no Nihongo - Bài 1", type: "Giáo trình" },
-  { title: "Từ vựng N5 - Chủ đề Gia đình", type: "Từ vựng" },
-  { title: "Ngữ pháp: Trợ từ は và が", type: "Ngữ pháp" },
-]
-
-const initialMessages = [
+const initialMessages: ChatMessageItem[] = [
   {
-    role: "assistant" as const,
-    content: `Xin chào! Tôi là trợ lý AI của Nihongo AI Study. Tôi có thể giúp bạn:
+    role: "assistant",
+    content: `Xin chào! Tôi là trợ lý AI của Nihongo AI Study.
 
-• Giải thích ngữ pháp và từ vựng N5
-• Đưa ra ví dụ và cách sử dụng
-• Tạo quiz nhanh để luyện tập
-• Gợi ý nội dung ôn tập phù hợp
+Tôi có thể tra cứu dữ liệu N5 trong hệ thống để hỗ trợ:
+
+• Giải thích ngữ pháp và từ vựng
+• Đưa ví dụ tiếng Nhật và nghĩa tiếng Việt
+• Gợi ý nội dung ôn tập
+• Trả lời kèm nguồn tham khảo từ kho dữ liệu
 
 Bạn muốn hỏi gì hôm nay?`,
     timestamp: "10:00",
   },
 ]
 
+function formatTime() {
+  return new Date().toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+function sourceIcon(type: string) {
+  if (type === "grammar") return <FileText className="h-5 w-5 text-success shrink-0" />
+  if (type === "quiz") return <HelpCircle className="h-5 w-5 text-accent shrink-0" />
+  return <BookOpen className="h-5 w-5 text-primary shrink-0" />
+}
+
 export default function ChatbotPage() {
   const [messages, setMessages] = useState(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const latestSources = [...messages].reverse().find((message) => message.sources?.length)?.sources ?? []
+  const todayQuestions = messages.filter((message) => message.role === "user").length
+  const popularTopic = latestSources[0]?.type ?? "Chưa có"
 
   const handleSend = async () => {
-    if (!inputValue.trim()) return
+    const message = inputValue.trim()
+    if (!message || isLoading) return
 
-    const userMessage = {
-      role: "user" as const,
-      content: inputValue,
-      timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+    const userMessage: ChatMessageItem = {
+      role: "user",
+      content: message,
+      timestamp: formatTime(),
     }
 
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
     setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      const botResponse = {
-        role: "assistant" as const,
-        content: `Câu hỏi hay đấy! Để tôi giải thích cho bạn:
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      })
+      const data = (await response.json()) as ChatResponse
 
-**Mẫu câu "N は N です"** là một trong những cấu trúc cơ bản nhất trong tiếng Nhật.
-
-📝 **Cấu trúc:**
-Danh từ 1 + は + Danh từ 2 + です
-
-📖 **Ý nghĩa:**
-"N1 là N2" - Dùng để giới thiệu hoặc khẳng định điều gì đó.
-
-✨ **Ví dụ:**
-• 私は学生です。(Watashi wa gakusei desu.) = Tôi là sinh viên.
-• 田中さんは先生です。(Tanaka-san wa sensei desu.) = Anh Tanaka là giáo viên.
-• これは本です。(Kore wa hon desu.) = Đây là sách.
-
-💡 **Lưu ý:**
-- は đọc là "wa" (không phải "ha") khi làm trợ từ
-- です làm cho câu lịch sự hơn
-
-Bạn có muốn tôi cho thêm ví dụ hoặc tạo quiz về mẫu câu này không?`,
-        timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
-        sources: [
-          { title: "Minna no Nihongo - Bài 1", type: "Giáo trình" },
-          { title: "Ngữ pháp N5 cơ bản", type: "Ngữ pháp" },
-        ],
+      const botResponse: ChatMessageItem = {
+        role: "assistant",
+        content:
+          data.provider === "fallback"
+            ? `${data.answer}\n\n(Ghi chú: hệ thống đang dùng trả lời fallback vì OpenRouter chưa phản hồi hoặc chưa cấu hình key.)`
+            : data.answer,
+        timestamp: formatTime(),
+        sources: data.sources,
       }
 
       setMessages((prev) => [...prev, botResponse])
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Mình chưa thể xử lý câu hỏi lúc này. Hãy thử lại sau.",
+          timestamp: formatTime(),
+        },
+      ])
+    } finally {
       setIsLoading(false)
-    }, 1500)
-  }
-
-  const handleSuggestedQuestion = (question: string) => {
-    setInputValue(question)
+    }
   }
 
   return (
     <div className="flex h-[calc(100vh-8rem)] gap-6">
-      {/* Main chat area */}
       <div className="flex flex-1 flex-col">
-        {/* Header */}
         <div className="mb-4">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-accent" />
             Chatbot AI
           </h1>
           <p className="text-muted-foreground">
-            Hỏi đáp về tiếng Nhật N5 với AI
+            Hỏi đáp tiếng Nhật N5 với RAG và OpenRouter
           </p>
         </div>
 
-        {/* Messages */}
         <Card className="flex-1 flex flex-col">
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-6">
@@ -120,7 +145,7 @@ Bạn có muốn tôi cho thêm ví dụ hoặc tạo quiz về mẫu câu này 
                   role={message.role}
                   content={message.content}
                   timestamp={message.timestamp}
-                  sources={(message as any).sources}
+                  sources={message.sources}
                 />
               ))}
               {isLoading && (
@@ -140,17 +165,16 @@ Bạn có muốn tôi cho thêm ví dụ hoặc tạo quiz về mẫu câu này 
             </div>
           </ScrollArea>
 
-          {/* Suggested questions */}
           <div className="border-t p-4">
             <p className="text-sm text-muted-foreground mb-3">Câu hỏi gợi ý:</p>
             <div className="flex flex-wrap gap-2">
-              {suggestedQuestions.map((question, index) => (
+              {suggestedQuestions.map((question) => (
                 <Button
-                  key={index}
+                  key={question}
                   variant="outline"
                   size="sm"
                   className="text-xs"
-                  onClick={() => handleSuggestedQuestion(question)}
+                  onClick={() => setInputValue(question)}
                 >
                   {question}
                 </Button>
@@ -158,18 +182,17 @@ Bạn có muốn tôi cho thêm ví dụ hoặc tạo quiz về mẫu câu này 
             </div>
           </div>
 
-          {/* Input */}
           <div className="border-t p-4">
             <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleSend()
+              onSubmit={(event) => {
+                event.preventDefault()
+                void handleSend()
               }}
               className="flex gap-2"
             >
               <Input
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(event) => setInputValue(event.target.value)}
                 placeholder="Nhập câu hỏi của bạn..."
                 className="flex-1"
               />
@@ -181,7 +204,6 @@ Bạn có muốn tôi cho thêm ví dụ hoặc tạo quiz về mẫu câu này 
         </Card>
       </div>
 
-      {/* Right sidebar - RAG sources */}
       <div className="hidden w-80 shrink-0 lg:block">
         <Card className="h-full">
           <CardHeader>
@@ -192,39 +214,41 @@ Bạn có muốn tôi cho thêm ví dụ hoặc tạo quiz về mẫu câu này 
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              AI sử dụng các nguồn sau để trả lời:
+              RAG truy xuất các nguồn sau để tạo câu trả lời:
             </p>
-            {ragSources.map((source, index) => (
-              <div
-                key={index}
-                className="rounded-lg border p-3 transition-colors hover:bg-muted/50"
-              >
-                <div className="flex items-start gap-3">
-                  {source.type === "Giáo trình" ? (
-                    <BookOpen className="h-5 w-5 text-primary shrink-0" />
-                  ) : source.type === "Ngữ pháp" ? (
-                    <FileText className="h-5 w-5 text-success shrink-0" />
-                  ) : (
-                    <HelpCircle className="h-5 w-5 text-accent shrink-0" />
-                  )}
-                  <div>
-                    <p className="text-sm font-medium">{source.title}</p>
-                    <p className="text-xs text-muted-foreground">{source.type}</p>
+            {latestSources.length ? (
+              latestSources.map((source) => (
+                <div
+                  key={source.id}
+                  className="rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-start gap-3">
+                    {sourceIcon(source.type)}
+                    <div>
+                      <p className="text-sm font-medium">{source.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {source.type} · score {source.score}
+                      </p>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                Chưa có nguồn nào. Hãy gửi một câu hỏi để hệ thống truy xuất dữ liệu.
               </div>
-            ))}
+            )}
 
             <div className="pt-4 border-t">
               <h4 className="text-sm font-medium mb-2">Thống kê hội thoại</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Câu hỏi hôm nay</span>
-                  <span className="font-medium">12</span>
+                  <span className="font-medium">{todayQuestions}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Chủ đề phổ biến</span>
-                  <span className="font-medium">Ngữ pháp</span>
+                  <span className="text-muted-foreground">Nguồn gần nhất</span>
+                  <span className="font-medium">{popularTopic}</span>
                 </div>
               </div>
             </div>
