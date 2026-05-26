@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { QuizQuestion } from "@/components/app/quiz-question"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
   Select,
@@ -25,71 +24,18 @@ import {
   Home,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import type { QuizQuestionItem } from "@/lib/data/nihongo-study"
+import { useStudyProgress } from "@/hooks/use-study-progress"
+import { useAdminContent } from "@/hooks/use-admin-content"
+import { useActivityLog } from "@/hooks/use-activity-log"
 
 type QuizState = "setup" | "playing" | "result"
 
-const quizQuestions = [
-  {
-    id: 1,
-    question: '"学生" nghĩa là gì?',
-    answers: [
-      { id: "a", text: "Giáo viên" },
-      { id: "b", text: "Sinh viên" },
-      { id: "c", text: "Sách" },
-      { id: "d", text: "Nhật Bản" },
-    ],
-    correctAnswer: "b",
-    explanation: "学生 (がくせい / gakusei) có nghĩa là sinh viên.",
-  },
-  {
-    id: 2,
-    question: 'Chọn cách đọc đúng của "先生"',
-    answers: [
-      { id: "a", text: "sakisei" },
-      { id: "b", text: "sensei" },
-      { id: "c", text: "seisei" },
-      { id: "d", text: "sensou" },
-    ],
-    correctAnswer: "b",
-    explanation: "先生 đọc là せんせい (sensei), có nghĩa là giáo viên.",
-  },
-  {
-    id: 3,
-    question: 'Điền vào chỗ trống: "私___学生です。"',
-    answers: [
-      { id: "a", text: "を" },
-      { id: "b", text: "が" },
-      { id: "c", text: "は" },
-      { id: "d", text: "に" },
-    ],
-    correctAnswer: "c",
-    explanation: 'Trợ từ は dùng để đánh dấu chủ đề của câu. "私は学生です" nghĩa là "Tôi là sinh viên".',
-  },
-  {
-    id: 4,
-    question: '"水" nghĩa là gì?',
-    answers: [
-      { id: "a", text: "Lửa" },
-      { id: "b", text: "Đất" },
-      { id: "c", text: "Gió" },
-      { id: "d", text: "Nước" },
-    ],
-    correctAnswer: "d",
-    explanation: "水 (みず / mizu) có nghĩa là nước.",
-  },
-  {
-    id: 5,
-    question: 'Câu nào đúng để nói "Đây là sách"?',
-    answers: [
-      { id: "a", text: "これは本です。" },
-      { id: "b", text: "それは本です。" },
-      { id: "c", text: "あれは本です。" },
-      { id: "d", text: "どれは本です。" },
-    ],
-    correctAnswer: "a",
-    explanation: 'これ dùng cho vật ở gần người nói. "これは本です" = "Cái này là sách".',
-  },
-]
+type SubmitQuizResponse = {
+  score: number
+  total: number
+  percentage: number
+}
 
 export default function QuizPage() {
   const [quizState, setQuizState] = useState<QuizState>("setup")
@@ -98,13 +44,27 @@ export default function QuizPage() {
   const [difficulty, setDifficulty] = useState("easy")
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
-  const [showResult, setShowResult] = useState(false)
+  const [finalResult, setFinalResult] = useState({ score: 0, total: 0, percentage: 0 })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { recordQuizAttempt } = useStudyProgress()
+  const { content } = useAdminContent()
+  const { addActivity } = useActivityLog()
+
+  const activeQuestions = useMemo(() => {
+    const filtered = content.quiz.filter((question) => {
+      const matchesType = quizType === "mixed" || question.type === quizType
+      const matchesDifficulty = difficulty === "easy" || question.difficulty === difficulty
+      return matchesType && matchesDifficulty
+    })
+
+    return filtered.slice(0, Number(questionCount))
+  }, [content.quiz, difficulty, questionCount, quizType])
 
   const startQuiz = () => {
     setQuizState("playing")
     setCurrentQuestion(0)
     setSelectedAnswers({})
-    setShowResult(false)
+    setFinalResult({ score: 0, total: activeQuestions.length, percentage: 0 })
   }
 
   const handleSelectAnswer = (answerId: string) => {
@@ -114,10 +74,50 @@ export default function QuizPage() {
     }))
   }
 
-  const handleNext = () => {
-    if (currentQuestion === quizQuestions.length - 1) {
-      setShowResult(true)
+  const submitQuiz = async () => {
+    setIsSubmitting(true)
+
+    const answersByQuestionId = activeQuestions.reduce<Record<string, string>>(
+      (answers, question, index) => {
+        answers[String(question.id)] = selectedAnswers[index]
+        return answers
+      },
+      {}
+    )
+
+    try {
+      const response = await fetch("/api/quiz/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quizType,
+          questionIds: activeQuestions.map((question) => question.id),
+          answers: answersByQuestionId,
+        }),
+      })
+      const result = (await response.json()) as SubmitQuizResponse
+
+      setFinalResult(result)
+      recordQuizAttempt(quizType, result)
+      addActivity({
+        type: "quiz",
+        content: `Hoàn thành quiz ${quizType === "vocabulary" ? "từ vựng" : quizType === "grammar" ? "ngữ pháp" : "tổng hợp"}`,
+        topic: activeQuestions[0]?.topic,
+        result: `${result.score}/${result.total} câu đúng`,
+        score: result.percentage,
+        durationMinutes: 12,
+      })
       setQuizState("result")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentQuestion === activeQuestions.length - 1) {
+      void submitQuiz()
     } else {
       setCurrentQuestion((prev) => prev + 1)
     }
@@ -129,20 +129,9 @@ export default function QuizPage() {
     }
   }
 
-  const calculateScore = () => {
-    let correct = 0
-    quizQuestions.forEach((q, index) => {
-      if (selectedAnswers[index] === q.correctAnswer) {
-        correct++
-      }
-    })
-    return correct
-  }
-
   if (quizState === "setup") {
     return (
       <div className="space-y-6">
-        {/* Header */}
         <div>
           <h1 className="text-2xl font-bold">Quiz N5</h1>
           <p className="text-muted-foreground">
@@ -150,7 +139,6 @@ export default function QuizPage() {
           </p>
         </div>
 
-        {/* Quiz setup */}
         <div className="mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -160,7 +148,6 @@ export default function QuizPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Quiz type */}
               <div className="space-y-3">
                 <label className="text-sm font-medium">Loại quiz</label>
                 <div className="grid grid-cols-3 gap-3">
@@ -189,7 +176,6 @@ export default function QuizPage() {
                 </div>
               </div>
 
-              {/* Question count */}
               <div className="space-y-3">
                 <label className="text-sm font-medium">Số câu hỏi</label>
                 <Select value={questionCount} onValueChange={setQuestionCount}>
@@ -204,7 +190,6 @@ export default function QuizPage() {
                 </Select>
               </div>
 
-              {/* Difficulty */}
               <div className="space-y-3">
                 <label className="text-sm font-medium">Độ khó</label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
@@ -219,10 +204,20 @@ export default function QuizPage() {
                 </Select>
               </div>
 
-              <Button onClick={startQuiz} className="w-full" size="lg">
+              <Button
+                onClick={startQuiz}
+                className="w-full"
+                size="lg"
+                disabled={activeQuestions.length === 0}
+              >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Bắt đầu làm quiz
               </Button>
+              {activeQuestions.length === 0 && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Chưa có câu hỏi phù hợp với lựa chọn này.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -231,14 +226,11 @@ export default function QuizPage() {
   }
 
   if (quizState === "result") {
-    const score = calculateScore()
-    const total = quizQuestions.length
-    const percentage = Math.round((score / total) * 100)
+    const { score, total, percentage } = finalResult
 
     return (
       <div className="space-y-6">
         <div className="mx-auto max-w-2xl space-y-6">
-          {/* Score card */}
           <Card className="text-center">
             <CardContent className="pt-8 pb-6">
               <div className="mb-6">
@@ -261,20 +253,20 @@ export default function QuizPage() {
                   <span>{total - score} câu sai</span>
                 </div>
               </div>
+              <Progress value={percentage} className="mt-6 h-2" />
             </CardContent>
           </Card>
 
-          {/* Explanations */}
           <Card>
             <CardHeader>
               <CardTitle>Chi tiết câu trả lời</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {quizQuestions.map((q, index) => {
-                const isCorrect = selectedAnswers[index] === q.correctAnswer
+              {activeQuestions.map((question, index) => {
+                const isCorrect = selectedAnswers[index] === question.correctAnswer
                 return (
                   <div
-                    key={q.id}
+                    key={question.id}
                     className={cn(
                       "rounded-lg border p-4",
                       isCorrect ? "border-success/50 bg-success/5" : "border-destructive/50 bg-destructive/5"
@@ -287,11 +279,11 @@ export default function QuizPage() {
                         <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                       )}
                       <div className="space-y-2">
-                        <p className="font-medium">Câu {index + 1}: {q.question}</p>
+                        <p className="font-medium">Câu {index + 1}: {question.question}</p>
                         <p className="text-sm text-muted-foreground">
-                          Đáp án đúng: {q.answers.find(a => a.id === q.correctAnswer)?.text}
+                          Đáp án đúng: {question.answers.find((answer) => answer.id === question.correctAnswer)?.text}
                         </p>
-                        <p className="text-sm">{q.explanation}</p>
+                        <p className="text-sm">{question.explanation}</p>
                       </div>
                     </div>
                   </div>
@@ -300,7 +292,6 @@ export default function QuizPage() {
             </CardContent>
           </Card>
 
-          {/* Actions */}
           <div className="flex gap-4">
             <Button
               variant="outline"
@@ -320,20 +311,21 @@ export default function QuizPage() {
     )
   }
 
-  // Playing state
+  const question = activeQuestions[currentQuestion]
+
   return (
     <div className="space-y-6">
       <QuizQuestion
         questionNumber={currentQuestion + 1}
-        totalQuestions={quizQuestions.length}
-        question={quizQuestions[currentQuestion].question}
-        answers={quizQuestions[currentQuestion].answers}
+        totalQuestions={activeQuestions.length}
+        question={question.question}
+        answers={question.answers}
         selectedAnswer={selectedAnswers[currentQuestion]}
         onSelectAnswer={handleSelectAnswer}
         onPrevious={handlePrevious}
         onNext={handleNext}
         canGoPrevious={currentQuestion > 0}
-        canGoNext={selectedAnswers[currentQuestion] !== undefined}
+        canGoNext={selectedAnswers[currentQuestion] !== undefined && !isSubmitting}
       />
     </div>
   )

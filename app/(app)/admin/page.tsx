@@ -1,335 +1,330 @@
 "use client"
 
-import { useState } from "react"
-import { AdminDataTable, StatusBadge } from "@/components/app/admin-data-table"
+import { FormEvent, useState } from "react"
 import { StatsCard } from "@/components/app/stats-card"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Users,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import {
   BookOpen,
   FileText,
   HelpCircle,
-  MessageSquare,
-  TrendingUp,
+  Pencil,
+  Plus,
+  RotateCcw,
   Settings,
+  Trash2,
 } from "lucide-react"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts"
+import { useAdminContent } from "@/hooks/use-admin-content"
+import type { GrammarItem, QuizQuestionItem, VocabularyItem } from "@/lib/data/nihongo-study"
 
-// Mock data
-const usersData = [
-  { id: 1, name: "Nguyễn Văn A", email: "vana@example.com", class: "22SE1A", progress: "65%", status: "Hoạt động" },
-  { id: 2, name: "Trần Thị B", email: "thib@example.com", class: "22SE1B", progress: "78%", status: "Hoạt động" },
-  { id: 3, name: "Lê Văn C", email: "vanc@example.com", class: "22SE1A", progress: "45%", status: "Không hoạt động" },
-  { id: 4, name: "Phạm Thị D", email: "thid@example.com", class: "22SE1C", progress: "82%", status: "Hoạt động" },
-  { id: 5, name: "Hoàng Văn E", email: "vane@example.com", class: "22SE1B", progress: "55%", status: "Hoạt động" },
-]
+const emptyVocabulary: Omit<VocabularyItem, "id"> = {
+  japanese: "",
+  hiragana: "",
+  romaji: "",
+  vietnamese: "",
+  type: "Danh từ",
+  topic: "Khác",
+  example: {
+    japanese: "",
+    vietnamese: "",
+  },
+}
 
-const vocabularyData = [
-  { id: 1, japanese: "学生", hiragana: "がくせい", vietnamese: "sinh viên", type: "Danh từ", status: "Hoạt động" },
-  { id: 2, japanese: "先生", hiragana: "せんせい", vietnamese: "giáo viên", type: "Danh từ", status: "Hoạt động" },
-  { id: 3, japanese: "日本", hiragana: "にほん", vietnamese: "Nhật Bản", type: "Danh từ", status: "Hoạt động" },
-  { id: 4, japanese: "本", hiragana: "ほん", vietnamese: "sách", type: "Danh từ", status: "Hoạt động" },
-  { id: 5, japanese: "水", hiragana: "みず", vietnamese: "nước", type: "Danh từ", status: "Hoạt động" },
-]
+const emptyGrammar: Omit<GrammarItem, "id"> = {
+  pattern: "",
+  meaning: "",
+  structure: "",
+  example: {
+    japanese: "",
+    vietnamese: "",
+  },
+  usageNote: "",
+  difficulty: "Dễ",
+  status: "Chưa học",
+}
 
-const grammarData = [
-  { id: 1, pattern: "N は N です", meaning: "N là N", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 2, pattern: "N じゃありません", meaning: "Không phải là N", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 3, pattern: "これ/それ/あれ", meaning: "Cái này/đó/kia", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 4, pattern: "〜ます", meaning: "Thể lịch sự", difficulty: "Trung bình", status: "Hoạt động" },
-  { id: 5, pattern: "〜ません", meaning: "Phủ định lịch sự", difficulty: "Trung bình", status: "Hoạt động" },
-]
+const emptyQuiz: Omit<QuizQuestionItem, "id"> = {
+  question: "",
+  type: "vocabulary",
+  difficulty: "easy",
+  topic: "Khác",
+  answers: [
+    { id: "a", text: "" },
+    { id: "b", text: "" },
+    { id: "c", text: "" },
+    { id: "d", text: "" },
+  ],
+  correctAnswer: "a",
+  explanation: "",
+}
 
-const quizData = [
-  { id: 1, question: '"学生" nghĩa là gì?', type: "Từ vựng", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 2, question: 'Chọn cách đọc đúng của "先生"', type: "Từ vựng", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 3, question: 'Điền vào chỗ trống: "私___学生です"', type: "Ngữ pháp", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 4, question: '"水" nghĩa là gì?', type: "Từ vựng", difficulty: "Dễ", status: "Hoạt động" },
-  { id: 5, question: 'Câu nào đúng để nói "Đây là sách"?', type: "Ngữ pháp", difficulty: "Trung bình", status: "Hoạt động" },
-]
-
-const chatbotQuestionsData = [
-  { id: 1, question: "Giải thích mẫu câu N は N です", count: 45, category: "Ngữ pháp" },
-  { id: 2, question: "Phân biệt は và が", count: 38, category: "Ngữ pháp" },
-  { id: 3, question: "Cho ví dụ với từ 学生", count: 32, category: "Từ vựng" },
-  { id: 4, question: "Tạo quiz nhanh", count: 28, category: "Quiz" },
-  { id: 5, question: "Cách chia động từ nhóm 2", count: 25, category: "Ngữ pháp" },
-]
-
-const learningStatsData = [
-  { day: "T2", users: 120, minutes: 450 },
-  { day: "T3", users: 145, minutes: 520 },
-  { day: "T4", users: 135, minutes: 480 },
-  { day: "T5", users: 160, minutes: 600 },
-  { day: "T6", users: 180, minutes: 720 },
-  { day: "T7", users: 95, minutes: 380 },
-  { day: "CN", users: 85, minutes: 320 },
-]
+type EditorMode = "create" | "edit"
 
 export default function AdminPage() {
+  const {
+    content,
+    addVocabulary,
+    updateVocabulary,
+    deleteVocabulary,
+    addGrammar,
+    updateGrammar,
+    deleteGrammar,
+    addQuizQuestion,
+    updateQuizQuestion,
+    deleteQuizQuestion,
+    resetContent,
+  } = useAdminContent()
+  const [vocabularyDialogOpen, setVocabularyDialogOpen] = useState(false)
+  const [grammarDialogOpen, setGrammarDialogOpen] = useState(false)
+  const [quizDialogOpen, setQuizDialogOpen] = useState(false)
+  const [editorMode, setEditorMode] = useState<EditorMode>("create")
+  const [vocabularyForm, setVocabularyForm] = useState<VocabularyItem | Omit<VocabularyItem, "id">>(emptyVocabulary)
+  const [grammarForm, setGrammarForm] = useState<GrammarItem | Omit<GrammarItem, "id">>(emptyGrammar)
+  const [quizForm, setQuizForm] = useState<QuizQuestionItem | Omit<QuizQuestionItem, "id">>(emptyQuiz)
+
+  const openNewVocabulary = () => {
+    setEditorMode("create")
+    setVocabularyForm(emptyVocabulary)
+    setVocabularyDialogOpen(true)
+  }
+
+  const openEditVocabulary = (item: VocabularyItem) => {
+    setEditorMode("edit")
+    setVocabularyForm(item)
+    setVocabularyDialogOpen(true)
+  }
+
+  const saveVocabulary = (event: FormEvent) => {
+    event.preventDefault()
+    if ("id" in vocabularyForm) {
+      updateVocabulary(vocabularyForm)
+    } else {
+      addVocabulary(vocabularyForm)
+    }
+    setVocabularyDialogOpen(false)
+  }
+
+  const openNewGrammar = () => {
+    setEditorMode("create")
+    setGrammarForm(emptyGrammar)
+    setGrammarDialogOpen(true)
+  }
+
+  const openEditGrammar = (item: GrammarItem) => {
+    setEditorMode("edit")
+    setGrammarForm(item)
+    setGrammarDialogOpen(true)
+  }
+
+  const saveGrammar = (event: FormEvent) => {
+    event.preventDefault()
+    if ("id" in grammarForm) {
+      updateGrammar(grammarForm)
+    } else {
+      addGrammar(grammarForm)
+    }
+    setGrammarDialogOpen(false)
+  }
+
+  const openNewQuiz = () => {
+    setEditorMode("create")
+    setQuizForm(emptyQuiz)
+    setQuizDialogOpen(true)
+  }
+
+  const openEditQuiz = (item: QuizQuestionItem) => {
+    setEditorMode("edit")
+    setQuizForm(item)
+    setQuizDialogOpen(true)
+  }
+
+  const saveQuiz = (event: FormEvent) => {
+    event.preventDefault()
+    if ("id" in quizForm) {
+      updateQuizQuestion(quizForm)
+    } else {
+      addQuizQuestion(quizForm)
+    }
+    setQuizDialogOpen(false)
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Settings className="h-6 w-6 text-primary" />
-          Quản trị hệ thống
-        </h1>
-        <p className="text-muted-foreground">
-          Quản lý nội dung và theo dõi hoạt động của người dùng
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Settings className="h-6 w-6 text-primary" />
+            Quản trị nội dung N5
+          </h1>
+          <p className="text-muted-foreground">
+            Thêm và chỉnh sửa dữ liệu học tập. Dữ liệu được lưu trên trình duyệt của bạn.
+          </p>
+        </div>
+        <Button variant="outline" onClick={resetContent}>
+          <RotateCcw className="mr-2 h-4 w-4" />
+          Khôi phục dữ liệu mẫu
+        </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Tổng người dùng"
-          value="256"
-          icon={<Users className="h-5 w-5" />}
-          trend={{ value: 12, label: "tháng này", positive: true }}
-        />
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatsCard
           title="Từ vựng"
-          value="500"
+          value={content.vocabulary.length}
+          subtitle="mục đang quản lý"
           icon={<BookOpen className="h-5 w-5" />}
         />
         <StatsCard
-          title="Mẫu ngữ pháp"
-          value="45"
+          title="Ngữ pháp"
+          value={content.grammar.length}
+          subtitle="mẫu câu"
           icon={<FileText className="h-5 w-5" />}
         />
         <StatsCard
-          title="Câu hỏi quiz"
-          value="320"
+          title="Quiz"
+          value={content.quiz.length}
+          subtitle="câu hỏi"
           icon={<HelpCircle className="h-5 w-5" />}
         />
       </div>
 
-      {/* Learning stats chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Thống kê học tập tuần này
-          </CardTitle>
-          <CardDescription>
-            Số người dùng và tổng thời gian học (phút) theo ngày
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={learningStatsData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="day" />
-                <YAxis yAxisId="left" orientation="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Bar yAxisId="left" dataKey="users" fill="hsl(var(--primary))" name="Người dùng" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="minutes" fill="hsl(var(--accent))" name="Phút học" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Data management tabs */}
-      <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="users">Người dùng</TabsTrigger>
+      <Tabs defaultValue="vocabulary">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="vocabulary">Từ vựng</TabsTrigger>
           <TabsTrigger value="grammar">Ngữ pháp</TabsTrigger>
           <TabsTrigger value="quiz">Quiz</TabsTrigger>
-          <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users" className="mt-6">
-          <AdminDataTable
-            title="Quản lý người dùng"
-            data={usersData}
-            columns={[
-              { key: "name", header: "Họ tên" },
-              { key: "email", header: "Email" },
-              { key: "class", header: "Lớp" },
-              { key: "progress", header: "Tiến độ" },
-              {
-                key: "status",
-                header: "Trạng thái",
-                render: (item) => <StatusBadge status={item.status} />,
-              },
-            ]}
-            searchPlaceholder="Tìm người dùng..."
-            onAdd={() => {}}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            currentPage={1}
-            totalPages={5}
-          />
-        </TabsContent>
-
         <TabsContent value="vocabulary" className="mt-6">
-          <AdminDataTable
-            title="Quản lý từ vựng"
-            data={vocabularyData}
-            columns={[
-              { key: "japanese", header: "Tiếng Nhật" },
-              { key: "hiragana", header: "Hiragana" },
-              { key: "vietnamese", header: "Tiếng Việt" },
-              {
-                key: "type",
-                header: "Loại từ",
-                render: (item) => (
-                  <Badge variant="outline">{item.type}</Badge>
-                ),
-              },
-              {
-                key: "status",
-                header: "Trạng thái",
-                render: (item) => <StatusBadge status={item.status} />,
-              },
-            ]}
-            searchPlaceholder="Tìm từ vựng..."
-            onAdd={() => {}}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            currentPage={1}
-            totalPages={10}
-          />
+          <Card>
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+              <div>
+                <CardTitle>Danh sách từ vựng</CardTitle>
+                <CardDescription>Nhập dần bộ từ vựng N5 theo chủ đề.</CardDescription>
+              </div>
+              <Button onClick={openNewVocabulary}>
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm từ
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg border">
+                <div className="grid grid-cols-[1.1fr_1.1fr_1.2fr_0.8fr_0.9fr_96px] gap-3 border-b px-4 py-3 text-sm font-medium text-muted-foreground">
+                  <span>Tiếng Nhật</span>
+                  <span>Hiragana</span>
+                  <span>Tiếng Việt</span>
+                  <span>Loại</span>
+                  <span>Chủ đề</span>
+                  <span />
+                </div>
+                {content.vocabulary.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[1.1fr_1.1fr_1.2fr_0.8fr_0.9fr_96px] items-center gap-3 border-b px-4 py-3 text-sm last:border-b-0"
+                  >
+                    <span className="font-medium">{item.japanese}</span>
+                    <span>{item.hiragana}</span>
+                    <span>{item.vietnamese}</span>
+                    <Badge variant="outline">{item.type}</Badge>
+                    <span>{item.topic}</span>
+                    <RowActions
+                      onEdit={() => openEditVocabulary(item)}
+                      onDelete={() => deleteVocabulary(item.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="grammar" className="mt-6">
-          <AdminDataTable
-            title="Quản lý ngữ pháp"
-            data={grammarData}
-            columns={[
-              { key: "pattern", header: "Mẫu câu" },
-              { key: "meaning", header: "Ý nghĩa" },
-              {
-                key: "difficulty",
-                header: "Độ khó",
-                render: (item) => (
-                  <Badge
-                    className={
-                      item.difficulty === "Dễ"
-                        ? "bg-green-100 text-green-700"
-                        : item.difficulty === "Trung bình"
-                        ? "bg-orange-100 text-orange-700"
-                        : "bg-red-100 text-red-700"
-                    }
+          <Card>
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+              <div>
+                <CardTitle>Danh sách ngữ pháp</CardTitle>
+                <CardDescription>Quản lý mẫu câu, cách dùng và ví dụ N5.</CardDescription>
+              </div>
+              <Button onClick={openNewGrammar}>
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm mẫu
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg border">
+                <div className="grid grid-cols-[1.1fr_1fr_0.8fr_0.9fr_96px] gap-3 border-b px-4 py-3 text-sm font-medium text-muted-foreground">
+                  <span>Mẫu câu</span>
+                  <span>Ý nghĩa</span>
+                  <span>Độ khó</span>
+                  <span>Trạng thái</span>
+                  <span />
+                </div>
+                {content.grammar.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[1.1fr_1fr_0.8fr_0.9fr_96px] items-center gap-3 border-b px-4 py-3 text-sm last:border-b-0"
                   >
-                    {item.difficulty}
-                  </Badge>
-                ),
-              },
-              {
-                key: "status",
-                header: "Trạng thái",
-                render: (item) => <StatusBadge status={item.status} />,
-              },
-            ]}
-            searchPlaceholder="Tìm ngữ pháp..."
-            onAdd={() => {}}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            currentPage={1}
-            totalPages={2}
-          />
+                    <span className="font-medium">{item.pattern}</span>
+                    <span>{item.meaning}</span>
+                    <Badge variant="outline">{item.difficulty}</Badge>
+                    <span>{item.status}</span>
+                    <RowActions
+                      onEdit={() => openEditGrammar(item)}
+                      onDelete={() => deleteGrammar(item.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="quiz" className="mt-6">
-          <AdminDataTable
-            title="Quản lý câu hỏi quiz"
-            data={quizData}
-            columns={[
-              { key: "question", header: "Câu hỏi" },
-              {
-                key: "type",
-                header: "Loại",
-                render: (item) => (
-                  <Badge variant="outline">{item.type}</Badge>
-                ),
-              },
-              {
-                key: "difficulty",
-                header: "Độ khó",
-                render: (item) => (
-                  <Badge
-                    className={
-                      item.difficulty === "Dễ"
-                        ? "bg-green-100 text-green-700"
-                        : item.difficulty === "Trung bình"
-                        ? "bg-orange-100 text-orange-700"
-                        : "bg-red-100 text-red-700"
-                    }
-                  >
-                    {item.difficulty}
-                  </Badge>
-                ),
-              },
-              {
-                key: "status",
-                header: "Trạng thái",
-                render: (item) => <StatusBadge status={item.status} />,
-              },
-            ]}
-            searchPlaceholder="Tìm câu hỏi..."
-            onAdd={() => {}}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            currentPage={1}
-            totalPages={8}
-          />
-        </TabsContent>
-
-        <TabsContent value="chatbot" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-primary" />
-                Câu hỏi thường gặp từ Chatbot
-              </CardTitle>
-              <CardDescription>
-                Các câu hỏi được hỏi nhiều nhất
-              </CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+              <div>
+                <CardTitle>Danh sách câu hỏi quiz</CardTitle>
+                <CardDescription>Tạo câu hỏi luyện tập từ vựng và ngữ pháp.</CardDescription>
+              </div>
+              <Button onClick={openNewQuiz}>
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm câu hỏi
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {chatbotQuestionsData.map((item, index) => (
+              <div className="rounded-lg border">
+                <div className="grid grid-cols-[1.8fr_0.8fr_0.8fr_1fr_96px] gap-3 border-b px-4 py-3 text-sm font-medium text-muted-foreground">
+                  <span>Câu hỏi</span>
+                  <span>Loại</span>
+                  <span>Độ khó</span>
+                  <span>Chủ đề</span>
+                  <span />
+                </div>
+                {content.quiz.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="grid grid-cols-[1.8fr_0.8fr_0.8fr_1fr_96px] items-center gap-3 border-b px-4 py-3 text-sm last:border-b-0"
                   >
-                    <div className="flex items-center gap-4">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                        {index + 1}
-                      </span>
-                      <div>
-                        <p className="font-medium">{item.question}</p>
-                        <Badge variant="outline" className="mt-1">
-                          {item.category}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold">{item.count}</p>
-                      <p className="text-xs text-muted-foreground">lượt hỏi</p>
-                    </div>
+                    <span className="font-medium">{item.question}</span>
+                    <Badge variant="outline">{item.type === "vocabulary" ? "Từ vựng" : "Ngữ pháp"}</Badge>
+                    <span>{item.difficulty}</span>
+                    <span>{item.topic}</span>
+                    <RowActions
+                      onEdit={() => openEditQuiz(item)}
+                      onDelete={() => deleteQuizQuestion(item.id)}
+                    />
                   </div>
                 ))}
               </div>
@@ -337,6 +332,135 @@ export default function AdminPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={vocabularyDialogOpen} onOpenChange={setVocabularyDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <form onSubmit={saveVocabulary} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>{editorMode === "create" ? "Thêm từ vựng" : "Sửa từ vựng"}</DialogTitle>
+              <DialogDescription>Nhập đầy đủ kana, romaji, nghĩa và ví dụ để dùng trong học/quiz.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Tiếng Nhật" value={vocabularyForm.japanese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, japanese: value })} />
+              <Field label="Hiragana" value={vocabularyForm.hiragana} onChange={(value) => setVocabularyForm({ ...vocabularyForm, hiragana: value })} />
+              <Field label="Romaji" value={vocabularyForm.romaji} onChange={(value) => setVocabularyForm({ ...vocabularyForm, romaji: value })} />
+              <Field label="Tiếng Việt" value={vocabularyForm.vietnamese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, vietnamese: value })} />
+              <Field label="Loại từ" value={vocabularyForm.type} onChange={(value) => setVocabularyForm({ ...vocabularyForm, type: value })} />
+              <Field label="Chủ đề" value={vocabularyForm.topic} onChange={(value) => setVocabularyForm({ ...vocabularyForm, topic: value })} />
+            </div>
+            <Field label="Ví dụ tiếng Nhật" value={vocabularyForm.example.japanese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, japanese: value } })} />
+            <Field label="Dịch ví dụ" value={vocabularyForm.example.vietnamese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, vietnamese: value } })} />
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setVocabularyDialogOpen(false)}>Hủy</Button>
+              <Button type="submit">Lưu</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={grammarDialogOpen} onOpenChange={setGrammarDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <form onSubmit={saveGrammar} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>{editorMode === "create" ? "Thêm ngữ pháp" : "Sửa ngữ pháp"}</DialogTitle>
+              <DialogDescription>Mỗi mẫu nên có cấu trúc, cách dùng và một ví dụ ngắn.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Mẫu câu" value={grammarForm.pattern} onChange={(value) => setGrammarForm({ ...grammarForm, pattern: value })} />
+              <Field label="Ý nghĩa" value={grammarForm.meaning} onChange={(value) => setGrammarForm({ ...grammarForm, meaning: value })} />
+              <Field label="Cấu trúc" value={grammarForm.structure} onChange={(value) => setGrammarForm({ ...grammarForm, structure: value })} />
+              <Field label="Độ khó" value={grammarForm.difficulty} onChange={(value) => setGrammarForm({ ...grammarForm, difficulty: value as GrammarItem["difficulty"] })} />
+            </div>
+            <Field label="Ví dụ tiếng Nhật" value={grammarForm.example.japanese} onChange={(value) => setGrammarForm({ ...grammarForm, example: { ...grammarForm.example, japanese: value } })} />
+            <Field label="Dịch ví dụ" value={grammarForm.example.vietnamese} onChange={(value) => setGrammarForm({ ...grammarForm, example: { ...grammarForm.example, vietnamese: value } })} />
+            <div className="space-y-2">
+              <Label>Ghi chú sử dụng</Label>
+              <Textarea value={grammarForm.usageNote} onChange={(event) => setGrammarForm({ ...grammarForm, usageNote: event.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setGrammarDialogOpen(false)}>Hủy</Button>
+              <Button type="submit">Lưu</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={quizDialogOpen} onOpenChange={setQuizDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <form onSubmit={saveQuiz} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>{editorMode === "create" ? "Thêm câu hỏi quiz" : "Sửa câu hỏi quiz"}</DialogTitle>
+              <DialogDescription>Câu hỏi có 4 đáp án A-D và một đáp án đúng.</DialogDescription>
+            </DialogHeader>
+            <Field label="Câu hỏi" value={quizForm.question} onChange={(value) => setQuizForm({ ...quizForm, question: value })} />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Loại" value={quizForm.type} onChange={(value) => setQuizForm({ ...quizForm, type: value as QuizQuestionItem["type"] })} />
+              <Field label="Độ khó" value={quizForm.difficulty} onChange={(value) => setQuizForm({ ...quizForm, difficulty: value as QuizQuestionItem["difficulty"] })} />
+              <Field label="Chủ đề" value={quizForm.topic} onChange={(value) => setQuizForm({ ...quizForm, topic: value })} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {quizForm.answers.map((answer, index) => (
+                <Field
+                  key={answer.id}
+                  label={`Đáp án ${answer.id.toUpperCase()}`}
+                  value={answer.text}
+                  onChange={(value) => {
+                    const nextAnswers = quizForm.answers.map((entry, entryIndex) =>
+                      entryIndex === index ? { ...entry, text: value } : entry
+                    )
+                    setQuizForm({ ...quizForm, answers: nextAnswers })
+                  }}
+                />
+              ))}
+            </div>
+            <Field label="Đáp án đúng (a/b/c/d)" value={quizForm.correctAnswer} onChange={(value) => setQuizForm({ ...quizForm, correctAnswer: value })} />
+            <div className="space-y-2">
+              <Label>Giải thích</Label>
+              <Textarea value={quizForm.explanation} onChange={(event) => setQuizForm({ ...quizForm, explanation: event.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setQuizDialogOpen(false)}>Hủy</Button>
+              <Button type="submit">Lưu</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+    </div>
+  )
+}
+
+function RowActions({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <Button type="button" variant="ghost" size="icon" onClick={onEdit}>
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <Button type="button" variant="ghost" size="icon" onClick={onDelete}>
+        <Trash2 className="h-4 w-4 text-destructive" />
+      </Button>
     </div>
   )
 }
