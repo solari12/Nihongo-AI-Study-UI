@@ -15,13 +15,13 @@ import {
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import type { DemoRole } from "@/hooks/use-demo-auth"
-import { useDemoAuth } from "@/hooks/use-demo-auth"
+import type { AuthRole } from "@/hooks/use-auth"
+import { useAuth } from "@/hooks/use-auth"
 
 interface HeaderProps {
   userName?: string
   userEmail?: string
-  userRole?: DemoRole
+  userRole?: AuthRole
   userAvatar?: string
   learningStreak?: number
 }
@@ -34,11 +34,12 @@ export function Header({
   learningStreak = 7 
 }: HeaderProps) {
   const router = useRouter()
-  const { logout } = useDemoAuth()
+  const { logout } = useAuth()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     router.push("/")
+    router.refresh()
   }
 
   return (

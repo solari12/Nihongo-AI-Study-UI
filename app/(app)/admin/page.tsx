@@ -30,7 +30,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { isAdminContent, useAdminContent } from "@/hooks/use-admin-content"
-import { useDemoAuth } from "@/hooks/use-demo-auth"
+import { useAuth } from "@/hooks/use-auth"
 import type { GrammarItem, QuizQuestionItem, VocabularyItem } from "@/lib/data/nihongo-study"
 
 const emptyVocabulary: Omit<VocabularyItem, "id"> = {
@@ -77,7 +77,7 @@ const emptyQuiz: Omit<QuizQuestionItem, "id"> = {
 type EditorMode = "create" | "edit"
 
 export default function AdminPage() {
-  const { activeUser, loginAs } = useDemoAuth()
+  const { activeUser } = useAuth()
   const {
     content,
     addVocabulary,
@@ -102,7 +102,7 @@ export default function AdminPage() {
   const [quizForm, setQuizForm] = useState<QuizQuestionItem | Omit<QuizQuestionItem, "id">>(emptyQuiz)
   const [importMessage, setImportMessage] = useState("")
 
-  if (activeUser.role !== "admin") {
+  if (activeUser?.role !== "admin") {
     return (
       <div className="space-y-6">
         <Card className="border-amber-200 bg-amber-50/60">
@@ -116,7 +116,6 @@ export default function AdminPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button onClick={() => loginAs("admin")}>Chuyển sang tài khoản admin demo</Button>
             <Button variant="outline" asChild>
               <Link href="/dashboard">Quay lại dashboard</Link>
             </Button>

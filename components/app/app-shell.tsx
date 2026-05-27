@@ -4,7 +4,7 @@ import { useState, createContext, useContext } from "react"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
 import { cn } from "@/lib/utils"
-import { useDemoAuth } from "@/hooks/use-demo-auth"
+import { type ClientAuthUser, useAuth } from "@/hooks/use-auth"
 
 interface SidebarContextType {
   collapsed: boolean
@@ -20,11 +20,12 @@ export const useSidebar = () => useContext(SidebarContext)
 
 interface AppShellProps {
   children: React.ReactNode
+  user: ClientAuthUser
 }
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, user: initialUser }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
-  const { activeUser } = useDemoAuth()
+  const { activeUser } = useAuth(initialUser)
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
@@ -32,7 +33,7 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar
           collapsed={collapsed}
           onCollapsedChange={setCollapsed}
-          role={activeUser.role}
+          role={activeUser?.role ?? "learner"}
         />
         <div 
           className={cn(
@@ -42,9 +43,9 @@ export function AppShell({ children }: AppShellProps) {
           )}
         >
           <Header
-            userName={activeUser.name}
-            userEmail={activeUser.email}
-            userRole={activeUser.role}
+            userName={activeUser?.name}
+            userEmail={activeUser?.email}
+            userRole={activeUser?.role}
           />
           <main className="flex-1 p-6">{children}</main>
         </div>

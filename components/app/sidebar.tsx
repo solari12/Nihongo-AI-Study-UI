@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import type { DemoRole } from "@/hooks/use-demo-auth"
+import type { AuthRole } from "@/hooks/use-auth"
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,7 +40,7 @@ const navItems = [
 interface SidebarProps {
   collapsed?: boolean
   onCollapsedChange?: (collapsed: boolean) => void
-  role?: DemoRole
+  role?: AuthRole
 }
 
 function SidebarContent({ 
