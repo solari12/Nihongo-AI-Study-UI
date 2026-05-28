@@ -22,8 +22,8 @@ type StudyProgress = {
 const storageKey = "nihongo-ai-study-progress"
 
 const defaultProgress: StudyProgress = {
-  learnedVocabularyIds: [1, 2, 5, 8],
-  reviewVocabularyIds: [3, 6],
+  learnedVocabularyIds: [],
+  reviewVocabularyIds: [],
   quizAttempts: [],
 }
 

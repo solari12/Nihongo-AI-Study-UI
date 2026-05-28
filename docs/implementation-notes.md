@@ -386,6 +386,15 @@ Cap nhat onboarding/cold-start moi nhat:
 - Recommendation engine dung cold-start boost khi user moi chua co lich su hoc/activity.
 ```
 
+Cap nhat dashboard user moi:
+
+```text
+- Bo du lieu dashboard hard-code cu nhu weekly minutes, weak topics, recent activities va recommended lessons mau.
+- Default progress cua user moi duoc dua ve rong thay vi co san 4 tu da hoc va 2 tu can review.
+- Dashboard hien 0/trong voi tai khoan moi va huong dan onboarding -> placement test -> learning path.
+- Tong so tu vung/ngu phap van lay tu database content, nhung tien do hoc/quiz/activity lay theo user hien tai.
+```
+
 Tai khoan seed hien tai:
 
 ```text
