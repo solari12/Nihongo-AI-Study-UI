@@ -1,13 +1,14 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { BookOpen, Clock, Goal, Languages, Target } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Spinner } from "@/components/ui/spinner"
 import {
   Select,
   SelectContent,
@@ -108,12 +109,22 @@ function buildColdStartProfile({
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { profile, saveProfile } = useLearnerProfile()
+  const { isLoaded, profile, saveProfile } = useLearnerProfile()
   const [goal, setGoal] = useState<LearningGoal>(profile.goal)
   const [kanaLevel, setKanaLevel] = useState<KanaLevel>(profile.kanaLevel)
   const [experience, setExperience] = useState<ExperienceLevel>(profile.experience)
   const [dailyMinutes, setDailyMinutes] = useState(String(profile.dailyMinutes))
   const [preferredTopics, setPreferredTopics] = useState(profile.preferredTopics)
+
+  useEffect(() => {
+    if (!isLoaded) return
+    setGoal(profile.goal)
+    setKanaLevel(profile.kanaLevel)
+    setExperience(profile.experience)
+    setDailyMinutes(String(profile.dailyMinutes))
+    setPreferredTopics(profile.preferredTopics)
+  }, [isLoaded, profile])
+
   const coldStart = buildColdStartProfile({
     goal,
     kanaLevel,
@@ -131,6 +142,8 @@ export default function OnboardingPage() {
   }
 
   const handleSubmit = () => {
+    if (!isLoaded) return
+
     saveProfile({
       goal,
       kanaLevel,
@@ -143,6 +156,19 @@ export default function OnboardingPage() {
       completedOnboarding: true,
     })
     router.push("/placement-test")
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
+            <Spinner className="h-5 w-5" />
+            <span>Đang tải hồ sơ học tập...</span>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -282,7 +308,7 @@ export default function OnboardingPage() {
               <p className="font-medium text-foreground">3. Sinh lộ trình đầu tiên</p>
               <p className="mt-1">Recommendation engine dùng hồ sơ + cold-start point + placement test để chọn bài học phù hợp.</p>
             </div>
-            <Button className="w-full" size="lg" onClick={handleSubmit}>
+            <Button className="w-full" size="lg" onClick={handleSubmit} disabled={!isLoaded}>
               Lưu hồ sơ và làm kiểm tra đầu vào
             </Button>
           </CardContent>
@@ -308,7 +334,7 @@ export default function OnboardingPage() {
               <Clock className="h-4 w-4 text-primary" />
               <span>Mục tiêu hiện tại: {dailyMinutes} phút/ngày</span>
             </div>
-            <Button className="w-full" size="lg" onClick={handleSubmit}>
+            <Button className="w-full" size="lg" onClick={handleSubmit} disabled={!isLoaded}>
               Tiếp tục làm kiểm tra đầu vào
             </Button>
           </CardContent>

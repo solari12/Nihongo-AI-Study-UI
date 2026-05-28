@@ -405,6 +405,16 @@ Cap nhat learner profile/cold-start DB:
 - Migration `20260528010000_add_learner_profile` da apply tren PostgreSQL local.
 ```
 
+Cap nhat onboarding gate:
+
+```text
+- Them `OnboardingGate` boc ben trong app layout de learner moi khong vao thang dashboard/learning path khi chua tao ho so.
+- Neu learner chua completed onboarding, cac man hoc chinh se chuyen ve `/onboarding`.
+- Neu learner da co ho so nhung chua lam placement test, cac man hoc chinh se chuyen ve `/placement-test`.
+- Admin duoc bo qua onboarding gate de van vao duoc man quan tri.
+- Onboarding va placement test cho loading state trong luc doc profile tu DB, tranh hien sai du lieu mac dinh truoc khi API tra ve.
+```
+
 Tai khoan seed hien tai:
 
 ```text

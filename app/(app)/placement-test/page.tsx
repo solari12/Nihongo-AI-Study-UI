@@ -1,11 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import { Brain, CheckCircle2, Home, RotateCcw, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { evaluatePlacement, placementQuestions } from "@/lib/onboarding/placement-test"
@@ -26,7 +28,8 @@ const levelLabels = {
 }
 
 export default function PlacementTestPage() {
-  const { profile, placement, savePlacementResult } = useLearnerProfile()
+  const router = useRouter()
+  const { isLoaded, profile, placement, savePlacementResult } = useLearnerProfile()
   const [testState, setTestState] = useState<TestState>(placement.completed ? "result" : "playing")
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -38,6 +41,46 @@ export default function PlacementTestPage() {
     () => evaluatePlacement({ answers, goal: profile.goal, kanaLevel: profile.kanaLevel }),
     [answers, profile.goal, profile.kanaLevel]
   )
+
+  useEffect(() => {
+    if (!isLoaded) return
+
+    if (!profile.completedOnboarding) {
+      router.replace("/onboarding")
+      return
+    }
+
+    if (placement.completed) {
+      setResult(placement)
+      setTestState("result")
+    }
+  }, [isLoaded, placement, profile.completedOnboarding, router])
+
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
+            <Spinner className="h-5 w-5" />
+            <span>Đang tải hồ sơ học tập...</span>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!profile.completedOnboarding) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
+            <Spinner className="h-5 w-5" />
+            <span>Chuyển về bước tạo hồ sơ học tập...</span>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const submitTest = () => {
     const saved = savePlacementResult(evaluatedResult)

@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app/app-shell"
+import { OnboardingGate } from "@/components/app/onboarding-gate"
 import { getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
@@ -13,5 +14,9 @@ export default async function DashboardLayout({
     redirect("/login")
   }
 
-  return <AppShell user={user}>{children}</AppShell>
+  return (
+    <AppShell user={user}>
+      <OnboardingGate user={user}>{children}</OnboardingGate>
+    </AppShell>
+  )
 }
