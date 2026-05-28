@@ -14,6 +14,11 @@ interface StatsCardProps {
     positive?: boolean
   }
   className?: string
+  contentClassName?: string
+  iconClassName?: string
+  titleClassName?: string
+  valueClassName?: string
+  subtitleClassName?: string
 }
 
 export function StatsCard({
@@ -23,16 +28,21 @@ export function StatsCard({
   icon,
   trend,
   className,
+  contentClassName,
+  iconClassName,
+  titleClassName,
+  valueClassName,
+  subtitleClassName,
 }: StatsCardProps) {
   return (
     <Card className={cn("overflow-hidden", className)}>
-      <CardContent className="p-6">
+      <CardContent className={cn("p-6", contentClassName)}>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold">{value}</p>
+            <p className={cn("text-sm font-medium text-muted-foreground", titleClassName)}>{title}</p>
+            <p className={cn("text-3xl font-bold", valueClassName)}>{value}</p>
             {subtitle && (
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
+              <p className={cn("text-sm text-muted-foreground", subtitleClassName)}>{subtitle}</p>
             )}
             {trend && (
               <div className="flex items-center gap-1">
@@ -50,7 +60,7 @@ export function StatsCard({
               </div>
             )}
           </div>
-          <div className="rounded-lg bg-primary/10 p-3 text-primary">
+          <div className={cn("rounded-lg bg-primary/10 p-3 text-primary", iconClassName)}>
             {icon}
           </div>
         </div>
