@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, BookOpen, CheckCircle2, Circle, Clock, FileText, HelpCircle, TrendingUp } from "lucide-react"
 import { StatsCard } from "@/components/app/stats-card"
@@ -111,14 +112,26 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-5 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/10 text-primary">
-              Dashboard học N5
-            </Badge>
-            <h1 className="text-2xl font-bold">Bắt đầu lộ trình học của bạn</h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground/80">
-              Dashboard chỉ hiển thị tiến độ thật của tài khoản hiện tại. Nếu bạn vừa tạo tài khoản mới, hãy hoàn tất hồ sơ học tập và placement test trước.
-            </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative flex h-28 w-32 shrink-0 items-end justify-center overflow-hidden rounded-lg bg-gradient-to-br from-amber-50 via-sky-50 to-emerald-50">
+              <Image
+                src="/dashboard-hero-torii.png"
+                alt="Minh họa cổng torii và sách học tiếng Nhật"
+                width={180}
+                height={180}
+                priority
+                className="h-28 w-28 object-contain"
+              />
+            </div>
+            <div>
+              <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/10 text-primary">
+                Dashboard học N5
+              </Badge>
+              <h1 className="text-2xl font-bold">Bắt đầu lộ trình học của bạn</h1>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground/80">
+                Dashboard chỉ hiển thị tiến độ thật của tài khoản hiện tại. Nếu bạn vừa tạo tài khoản mới, hãy hoàn tất hồ sơ học tập và placement test trước.
+              </p>
+            </div>
           </div>
           <div className="grid min-w-[260px] gap-3 rounded-lg border border-primary/15 bg-background/80 p-4 shadow-sm">
             <div className="flex items-center justify-between">
@@ -188,10 +201,10 @@ export default function DashboardPage() {
           title="Từ vựng đã học"
           value={stats.learnedVocabulary}
           subtitle={`hoàn thành / ${totalVocabulary} từ`}
-          icon={<BookOpen className="h-4 w-4" />}
-          className="border border-border/60 bg-card shadow-sm"
-          contentClassName="p-4"
-          iconClassName="bg-primary/10 p-2 text-primary"
+          icon={<BookOpen className="h-10 w-10" />}
+          className="relative border border-border/60 bg-card shadow-sm"
+          contentClassName="p-4 pr-20"
+          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
@@ -199,10 +212,10 @@ export default function DashboardPage() {
           title="Ngữ pháp đã học"
           value={completedGrammar}
           subtitle={`hoàn thành / ${totalGrammar} mẫu`}
-          icon={<FileText className="h-4 w-4" />}
-          className="border border-border/60 bg-card shadow-sm"
-          contentClassName="p-4"
-          iconClassName="bg-primary/10 p-2 text-primary"
+          icon={<FileText className="h-10 w-10" />}
+          className="relative border border-border/60 bg-card shadow-sm"
+          contentClassName="p-4 pr-20"
+          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
@@ -210,10 +223,10 @@ export default function DashboardPage() {
           title="Quiz đã làm"
           value={stats.quizAttempts}
           subtitle="bài kiểm tra"
-          icon={<HelpCircle className="h-4 w-4" />}
-          className="border border-border/60 bg-card shadow-sm"
-          contentClassName="p-4"
-          iconClassName="bg-primary/10 p-2 text-primary"
+          icon={<HelpCircle className="h-10 w-10" />}
+          className="relative border border-border/60 bg-card shadow-sm"
+          contentClassName="p-4 pr-20"
+          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
@@ -221,10 +234,10 @@ export default function DashboardPage() {
           title="Điểm trung bình"
           value={`${stats.averageQuizScore}%`}
           subtitle="tất cả quiz"
-          icon={<TrendingUp className="h-4 w-4" />}
-          className="border border-border/60 bg-card shadow-sm"
-          contentClassName="p-4"
-          iconClassName="bg-primary/10 p-2 text-primary"
+          icon={<TrendingUp className="h-10 w-10" />}
+          className="relative border border-border/60 bg-card shadow-sm"
+          contentClassName="p-4 pr-20"
+          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
