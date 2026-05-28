@@ -371,6 +371,8 @@ Cap nhat da ngon ngu moi nhat:
 - Lua chon ngon ngu duoc luu vao localStorage va cap nhat `document.documentElement.lang`.
 - Them language switcher vao login, register, header trong app va sidebar.
 - Da ap dung dich cho auth flow, header, sidebar/navigation va cac thong diep thao tac chinh.
+- Bo sung lop dich DOM toan cuc de phu cac text tinh con sot tren dashboard, vocabulary, grammar, quiz, chatbot, profile, admin va cac man phu.
+- Noi dung hoc trong database khong dich tu dong vi do la hoc lieu tieng Nhat/Viet, khong phai nhan UI.
 ```
 
 Tai khoan seed hien tai:

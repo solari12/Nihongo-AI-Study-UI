@@ -5,6 +5,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react"
 export type Locale = "vi" | "en" | "ja"
 
 const storageKey = "nihongo_locale"
+const originalTextNodes = new WeakMap<Text, string>()
+const originalElementAttributes = new WeakMap<Element, Record<string, string>>()
 
 const dictionaries = {
   vi: {
@@ -275,6 +277,170 @@ const dictionaries = {
 
 type TranslationKey = keyof typeof dictionaries.vi
 
+const globalTextTranslations: Record<string, Partial<Record<Locale, string>>> = {
+  "Dashboard": { en: "Dashboard", ja: "ダッシュボード" },
+  "Hồ sơ học": { en: "Study profile", ja: "学習プロフィール" },
+  "Từ vựng": { en: "Vocabulary", ja: "語彙" },
+  "Ngữ pháp": { en: "Grammar", ja: "文法" },
+  "Quiz": { en: "Quiz", ja: "クイズ" },
+  "Lộ trình học": { en: "Learning path", ja: "学習ルート" },
+  "Lịch sử học tập": { en: "Study history", ja: "学習履歴" },
+  "Hồ sơ": { en: "Profile", ja: "プロフィール" },
+  "Quản trị": { en: "Admin", ja: "管理" },
+  "Đăng nhập": { en: "Log in", ja: "ログイン" },
+  "Đăng ký": { en: "Sign up", ja: "登録" },
+  "Đăng xuất": { en: "Log out", ja: "ログアウト" },
+  "Tạo tài khoản": { en: "Create account", ja: "アカウント作成" },
+  "Email": { en: "Email", ja: "メール" },
+  "Mật khẩu": { en: "Password", ja: "パスワード" },
+  "Họ và tên": { en: "Full name", ja: "氏名" },
+  "Xác nhận mật khẩu": { en: "Confirm password", ja: "パスワード確認" },
+  "Hủy": { en: "Cancel", ja: "キャンセル" },
+  "Lưu": { en: "Save", ja: "保存" },
+  "Đang lưu...": { en: "Saving...", ja: "保存中..." },
+  "Thêm": { en: "Add", ja: "追加" },
+  "Sửa": { en: "Edit", ja: "編集" },
+  "Xem": { en: "View", ja: "表示" },
+  "Xóa": { en: "Delete", ja: "削除" },
+  "Tất cả": { en: "All", ja: "すべて" },
+  "Dễ": { en: "Easy", ja: "易しい" },
+  "Trung bình": { en: "Medium", ja: "普通" },
+  "Khó": { en: "Hard", ja: "難しい" },
+  "Chưa học": { en: "Not started", ja: "未学習" },
+  "Đang học": { en: "In progress", ja: "学習中" },
+  "Đã hoàn thành": { en: "Completed", ja: "完了" },
+  "Từ vựng N5": { en: "N5 Vocabulary", ja: "N5語彙" },
+  "Ngữ pháp N5": { en: "N5 Grammar", ja: "N5文法" },
+  "Quiz N5": { en: "N5 Quiz", ja: "N5クイズ" },
+  "Học và ôn tập từ vựng tiếng Nhật N5": {
+    en: "Learn and review N5 Japanese vocabulary",
+    ja: "日本語N5の語彙を学習・復習します",
+  },
+  "Học các mẫu ngữ pháp tiếng Nhật N5": {
+    en: "Learn N5 Japanese grammar patterns",
+    ja: "日本語N5の文法パターンを学習します",
+  },
+  "Kiểm tra kiến thức tiếng Nhật của bạn": {
+    en: "Check your Japanese knowledge",
+    ja: "日本語の知識を確認します",
+  },
+  "Tìm từ vựng...": { en: "Search vocabulary...", ja: "語彙を検索..." },
+  "Không tìm thấy từ vựng": { en: "No vocabulary found", ja: "語彙が見つかりません" },
+  "Thử tìm kiếm với từ khóa khác": {
+    en: "Try another keyword",
+    ja: "別のキーワードで検索してください",
+  },
+  "Không có ngữ pháp nào": { en: "No grammar items", ja: "文法項目がありません" },
+  "Chọn bộ lọc khác để xem thêm": {
+    en: "Choose another filter to see more",
+    ja: "別のフィルターを選択してください",
+  },
+  "Thống kê từ vựng": { en: "Vocabulary stats", ja: "語彙統計" },
+  "Tổng số từ": { en: "Total words", ja: "総語数" },
+  "Đã học": { en: "Learned", ja: "学習済み" },
+  "Tiến độ": { en: "Progress", ja: "進捗" },
+  "Luyện tập nhanh": { en: "Quick practice", ja: "クイック練習" },
+  "Học từ mới": { en: "Learn new words", ja: "新しい語彙を学習" },
+  "Thiết lập bài kiểm tra": { en: "Quiz setup", ja: "クイズ設定" },
+  "Chọn loại quiz và số lượng câu hỏi": {
+    en: "Choose quiz type and question count",
+    ja: "クイズ種類と問題数を選択します",
+  },
+  "Loại quiz": { en: "Quiz type", ja: "クイズ種類" },
+  "Tổng hợp": { en: "Mixed", ja: "総合" },
+  "Số câu hỏi": { en: "Question count", ja: "問題数" },
+  "Độ khó": { en: "Difficulty", ja: "難易度" },
+  "Bắt đầu làm quiz": { en: "Start quiz", ja: "クイズを開始" },
+  "Đang tải câu hỏi từ PostgreSQL...": {
+    en: "Loading questions from PostgreSQL...",
+    ja: "PostgreSQLから問題を読み込み中...",
+  },
+  "Chưa có câu hỏi phù hợp với lựa chọn này.": {
+    en: "No questions match this selection.",
+    ja: "この条件に合う問題はありません。",
+  },
+  "Kết quả": { en: "Result", ja: "結果" },
+  "Chi tiết câu trả lời": { en: "Answer details", ja: "回答詳細" },
+  "Về trang quiz": { en: "Back to quiz", ja: "クイズへ戻る" },
+  "Làm lại": { en: "Retry", ja: "もう一度" },
+  "Chatbot AI": { en: "AI Chatbot", ja: "AIチャット" },
+  "Hỏi đáp tiếng Nhật N5 với RAG và OpenRouter": {
+    en: "Ask N5 Japanese questions with RAG and OpenRouter",
+    ja: "RAGとOpenRouterでN5日本語の質問に回答します",
+  },
+  "Câu hỏi gợi ý:": { en: "Suggested questions:", ja: "おすすめ質問:" },
+  "Nhập câu hỏi của bạn...": { en: "Enter your question...", ja: "質問を入力..." },
+  "Nguồn tham khảo": { en: "References", ja: "参照元" },
+  "RAG truy xuất các nguồn sau để tạo câu trả lời:": {
+    en: "RAG retrieved these sources to generate the answer:",
+    ja: "RAGは回答生成のために以下の参照元を取得しました:",
+  },
+  "Thống kê hội thoại": { en: "Conversation stats", ja: "会話統計" },
+  "Câu hỏi hôm nay": { en: "Questions today", ja: "今日の質問" },
+  "Nguồn gần nhất": { en: "Latest source", ja: "最新の参照元" },
+  "Chưa có": { en: "None yet", ja: "まだありません" },
+  "Hồ sơ cá nhân": { en: "Personal profile", ja: "個人プロフィール" },
+  "Quản lý thông tin và xem thành tích của bạn": {
+    en: "Manage your information and view achievements",
+    ja: "情報を管理し、実績を確認します",
+  },
+  "Lớp": { en: "Class", ja: "クラス" },
+  "Ngành": { en: "Major", ja: "専攻" },
+  "Mục tiêu": { en: "Goal", ja: "目標" },
+  "Ngày bắt đầu": { en: "Start date", ja: "開始日" },
+  "Tổng thời gian học": { en: "Total study time", ja: "総学習時間" },
+  "Chỉnh sửa hồ sơ": { en: "Edit profile", ja: "プロフィール編集" },
+  "Tiến độ học tập": { en: "Learning progress", ja: "学習進捗" },
+  "Tổng quan tiến độ N5 của bạn": {
+    en: "Overview of your N5 progress",
+    ja: "N5進捗の概要",
+  },
+  "Tiến độ tổng thể": { en: "Overall progress", ja: "全体進捗" },
+  "Quiz đã làm": { en: "Completed quizzes", ja: "完了したクイズ" },
+  "Điểm trung bình": { en: "Average score", ja: "平均点" },
+  "Streak hiện tại": { en: "Current streak", ja: "現在の連続記録" },
+  "Thành tích": { en: "Achievements", ja: "実績" },
+  "Các thành tích bạn đã đạt được": {
+    en: "Achievements you have earned",
+    ja: "獲得した実績",
+  },
+  "Chưa đạt": { en: "Not earned", ja: "未達成" },
+  "Quản trị nội dung N5": { en: "N5 content admin", ja: "N5コンテンツ管理" },
+  "Nhập JSON": { en: "Import JSON", ja: "JSONインポート" },
+  "Xuất JSON": { en: "Export JSON", ja: "JSONエクスポート" },
+  "Khôi phục dữ liệu mẫu": { en: "Restore sample data", ja: "サンプルデータ復元" },
+  "Danh sách từ vựng": { en: "Vocabulary list", ja: "語彙リスト" },
+  "Danh sách ngữ pháp": { en: "Grammar list", ja: "文法リスト" },
+  "Danh sách câu hỏi quiz": { en: "Quiz question list", ja: "クイズ問題リスト" },
+  "Thêm từ": { en: "Add word", ja: "語彙を追加" },
+  "Thêm mẫu": { en: "Add pattern", ja: "文型を追加" },
+  "Thêm câu hỏi": { en: "Add question", ja: "問題を追加" },
+  "Tiếng Nhật": { en: "Japanese", ja: "日本語" },
+  "Tiếng Việt": { en: "Vietnamese", ja: "ベトナム語" },
+  "Loại": { en: "Type", ja: "種類" },
+  "Chủ đề": { en: "Topic", ja: "トピック" },
+  "Mẫu câu": { en: "Pattern", ja: "文型" },
+  "Ý nghĩa": { en: "Meaning", ja: "意味" },
+  "Trạng thái": { en: "Status", ja: "状態" },
+  "Câu hỏi": { en: "Question", ja: "問題" },
+  "Giải thích": { en: "Explanation", ja: "説明" },
+  "Dịch ví dụ": { en: "Example translation", ja: "例文の訳" },
+  "Ghi chú sử dụng": { en: "Usage note", ja: "使い方メモ" },
+  "Đáp án đúng (a/b/c/d)": { en: "Correct answer (a/b/c/d)", ja: "正解 (a/b/c/d)" },
+  "Hoạt động gần đây": { en: "Recent activity", ja: "最近の活動" },
+  "Bài học đề xuất hôm nay": { en: "Recommended lessons today", ja: "今日のおすすめレッスン" },
+  "Học ngay": { en: "Study now", ja: "今すぐ学習" },
+  "Ôn tập ngay": { en: "Review now", ja: "今すぐ復習" },
+  "Cần ôn tập": { en: "Needs review", ja: "復習が必要" },
+  "Đang tải dữ liệu...": { en: "Loading data...", ja: "データを読み込み中..." },
+  "Đang tải từ vựng...": { en: "Loading vocabulary...", ja: "語彙を読み込み中..." },
+  "Đang tải ngữ pháp...": { en: "Loading grammar...", ja: "文法を読み込み中..." },
+  "Không tải được dữ liệu mới nhất": {
+    en: "Unable to load latest data",
+    ja: "最新データを読み込めません",
+  },
+}
+
 type I18nContextValue = {
   locale: Locale
   setLocale: (locale: Locale) => void
@@ -287,6 +453,74 @@ function isLocale(value: string | null): value is Locale {
   return value === "vi" || value === "en" || value === "ja"
 }
 
+function translateStaticText(original: string, locale: Locale) {
+  if (locale === "vi") return original
+  return globalTextTranslations[original]?.[locale] ?? original
+}
+
+function preserveOuterWhitespace(current: string, translated: string) {
+  const leading = current.match(/^\s*/)?.[0] ?? ""
+  const trailing = current.match(/\s*$/)?.[0] ?? ""
+  return `${leading}${translated}${trailing}`
+}
+
+function translateTextNode(node: Text, locale: Locale) {
+  const raw = node.nodeValue ?? ""
+  const trimmed = raw.trim()
+  if (!trimmed) return
+
+  const original = originalTextNodes.get(node) ?? trimmed
+  originalTextNodes.set(node, original)
+
+  const translated = translateStaticText(original, locale)
+  node.nodeValue = preserveOuterWhitespace(raw, translated)
+}
+
+function translateElementAttributes(element: Element, locale: Locale) {
+  const attributes = ["placeholder", "title", "aria-label"]
+  const originals = originalElementAttributes.get(element) ?? {}
+
+  attributes.forEach((attribute) => {
+    const current = element.getAttribute(attribute)
+    if (!current) return
+
+    const original = originals[attribute] ?? current
+    originals[attribute] = original
+    element.setAttribute(attribute, translateStaticText(original, locale))
+  })
+
+  originalElementAttributes.set(element, originals)
+}
+
+function translateStaticDom(locale: Locale) {
+  if (typeof document === "undefined") return
+
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        const parent = node.parentElement
+        if (!parent) return NodeFilter.FILTER_REJECT
+        if (["SCRIPT", "STYLE", "TEXTAREA", "INPUT"].includes(parent.tagName)) {
+          return NodeFilter.FILTER_REJECT
+        }
+        return NodeFilter.FILTER_ACCEPT
+      },
+    }
+  )
+
+  let node = walker.nextNode()
+  while (node) {
+    translateTextNode(node as Text, locale)
+    node = walker.nextNode()
+  }
+
+  document.querySelectorAll("[placeholder], [title], [aria-label]").forEach((element) => {
+    translateElementAttributes(element, locale)
+  })
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("vi")
 
@@ -297,6 +531,19 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.lang = stored
     }
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    translateStaticDom(locale)
+
+    const observer = new MutationObserver(() => translateStaticDom(locale))
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+
+    return () => observer.disconnect()
+  }, [locale])
 
   const setLocale = (nextLocale: Locale) => {
     setLocaleState(nextLocale)
