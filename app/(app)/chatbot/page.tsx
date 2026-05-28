@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Sparkles, BookOpen, FileText, HelpCircle } from "lucide-react"
+import { readJsonResponse } from "@/lib/http"
 
 type ChatSource = {
   id: string
@@ -96,7 +97,7 @@ export default function ChatbotPage() {
         },
         body: JSON.stringify({ message }),
       })
-      const data = (await response.json()) as ChatResponse
+      const data = await readJsonResponse<ChatResponse>(response)
 
       const botResponse: ChatMessageItem = {
         role: "assistant",

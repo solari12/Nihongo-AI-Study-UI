@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { readJsonResponse } from "@/lib/http"
 import {
   grammarData,
   quizQuestions,
@@ -59,11 +60,7 @@ function readContent(): AdminContent {
 async function fetchJson<T>(url: string, signal: AbortSignal) {
   const response = await fetch(url, { signal })
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}`)
-  }
-
-  return (await response.json()) as T
+  return readJsonResponse<T>(response)
 }
 
 async function fetchContent(signal: AbortSignal): Promise<AdminContent> {
@@ -89,11 +86,7 @@ async function mutateJson<T>(url: string, method: "POST" | "PUT" | "DELETE", bod
     body: JSON.stringify(body),
   })
 
-  if (!response.ok) {
-    throw new Error(`Failed to ${method} ${url}`)
-  }
-
-  return (await response.json()) as T
+  return readJsonResponse<T>(response)
 }
 
 export function isAdminContent(value: unknown): value is AdminContent {

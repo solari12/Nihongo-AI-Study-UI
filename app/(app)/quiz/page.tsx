@@ -24,6 +24,7 @@ import {
   Home,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { readJsonResponse } from "@/lib/http"
 import type { QuizQuestionItem } from "@/lib/data/nihongo-study"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 import { useAdminContent } from "@/hooks/use-admin-content"
@@ -97,7 +98,7 @@ export default function QuizPage() {
           answers: answersByQuestionId,
         }),
       })
-      const result = (await response.json()) as SubmitQuizResponse
+      const result = await readJsonResponse<SubmitQuizResponse>(response)
 
       setFinalResult(result)
       recordQuizAttempt(quizType, result)

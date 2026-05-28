@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { readJsonResponse } from "@/lib/http"
 import { grammarData, quizQuestions, vocabularyData } from "@/lib/data/nihongo-study"
 
 type QuizAttempt = {
@@ -45,11 +46,7 @@ function readProgress(): StudyProgress {
 async function fetchProgress() {
   const response = await fetch("/api/progress")
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch progress")
-  }
-
-  return (await response.json()) as StudyProgress
+  return readJsonResponse<StudyProgress>(response)
 }
 
 async function saveVocabularyProgress(vocabularyId: number, status: "learned" | "review") {

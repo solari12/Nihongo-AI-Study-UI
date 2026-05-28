@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { readJsonResponse } from "@/lib/http"
 
 export type AuthRole = "learner" | "admin"
 
@@ -24,14 +25,10 @@ type RegisterPayload = {
 }
 
 async function parseAuthResponse(response: Response) {
-  const data = (await response.json()) as {
+  const data = await readJsonResponse<{
     user?: ClientAuthUser | null
     error?: string
-  }
-
-  if (!response.ok) {
-    throw new Error(data.error || "Yêu cầu xác thực thất bại.")
-  }
+  }>(response)
 
   return data.user ?? null
 }
@@ -46,7 +43,7 @@ export function useAuth(initialUser?: ClientAuthUser | null) {
     let cancelled = false
 
     fetch("/api/auth/me")
-      .then((response) => response.json())
+      .then((response) => readJsonResponse<{ user?: ClientAuthUser | null }>(response))
       .then((data: { user?: ClientAuthUser | null }) => {
         if (!cancelled) setUser(data.user ?? null)
       })

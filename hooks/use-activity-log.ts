@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { readJsonResponse } from "@/lib/http"
 
 export type ActivityType = "vocabulary" | "review" | "quiz" | "grammar"
 
@@ -31,13 +32,9 @@ function readActivities(): LearningActivity[] {
 async function fetchActivities() {
   const response = await fetch("/api/activity")
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch activities")
-  }
-
-  const data = (await response.json()) as {
+  const data = await readJsonResponse<{
     items: LearningActivity[]
-  }
+  }>(response)
   return data.items
 }
 
@@ -50,13 +47,9 @@ async function saveActivity(activity: Omit<LearningActivity, "id" | "createdAt">
     body: JSON.stringify(activity),
   })
 
-  if (!response.ok) {
-    throw new Error("Failed to save activity")
-  }
-
-  const data = (await response.json()) as {
+  const data = await readJsonResponse<{
     item: LearningActivity
-  }
+  }>(response)
   return data.item
 }
 

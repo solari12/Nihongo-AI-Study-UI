@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
   }
 
   const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+
   let sources = await retrieveSourcesFromDatabase(message, 5)
 
   if (!sources.length) {
@@ -88,22 +90,20 @@ export async function POST(request: NextRequest) {
     answer = buildFallbackAnswer(message, sources)
   }
 
-  if (user) {
-    await prisma.chatLog.create({
-      data: {
-        userId: user.id,
-        message,
-        answer,
-        provider,
-        sourcesJson: sources.map((source) => ({
-          id: source.id,
-          type: source.type,
-          title: source.title,
-          score: source.score,
-        })),
-      },
-    })
-  }
+  await prisma.chatLog.create({
+    data: {
+      userId: user.id,
+      message,
+      answer,
+      provider,
+      sourcesJson: sources.map((source) => ({
+        id: source.id,
+        type: source.type,
+        title: source.title,
+        score: source.score,
+      })),
+    },
+  })
 
   return NextResponse.json({
     answer,

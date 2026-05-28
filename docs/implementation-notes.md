@@ -42,6 +42,10 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - Neu DB khong co nguon phu hop, route fallback ve retriever seed cu.
   - Chat request khong con gui toan bo content tu client.
   - Cau hoi, cau tra loi, provider va source metadata duoc luu vao `chat_logs` theo user dang dang nhap.
+- Da tang cuong API protection va xu ly loi client:
+  - `/api/chat` va `/api/quiz/submit` yeu cau user dang nhap.
+  - Cac API admin mutation da yeu cau role `admin`.
+  - Them helper `readJsonResponse` de client khong bi loi `Unexpected end of JSON input` khi response loi/rong.
 
 ## 2. Quyet dinh ve database
 
@@ -275,11 +279,12 @@ limit 5;
 5. Tao migration cho cac bang chinh.
 6. Seed du lieu tu `lib/data/nihongo-study.ts` vao PostgreSQL.
 7. Thay cac API route doc seed data/localStorage bang truy van database.
-8. Cai `pgvector` cho PostgreSQL local neu can vector search that.
-9. Tao script generate embedding.
-10. Nang cap chatbot tu keyword retrieval sang vector retrieval.
-13. Them fallback khi API embedding/LLM loi hoac mat mang.
-14. Cap nhat tai lieu bao cao va test plan.
+8. UI loading/error polish cho cac man hoc tap va admin.
+9. Cai `pgvector` cho PostgreSQL local neu can vector search that.
+10. Tao script generate embedding.
+11. Nang cap chatbot tu keyword retrieval sang vector retrieval.
+12. Them fallback khi API embedding/LLM loi hoac mat mang.
+13. Cap nhat tai lieu bao cao va test plan.
 
 ## 7. Ghi chu cai dat moi truong local
 
