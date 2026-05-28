@@ -25,6 +25,7 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - `GET /api/grammar` doc bang `grammar`.
   - `GET /api/quiz` doc bang `quiz_questions` va `quiz_answers`.
   - `POST /api/quiz/submit` cham diem dua tren dap an trong database.
+- Da chuyen `useAdminContent` sang load du lieu ban dau tu cac API tren, nen cac man Vocabulary, Grammar, Quiz va danh sach Admin bat dau doc noi dung tu PostgreSQL thay vi chi doc seed/localStorage.
 
 ## 2. Quyet dinh ve database
 
@@ -258,7 +259,7 @@ limit 5;
 5. Tao migration cho cac bang chinh.
 6. Seed du lieu tu `lib/data/nihongo-study.ts` vao PostgreSQL.
 7. Thay cac API route doc seed data/localStorage bang truy van database.
-8. Thay cac page hoc tap goi API/DB thay vi doc hook localStorage/seed truc tiep.
+8. Thay Admin CRUD ghi database that thay vi chi cap nhat state/localStorage phia client.
 9. Luu knowledge chunk va embedding dang JSONB de demo RAG co nguon du lieu.
 10. Cai `pgvector` cho PostgreSQL local neu can vector search that.
 11. Tao script generate embedding.

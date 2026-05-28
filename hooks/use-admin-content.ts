@@ -24,6 +24,18 @@ const defaultContent: AdminContent = {
   quiz: quizQuestions,
 }
 
+type VocabularyApiResponse = {
+  items: VocabularyItem[]
+}
+
+type GrammarApiResponse = {
+  items: GrammarItem[]
+}
+
+type QuizApiResponse = {
+  items: QuizQuestionItem[]
+}
+
 function readContent(): AdminContent {
   if (typeof window === "undefined") return defaultContent
 
@@ -37,6 +49,30 @@ function readContent(): AdminContent {
     }
   } catch {
     return defaultContent
+  }
+}
+
+async function fetchJson<T>(url: string, signal: AbortSignal) {
+  const response = await fetch(url, { signal })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}`)
+  }
+
+  return (await response.json()) as T
+}
+
+async function fetchContent(signal: AbortSignal): Promise<AdminContent> {
+  const [vocabulary, grammar, quiz] = await Promise.all([
+    fetchJson<VocabularyApiResponse>("/api/vocabulary", signal),
+    fetchJson<GrammarApiResponse>("/api/grammar", signal),
+    fetchJson<QuizApiResponse>("/api/quiz", signal),
+  ])
+
+  return {
+    vocabulary: vocabulary.items,
+    grammar: grammar.items,
+    quiz: quiz.items,
   }
 }
 
@@ -54,10 +90,29 @@ export function isAdminContent(value: unknown): value is AdminContent {
 export function useAdminContent() {
   const [content, setContent] = useState<AdminContent>(defaultContent)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setContent(readContent())
-    setIsLoaded(true)
+    const controller = new AbortController()
+
+    fetchContent(controller.signal)
+      .then((nextContent) => {
+        setContent(nextContent)
+        setError(null)
+      })
+      .catch((fetchError) => {
+        if (controller.signal.aborted) return
+
+        setContent(readContent())
+        setError(fetchError instanceof Error ? fetchError.message : "Failed to load content")
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoaded(true)
+      })
+
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   useEffect(() => {
@@ -143,6 +198,8 @@ export function useAdminContent() {
 
   return {
     content,
+    isLoaded,
+    error,
     topics,
     addVocabulary,
     updateVocabulary,
