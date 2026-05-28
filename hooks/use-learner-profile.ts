@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
+import { readJsonResponse } from "@/lib/http"
 
 export type LearningGoal = "JLPT_N5" | "COMMUNICATION" | "FROM_ZERO"
 export type KanaLevel = "none" | "hiragana" | "hiragana_katakana"
@@ -77,6 +78,59 @@ function writeStoredValue<T>(key: string, value: T) {
   window.localStorage.setItem(key, JSON.stringify(value))
 }
 
+type LearnerProfileResponse = {
+  profile: LearnerProfile | null
+  placement: PlacementResult | null
+}
+
+async function fetchLearnerProfile() {
+  const response = await fetch("/api/learner-profile")
+  return readJsonResponse<LearnerProfileResponse>(response)
+}
+
+async function saveProfileToDatabase(profile: LearnerProfile) {
+  const response = await fetch("/api/learner-profile", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "profile",
+      goal: profile.goal,
+      kanaLevel: profile.kanaLevel,
+      dailyMinutes: profile.dailyMinutes,
+      experience: profile.experience,
+      preferredTopics: profile.preferredTopics,
+      coldStartScore: profile.coldStartScore,
+      coldStartReasons: profile.coldStartReasons,
+      guideCompletedSteps: profile.guideCompletedSteps,
+      completedOnboarding: profile.completedOnboarding,
+    }),
+  })
+
+  return readJsonResponse<{ profile: LearnerProfile }>(response)
+}
+
+async function savePlacementToDatabase(placement: PlacementResult) {
+  const response = await fetch("/api/learner-profile", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "placement",
+      score: placement.score,
+      total: placement.total,
+      percentage: placement.percentage,
+      level: placement.level,
+      weakAreas: placement.weakAreas,
+      recommendedStart: placement.recommendedStart,
+    }),
+  })
+
+  return readJsonResponse<{ placement: PlacementResult }>(response)
+}
+
 export function useLearnerProfile() {
   const { activeUser, isLoaded: isAuthLoaded } = useAuth()
   const [profile, setProfile] = useState<LearnerProfile>(defaultLearnerProfile)
@@ -88,9 +142,31 @@ export function useLearnerProfile() {
   useEffect(() => {
     if (!isAuthLoaded) return
 
-    setProfile(readStoredValue(scopedProfileStorageKey, defaultLearnerProfile))
-    setPlacement(readStoredValue(scopedPlacementStorageKey, defaultPlacementResult))
-    setIsLoaded(true)
+    const controller = new AbortController()
+
+    fetchLearnerProfile()
+      .then((data) => {
+        if (controller.signal.aborted) return
+
+        const nextProfile = data.profile ?? readStoredValue(scopedProfileStorageKey, defaultLearnerProfile)
+        const nextPlacement = data.placement ?? readStoredValue(scopedPlacementStorageKey, defaultPlacementResult)
+        setProfile(nextProfile)
+        setPlacement(nextPlacement)
+        writeStoredValue(scopedProfileStorageKey, nextProfile)
+        writeStoredValue(scopedPlacementStorageKey, nextPlacement)
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return
+        setProfile(readStoredValue(scopedProfileStorageKey, defaultLearnerProfile))
+        setPlacement(readStoredValue(scopedPlacementStorageKey, defaultPlacementResult))
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoaded(true)
+      })
+
+    return () => {
+      controller.abort()
+    }
   }, [isAuthLoaded, scopedPlacementStorageKey, scopedProfileStorageKey])
 
   const saveProfile = useCallback((payload: Omit<LearnerProfile, "createdAt" | "updatedAt">) => {
@@ -103,6 +179,10 @@ export function useLearnerProfile() {
 
     setProfile(nextProfile)
     writeStoredValue(scopedProfileStorageKey, nextProfile)
+    void saveProfileToDatabase(nextProfile).then(({ profile: savedProfile }) => {
+      setProfile(savedProfile)
+      writeStoredValue(scopedProfileStorageKey, savedProfile)
+    })
     return nextProfile
   }, [profile.createdAt, scopedProfileStorageKey])
 
@@ -115,6 +195,10 @@ export function useLearnerProfile() {
 
     setPlacement(nextResult)
     writeStoredValue(scopedPlacementStorageKey, nextResult)
+    void savePlacementToDatabase(nextResult).then(({ placement: savedPlacement }) => {
+      setPlacement(savedPlacement)
+      writeStoredValue(scopedPlacementStorageKey, savedPlacement)
+    })
     return nextResult
   }, [scopedPlacementStorageKey])
 

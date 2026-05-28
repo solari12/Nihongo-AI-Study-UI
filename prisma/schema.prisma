@@ -34,6 +34,30 @@ enum VocabularyProgressStatus {
   review
 }
 
+enum LearningGoal {
+  JLPT_N5
+  COMMUNICATION
+  FROM_ZERO
+}
+
+enum KanaLevel {
+  none
+  hiragana
+  hiragana_katakana
+}
+
+enum ExperienceLevel {
+  new
+  some
+  returning
+}
+
+enum InitialLevel {
+  absolute_beginner
+  early_n5
+  n5_review
+}
+
 model User {
   id                 String                   @id @default(uuid())
   fullName           String                   @map("full_name")
@@ -45,10 +69,48 @@ model User {
   quizAttempts       QuizAttempt[]
   activityLogs       ActivityLog[]
   chatLogs           ChatLog[]
+  learnerProfile     LearnerProfile?
+  placementResult    PlacementResult?
   createdAt          DateTime                 @default(now()) @map("created_at")
   updatedAt          DateTime                 @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model LearnerProfile {
+  id                  String          @id @default(uuid())
+  userId              String          @unique @map("user_id")
+  goal                LearningGoal
+  kanaLevel           KanaLevel       @map("kana_level")
+  dailyMinutes        Int             @map("daily_minutes")
+  experience          ExperienceLevel
+  preferredTopics     Json            @map("preferred_topics")
+  coldStartScore      Int             @map("cold_start_score")
+  coldStartReasons    Json            @map("cold_start_reasons")
+  guideCompletedSteps Json            @map("guide_completed_steps")
+  completedOnboarding Boolean         @default(false) @map("completed_onboarding")
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  @@map("learner_profiles")
+}
+
+model PlacementResult {
+  id               String       @id @default(uuid())
+  userId           String       @unique @map("user_id")
+  score            Int
+  total            Int
+  percentage       Int
+  level            InitialLevel
+  weakAreas        Json         @map("weak_areas")
+  recommendedStart String       @map("recommended_start")
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedAt      DateTime     @map("completed_at")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  @@map("placement_results")
 }
 
 model AuthSession {

@@ -395,6 +395,16 @@ Cap nhat dashboard user moi:
 - Tong so tu vung/ngu phap van lay tu database content, nhung tien do hoc/quiz/activity lay theo user hien tai.
 ```
 
+Cap nhat learner profile/cold-start DB:
+
+```text
+- Them bang `learner_profiles` luu goal, kana level, kinh nghiem, thoi gian hoc, chu de uu tien, cold-start score/reasons va onboarding status theo user.
+- Them bang `placement_results` luu ket qua placement test theo user.
+- Them API `/api/learner-profile` de doc/ghi profile va placement bang PostgreSQL.
+- `useLearnerProfile` da chuyen sang doc/ghi API DB, localStorage chi con la fallback offline/cache theo userId.
+- Migration `20260528010000_add_learner_profile` da apply tren PostgreSQL local.
+```
+
 Tai khoan seed hien tai:
 
 ```text
