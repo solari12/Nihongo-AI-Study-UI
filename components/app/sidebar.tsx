@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   BookOpen,
@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import type { AuthRole } from "@/hooks/use-auth"
+import { type AuthRole, useAuth } from "@/hooks/use-auth"
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -50,7 +50,16 @@ function SidebarContent({
   role = "learner",
 }: SidebarProps & { isMobile?: boolean }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { logout } = useAuth()
   const visibleNavItems = navItems.filter((item) => role === "admin" || item.href !== "/admin")
+
+  const handleLogout = async () => {
+    await logout()
+    if (isMobile) onCollapsedChange?.(false)
+    router.push("/login")
+    router.refresh()
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -133,19 +142,21 @@ function SidebarContent({
             )}
           </Button>
         )}
-        <Link href="/">
+        <div>
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className={cn(
               "mt-1 w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive",
               collapsed && !isMobile && "justify-center px-0"
             )}
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
             {(!collapsed || isMobile) && <span className="ml-2">Đăng xuất</span>}
           </Button>
-        </Link>
+        </div>
       </div>
     </div>
   )

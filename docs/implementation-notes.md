@@ -361,6 +361,7 @@ Cap nhat auth moi nhat:
 - Dang ky tao tai khoan that, validate ho ten/email/mat khau va xac nhan mat khau o client.
 - API login/register validate input bang Zod, tra loi JSON loi ro rang va khong crash khi body JSON rong/sai.
 - Database bat buoc user phai co password_hash, migration da apply tren PostgreSQL local.
+- Nut dang xuat trong sidebar da goi API logout that thay vi chi chuyen ve trang chu.
 ```
 
 Tai khoan seed hien tai:
