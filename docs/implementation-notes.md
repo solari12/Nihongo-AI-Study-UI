@@ -376,6 +376,16 @@ Cap nhat da ngon ngu moi nhat:
 - Noi dung hoc trong database khong dich tu dong vi do la hoc lieu tieng Nhat/Viet, khong phai nhan UI.
 ```
 
+Cap nhat onboarding/cold-start moi nhat:
+
+```text
+- Ho so hoc tap va placement result duoc scope theo userId de tai khoan moi khong bi dinh du lieu onboarding cua tai khoan cu tren cung trinh duyet.
+- Onboarding tinh cold-start point dua tren kinh nghiem, kana level, muc tieu, thoi gian hoc moi ngay va chu de uu tien.
+- Man onboarding hien huong dan cho tai khoan moi: tao cold-start profile, lam placement test, sinh lo trinh dau tien.
+- Placement test hien lai cold-start point de giai thich vi sao recommendation uu tien bai nen tang.
+- Recommendation engine dung cold-start boost khi user moi chua co lich su hoc/activity.
+```
+
 Tai khoan seed hien tai:
 
 ```text

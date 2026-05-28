@@ -98,6 +98,10 @@ export function generateRecommendations({
   const nextGrammar = content.grammar.find((item) => item.status !== "Đã hoàn thành")
 
   const recommendations: Recommendation[] = []
+  const coldStartScore = profile?.coldStartScore ?? 0
+  const coldStartBoost = profile?.completedOnboarding && !activities.length
+    ? Math.min(35, Math.round(coldStartScore * 0.35))
+    : 0
 
   if (!profile?.completedOnboarding) {
     recommendations.push({
@@ -121,7 +125,7 @@ export function generateRecommendations({
       type: "quiz",
       title: "Làm kiểm tra đầu vào",
       reason: "Placement test giúp xác định bạn nên bắt đầu từ kana, từ vựng nền tảng hay ôn tập N5.",
-      priority: 98,
+      priority: clampPriority(98 + coldStartBoost),
       estimatedTime: "5 phút",
       targetUrl: "/placement-test",
       explanation: buildExplanation([
@@ -137,7 +141,7 @@ export function generateRecommendations({
       type: "vocabulary",
       title: "Bắt đầu với kana và từ vựng nền tảng",
       reason: "Kết quả đầu vào cho thấy kana là điểm cần xử lý trước khi học nhiều từ N5.",
-      priority: 94,
+      priority: clampPriority(94 + coldStartBoost),
       estimatedTime: `${Math.min(profile?.dailyMinutes ?? 20, 20)} phút`,
       targetUrl: "/vocabulary",
       explanation: buildExplanation([

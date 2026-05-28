@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { useAuth } from "@/hooks/use-auth"
 
 export type LearningGoal = "JLPT_N5" | "COMMUNICATION" | "FROM_ZERO"
 export type KanaLevel = "none" | "hiragana" | "hiragana_katakana"
@@ -13,6 +14,9 @@ export type LearnerProfile = {
   dailyMinutes: number
   experience: ExperienceLevel
   preferredTopics: string[]
+  coldStartScore: number
+  coldStartReasons: string[]
+  guideCompletedSteps: string[]
   completedOnboarding: boolean
   createdAt: string
   updatedAt: string
@@ -38,6 +42,9 @@ export const defaultLearnerProfile: LearnerProfile = {
   dailyMinutes: 20,
   experience: "new",
   preferredTopics: ["Chào hỏi", "Trường học"],
+  coldStartScore: 0,
+  coldStartReasons: [],
+  guideCompletedSteps: [],
   completedOnboarding: false,
   createdAt: "",
   updatedAt: "",
@@ -71,15 +78,20 @@ function writeStoredValue<T>(key: string, value: T) {
 }
 
 export function useLearnerProfile() {
+  const { activeUser, isLoaded: isAuthLoaded } = useAuth()
   const [profile, setProfile] = useState<LearnerProfile>(defaultLearnerProfile)
   const [placement, setPlacement] = useState<PlacementResult>(defaultPlacementResult)
   const [isLoaded, setIsLoaded] = useState(false)
+  const scopedProfileStorageKey = activeUser ? `${profileStorageKey}:${activeUser.id}` : profileStorageKey
+  const scopedPlacementStorageKey = activeUser ? `${placementStorageKey}:${activeUser.id}` : placementStorageKey
 
   useEffect(() => {
-    setProfile(readStoredValue(profileStorageKey, defaultLearnerProfile))
-    setPlacement(readStoredValue(placementStorageKey, defaultPlacementResult))
+    if (!isAuthLoaded) return
+
+    setProfile(readStoredValue(scopedProfileStorageKey, defaultLearnerProfile))
+    setPlacement(readStoredValue(scopedPlacementStorageKey, defaultPlacementResult))
     setIsLoaded(true)
-  }, [])
+  }, [isAuthLoaded, scopedPlacementStorageKey, scopedProfileStorageKey])
 
   const saveProfile = useCallback((payload: Omit<LearnerProfile, "createdAt" | "updatedAt">) => {
     const now = new Date().toISOString()
@@ -90,9 +102,9 @@ export function useLearnerProfile() {
     }
 
     setProfile(nextProfile)
-    writeStoredValue(profileStorageKey, nextProfile)
+    writeStoredValue(scopedProfileStorageKey, nextProfile)
     return nextProfile
-  }, [profile.createdAt])
+  }, [profile.createdAt, scopedProfileStorageKey])
 
   const savePlacementResult = useCallback((result: Omit<PlacementResult, "completed" | "completedAt">) => {
     const nextResult: PlacementResult = {
@@ -102,18 +114,18 @@ export function useLearnerProfile() {
     }
 
     setPlacement(nextResult)
-    writeStoredValue(placementStorageKey, nextResult)
+    writeStoredValue(scopedPlacementStorageKey, nextResult)
     return nextResult
-  }, [])
+  }, [scopedPlacementStorageKey])
 
   const resetLearnerProfile = useCallback(() => {
     setProfile(defaultLearnerProfile)
     setPlacement(defaultPlacementResult)
     if (typeof window !== "undefined") {
-      window.localStorage.removeItem(profileStorageKey)
-      window.localStorage.removeItem(placementStorageKey)
+      window.localStorage.removeItem(scopedProfileStorageKey)
+      window.localStorage.removeItem(scopedPlacementStorageKey)
     }
-  }, [])
+  }, [scopedPlacementStorageKey, scopedProfileStorageKey])
 
   return {
     isLoaded,

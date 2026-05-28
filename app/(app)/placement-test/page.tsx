@@ -77,7 +77,18 @@ export default function PlacementTestPage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Cold-start point</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-primary">{profile.coldStartScore}/100</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Dùng khi tài khoản mới chưa có lịch sử học.
+              </p>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Điểm yếu cần xử lý</CardTitle>

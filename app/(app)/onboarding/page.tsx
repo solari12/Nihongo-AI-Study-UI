@@ -42,6 +42,70 @@ const goalOptions: { value: LearningGoal; label: string; description: string }[]
   },
 ]
 
+function buildColdStartProfile({
+  goal,
+  kanaLevel,
+  experience,
+  dailyMinutes,
+  preferredTopics,
+}: {
+  goal: LearningGoal
+  kanaLevel: KanaLevel
+  experience: ExperienceLevel
+  dailyMinutes: number
+  preferredTopics: string[]
+}) {
+  const reasons: string[] = []
+  let score = 20
+
+  if (experience === "new") {
+    score += 30
+    reasons.push("Người mới hoàn toàn: ưu tiên hướng dẫn từng bước và bài nền tảng.")
+  } else if (experience === "some") {
+    score += 18
+    reasons.push("Đã học một ít: cần placement test để tránh học lại quá nhiều.")
+  } else {
+    score += 12
+    reasons.push("Học lại sau thời gian nghỉ: ưu tiên ôn tập và kiểm tra lỗ hổng.")
+  }
+
+  if (kanaLevel === "none") {
+    score += 25
+    reasons.push("Chưa biết kana: bắt đầu từ kana và từ vựng rất cơ bản.")
+  } else if (kanaLevel === "hiragana") {
+    score += 14
+    reasons.push("Biết hiragana: cần bổ sung katakana trước khi tăng tốc N5.")
+  } else {
+    score += 6
+    reasons.push("Đã biết hiragana + katakana: có thể vào từ vựng/ngữ pháp N5 sớm hơn.")
+  }
+
+  if (goal === "FROM_ZERO") {
+    score += 15
+    reasons.push("Mục tiêu học từ đầu: hệ thống sẽ giảm độ khó bài đầu tiên.")
+  } else if (goal === "JLPT_N5") {
+    score += 10
+    reasons.push("Mục tiêu JLPT N5: ưu tiên nội dung có thể đo bằng quiz.")
+  } else {
+    score += 8
+    reasons.push("Mục tiêu giao tiếp: ưu tiên chủ đề thực dụng và câu mẫu hàng ngày.")
+  }
+
+  if (dailyMinutes <= 10) {
+    score += 10
+    reasons.push("Thời gian học ngắn: chia bài thành phiên nhỏ để dễ duy trì.")
+  }
+
+  if (preferredTopics.length > 0) {
+    reasons.push(`Chủ đề quan tâm: ${preferredTopics.join(", ")}.`)
+  }
+
+  return {
+    coldStartScore: Math.min(100, score),
+    coldStartReasons: reasons,
+  }
+}
+
 export default function OnboardingPage() {
   const router = useRouter()
   const { profile, saveProfile } = useLearnerProfile()
@@ -50,6 +114,13 @@ export default function OnboardingPage() {
   const [experience, setExperience] = useState<ExperienceLevel>(profile.experience)
   const [dailyMinutes, setDailyMinutes] = useState(String(profile.dailyMinutes))
   const [preferredTopics, setPreferredTopics] = useState(profile.preferredTopics)
+  const coldStart = buildColdStartProfile({
+    goal,
+    kanaLevel,
+    experience,
+    dailyMinutes: Number(dailyMinutes),
+    preferredTopics,
+  })
 
   const toggleTopic = (topic: string) => {
     setPreferredTopics((current) =>
@@ -66,6 +137,9 @@ export default function OnboardingPage() {
       experience,
       dailyMinutes: Number(dailyMinutes),
       preferredTopics,
+      coldStartScore: coldStart.coldStartScore,
+      coldStartReasons: coldStart.coldStartReasons,
+      guideCompletedSteps: ["profile-created"],
       completedOnboarding: true,
     })
     router.push("/placement-test")
@@ -181,6 +255,39 @@ export default function OnboardingPage() {
           </Card>
         </div>
 
+        <div className="space-y-4">
+        <Card className="h-fit">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Hướng dẫn cho tài khoản mới
+            </CardTitle>
+            <CardDescription>Hệ thống dùng các câu trả lời này để tạo cold-start point trước khi có lịch sử học.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="font-medium text-foreground">1. Tạo cold-start profile</p>
+              <p className="mt-1">Điểm khởi tạo hiện tại: {coldStart.coldStartScore}/100.</p>
+              <ul className="mt-3 space-y-2">
+                {coldStart.coldStartReasons.slice(0, 4).map((reason) => (
+                  <li key={reason} className="rounded-md bg-background px-3 py-2">{reason}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="font-medium text-foreground">2. Làm placement test</p>
+              <p className="mt-1">Kiểm tra nhanh kana, từ vựng và ngữ pháp nền tảng.</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="font-medium text-foreground">3. Sinh lộ trình đầu tiên</p>
+              <p className="mt-1">Recommendation engine dùng hồ sơ + cold-start point + placement test để chọn bài học phù hợp.</p>
+            </div>
+            <Button className="w-full" size="lg" onClick={handleSubmit}>
+              Lưu hồ sơ và làm kiểm tra đầu vào
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -206,6 +313,7 @@ export default function OnboardingPage() {
             </Button>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   )
