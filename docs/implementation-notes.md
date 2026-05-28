@@ -37,6 +37,11 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - `GET/POST/DELETE /api/activity` doc/ghi/xoa `activity_logs` theo user dang dang nhap.
   - `useStudyProgress` va `useActivityLog` load tu API DB, fallback localStorage neu API loi.
   - Seed script tao progress mau cho `demo-learner`.
+- Da nang cap chatbot/RAG sang PostgreSQL:
+  - `/api/chat` truy xuat nguon tu bang `knowledge_chunks`.
+  - Neu DB khong co nguon phu hop, route fallback ve retriever seed cu.
+  - Chat request khong con gui toan bo content tu client.
+  - Cau hoi, cau tra loi, provider va source metadata duoc luu vao `chat_logs` theo user dang dang nhap.
 
 ## 2. Quyet dinh ve database
 
@@ -270,11 +275,9 @@ limit 5;
 5. Tao migration cho cac bang chinh.
 6. Seed du lieu tu `lib/data/nihongo-study.ts` vao PostgreSQL.
 7. Thay cac API route doc seed data/localStorage bang truy van database.
-8. Nang cap chatbot/RAG doc `knowledge_chunks` tu PostgreSQL.
-9. Luu chat log vao PostgreSQL.
-10. Cai `pgvector` cho PostgreSQL local neu can vector search that.
-11. Tao script generate embedding.
-12. Nang cap chatbot tu keyword retrieval sang vector retrieval.
+8. Cai `pgvector` cho PostgreSQL local neu can vector search that.
+9. Tao script generate embedding.
+10. Nang cap chatbot tu keyword retrieval sang vector retrieval.
 13. Them fallback khi API embedding/LLM loi hoac mat mang.
 14. Cap nhat tai lieu bao cao va test plan.
 

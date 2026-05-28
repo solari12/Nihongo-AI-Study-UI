@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Sparkles, BookOpen, FileText, HelpCircle } from "lucide-react"
-import { useAdminContent } from "@/hooks/use-admin-content"
 
 type ChatSource = {
   id: string
@@ -68,7 +67,6 @@ function sourceIcon(type: string) {
 }
 
 export default function ChatbotPage() {
-  const { content } = useAdminContent()
   const [messages, setMessages] = useState(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -96,7 +94,7 @@ export default function ChatbotPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, content }),
+        body: JSON.stringify({ message }),
       })
       const data = (await response.json()) as ChatResponse
 

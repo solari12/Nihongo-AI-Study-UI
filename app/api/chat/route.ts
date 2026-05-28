@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getCurrentUser } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { buildChatPrompt, nihongoTutorSystemPrompt } from "@/lib/rag/chat-prompt"
-import { buildFallbackAnswer, retrieveSources } from "@/lib/rag/retriever"
-import type { AdminContent } from "@/hooks/use-admin-content"
+import { buildFallbackAnswer, retrieveSources, retrieveSourcesFromDatabase } from "@/lib/rag/retriever"
 
 type ChatRequest = {
   message?: string
-  content?: Partial<AdminContent>
 }
 
 type OpenRouterResponse = {
@@ -65,7 +65,13 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const sources = retrieveSources(message, 5, body.content)
+  const user = await getCurrentUser()
+  let sources = await retrieveSourcesFromDatabase(message, 5)
+
+  if (!sources.length) {
+    sources = retrieveSources(message, 5)
+  }
+
   const prompt = buildChatPrompt(message, sources)
 
   let answer: string | null = null
@@ -80,6 +86,23 @@ export async function POST(request: NextRequest) {
 
   if (!answer) {
     answer = buildFallbackAnswer(message, sources)
+  }
+
+  if (user) {
+    await prisma.chatLog.create({
+      data: {
+        userId: user.id,
+        message,
+        answer,
+        provider,
+        sourcesJson: sources.map((source) => ({
+          id: source.id,
+          type: source.type,
+          title: source.title,
+          score: source.score,
+        })),
+      },
+    })
   }
 
   return NextResponse.json({

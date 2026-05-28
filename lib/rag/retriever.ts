@@ -6,6 +6,7 @@ import {
   type QuizQuestionItem,
   type VocabularyItem,
 } from "@/lib/data/nihongo-study"
+import { prisma } from "@/lib/prisma"
 
 export type RagSource = {
   id: string
@@ -115,6 +116,29 @@ export function retrieveSources(
   ]
 
   return sources
+    .filter((source) => source.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+}
+
+export async function retrieveSourcesFromDatabase(query: string, limit = 5): Promise<RagSource[]> {
+  const queryTokens = tokenize(query)
+  if (!queryTokens.length) return []
+
+  const chunks = await prisma.knowledgeChunk.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  })
+
+  return chunks
+    .map((chunk) => ({
+      id: chunk.id,
+      type: chunk.sourceType === "grammar" ? "grammar" as const : chunk.sourceType === "quiz" ? "quiz" as const : "vocabulary" as const,
+      title: chunk.title,
+      content: chunk.content,
+      score: scoreSource(queryTokens, `${chunk.title}\n${chunk.content}`),
+    }))
     .filter((source) => source.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
