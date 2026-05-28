@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { ContentErrorAlert, ContentLoadingCard } from "@/components/app/content-state"
 import {
   BookOpen,
   FileText,
@@ -91,6 +92,8 @@ export default function AdminPage() {
     deleteQuizQuestion,
     resetContent,
     replaceContent,
+    isLoaded,
+    error,
   } = useAdminContent()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [vocabularyDialogOpen, setVocabularyDialogOpen] = useState(false)
@@ -101,6 +104,7 @@ export default function AdminPage() {
   const [grammarForm, setGrammarForm] = useState<GrammarItem | Omit<GrammarItem, "id">>(emptyGrammar)
   const [quizForm, setQuizForm] = useState<QuizQuestionItem | Omit<QuizQuestionItem, "id">>(emptyQuiz)
   const [importMessage, setImportMessage] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
 
   if (activeUser?.role !== "admin") {
     return (
@@ -139,6 +143,7 @@ export default function AdminPage() {
 
   const saveVocabulary = async (event: FormEvent) => {
     event.preventDefault()
+    setIsSaving(true)
     try {
       if ("id" in vocabularyForm) {
         await updateVocabulary(vocabularyForm)
@@ -149,6 +154,8 @@ export default function AdminPage() {
       setImportMessage("Đã lưu từ vựng vào PostgreSQL.")
     } catch {
       setImportMessage("Không lưu được từ vựng. Hãy kiểm tra quyền admin hoặc dữ liệu nhập.")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -166,6 +173,7 @@ export default function AdminPage() {
 
   const saveGrammar = async (event: FormEvent) => {
     event.preventDefault()
+    setIsSaving(true)
     try {
       if ("id" in grammarForm) {
         await updateGrammar(grammarForm)
@@ -176,6 +184,8 @@ export default function AdminPage() {
       setImportMessage("Đã lưu ngữ pháp vào PostgreSQL.")
     } catch {
       setImportMessage("Không lưu được ngữ pháp. Hãy kiểm tra quyền admin hoặc dữ liệu nhập.")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -193,6 +203,7 @@ export default function AdminPage() {
 
   const saveQuiz = async (event: FormEvent) => {
     event.preventDefault()
+    setIsSaving(true)
     try {
       if ("id" in quizForm) {
         await updateQuizQuestion(quizForm)
@@ -203,6 +214,8 @@ export default function AdminPage() {
       setImportMessage("Đã lưu câu hỏi quiz vào PostgreSQL.")
     } catch {
       setImportMessage("Không lưu được câu hỏi quiz. Hãy kiểm tra quyền admin hoặc dữ liệu nhập.")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -220,29 +233,38 @@ export default function AdminPage() {
   }
 
   const removeVocabulary = async (id: number) => {
+    setIsSaving(true)
     try {
       await deleteVocabulary(id)
       setImportMessage("Đã xóa từ vựng khỏi PostgreSQL.")
     } catch {
       setImportMessage("Không xóa được từ vựng.")
+    } finally {
+      setIsSaving(false)
     }
   }
 
   const removeGrammar = async (id: number) => {
+    setIsSaving(true)
     try {
       await deleteGrammar(id)
       setImportMessage("Đã xóa ngữ pháp khỏi PostgreSQL.")
     } catch {
       setImportMessage("Không xóa được ngữ pháp.")
+    } finally {
+      setIsSaving(false)
     }
   }
 
   const removeQuiz = async (id: number) => {
+    setIsSaving(true)
     try {
       await deleteQuizQuestion(id)
       setImportMessage("Đã xóa câu hỏi quiz khỏi PostgreSQL.")
     } catch {
       setImportMessage("Không xóa được câu hỏi quiz.")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -290,18 +312,22 @@ export default function AdminPage() {
             className="hidden"
             onChange={importContent}
           />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={!isLoaded}>
             Nhập JSON
           </Button>
-          <Button variant="outline" onClick={exportContent}>
+          <Button variant="outline" onClick={exportContent} disabled={!isLoaded}>
             Xuất JSON
           </Button>
-          <Button variant="outline" onClick={resetContent}>
+          <Button variant="outline" onClick={resetContent} disabled={!isLoaded}>
             <RotateCcw className="mr-2 h-4 w-4" />
             Khôi phục dữ liệu mẫu
           </Button>
         </div>
       </div>
+
+      {error && <ContentErrorAlert message={error} />}
+
+      {!isLoaded && <ContentLoadingCard label="Đang tải dữ liệu quản trị..." />}
 
       {importMessage && (
         <Card>
@@ -346,7 +372,7 @@ export default function AdminPage() {
                 <CardTitle>Danh sách từ vựng</CardTitle>
                 <CardDescription>Nhập dần bộ từ vựng N5 theo chủ đề.</CardDescription>
               </div>
-              <Button onClick={openNewVocabulary}>
+              <Button onClick={openNewVocabulary} disabled={!isLoaded}>
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm từ
               </Button>
@@ -374,6 +400,7 @@ export default function AdminPage() {
                     <RowActions
                       onEdit={() => openEditVocabulary(item)}
                       onDelete={() => void removeVocabulary(item.id)}
+                      disabled={isSaving}
                     />
                   </div>
                 ))}
@@ -389,7 +416,7 @@ export default function AdminPage() {
                 <CardTitle>Danh sách ngữ pháp</CardTitle>
                 <CardDescription>Quản lý mẫu câu, cách dùng và ví dụ N5.</CardDescription>
               </div>
-              <Button onClick={openNewGrammar}>
+              <Button onClick={openNewGrammar} disabled={!isLoaded}>
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm mẫu
               </Button>
@@ -415,6 +442,7 @@ export default function AdminPage() {
                     <RowActions
                       onEdit={() => openEditGrammar(item)}
                       onDelete={() => void removeGrammar(item.id)}
+                      disabled={isSaving}
                     />
                   </div>
                 ))}
@@ -430,7 +458,7 @@ export default function AdminPage() {
                 <CardTitle>Danh sách câu hỏi quiz</CardTitle>
                 <CardDescription>Tạo câu hỏi luyện tập từ vựng và ngữ pháp.</CardDescription>
               </div>
-              <Button onClick={openNewQuiz}>
+              <Button onClick={openNewQuiz} disabled={!isLoaded}>
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm câu hỏi
               </Button>
@@ -456,6 +484,7 @@ export default function AdminPage() {
                     <RowActions
                       onEdit={() => openEditQuiz(item)}
                       onDelete={() => void removeQuiz(item.id)}
+                      disabled={isSaving}
                     />
                   </div>
                 ))}
@@ -484,7 +513,7 @@ export default function AdminPage() {
             <Field label="Dịch ví dụ" value={vocabularyForm.example.vietnamese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, vietnamese: value } })} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setVocabularyDialogOpen(false)}>Hủy</Button>
-              <Button type="submit">Lưu</Button>
+              <Button type="submit" disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -511,7 +540,7 @@ export default function AdminPage() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setGrammarDialogOpen(false)}>Hủy</Button>
-              <Button type="submit">Lưu</Button>
+              <Button type="submit" disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -552,7 +581,7 @@ export default function AdminPage() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setQuizDialogOpen(false)}>Hủy</Button>
-              <Button type="submit">Lưu</Button>
+              <Button type="submit" disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -581,16 +610,18 @@ function Field({
 function RowActions({
   onEdit,
   onDelete,
+  disabled,
 }: {
   onEdit: () => void
   onDelete: () => void
+  disabled?: boolean
 }) {
   return (
     <div className="flex items-center justify-end gap-1">
-      <Button type="button" variant="ghost" size="icon" onClick={onEdit}>
+      <Button type="button" variant="ghost" size="icon" onClick={onEdit} disabled={disabled}>
         <Pencil className="h-4 w-4" />
       </Button>
-      <Button type="button" variant="ghost" size="icon" onClick={onDelete}>
+      <Button type="button" variant="ghost" size="icon" onClick={onDelete} disabled={disabled}>
         <Trash2 className="h-4 w-4 text-destructive" />
       </Button>
     </div>

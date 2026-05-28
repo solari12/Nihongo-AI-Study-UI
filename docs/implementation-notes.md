@@ -344,6 +344,15 @@ TypeScript noEmit thanh cong.
 Next production build thanh cong.
 ```
 
+Cap nhat UI moi nhat:
+
+```text
+- Them component hien thi trang thai loading/error dung chung cho du lieu hoc tap.
+- Vocabulary, Grammar, Quiz hien thong bao khi dang tai du lieu hoac khi API/DB loi.
+- Admin hien loading/error rieng, khoa nut import/export/reset/them moi khi du lieu chua tai xong.
+- Admin khoa nut luu/xoa trong luc request dang chay de tranh bam lap.
+```
+
 Tai khoan seed hien tai:
 
 ```text

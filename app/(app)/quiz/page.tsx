@@ -29,6 +29,7 @@ import type { QuizQuestionItem } from "@/lib/data/nihongo-study"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 import { useAdminContent } from "@/hooks/use-admin-content"
 import { useActivityLog } from "@/hooks/use-activity-log"
+import { ContentErrorAlert } from "@/components/app/content-state"
 
 type QuizState = "setup" | "playing" | "result"
 
@@ -48,7 +49,7 @@ export default function QuizPage() {
   const [finalResult, setFinalResult] = useState({ score: 0, total: 0, percentage: 0 })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { recordQuizAttempt } = useStudyProgress()
-  const { content } = useAdminContent()
+  const { content, isLoaded, error } = useAdminContent()
   const { addActivity } = useActivityLog()
 
   const activeQuestions = useMemo(() => {
@@ -140,6 +141,8 @@ export default function QuizPage() {
           </p>
         </div>
 
+        {error && <ContentErrorAlert message={error} />}
+
         <div className="mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -209,12 +212,17 @@ export default function QuizPage() {
                 onClick={startQuiz}
                 className="w-full"
                 size="lg"
-                disabled={activeQuestions.length === 0}
+                disabled={!isLoaded || activeQuestions.length === 0}
               >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Bắt đầu làm quiz
               </Button>
-              {activeQuestions.length === 0 && (
+              {!isLoaded && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Đang tải câu hỏi từ PostgreSQL...
+                </p>
+              )}
+              {isLoaded && activeQuestions.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground">
                   Chưa có câu hỏi phù hợp với lựa chọn này.
                 </p>

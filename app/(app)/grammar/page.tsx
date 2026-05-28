@@ -7,10 +7,11 @@ import { FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { grammarFilters } from "@/lib/data/nihongo-study"
 import { useAdminContent } from "@/hooks/use-admin-content"
+import { ContentErrorAlert, ContentLoadingCard } from "@/components/app/content-state"
 
 export default function GrammarPage() {
   const [selectedFilter, setSelectedFilter] = useState("Tất cả")
-  const { content } = useAdminContent()
+  const { content, isLoaded, error } = useAdminContent()
 
   const filteredGrammar = content.grammar.filter((grammar) => {
     if (selectedFilter === "Tất cả") return true
@@ -25,6 +26,8 @@ export default function GrammarPage() {
           Học các mẫu ngữ pháp tiếng Nhật N5
         </p>
       </div>
+
+      {error && <ContentErrorAlert message={error} />}
 
       <div className="flex flex-wrap gap-2">
         {grammarFilters.map((filter) => (
@@ -47,6 +50,9 @@ export default function GrammarPage() {
         ))}
       </div>
 
+      {!isLoaded ? (
+        <ContentLoadingCard label="Đang tải ngữ pháp..." />
+      ) : (
       <div className="grid gap-4 md:grid-cols-2">
         {filteredGrammar.map((grammar) => (
           <GrammarCard
@@ -61,8 +67,9 @@ export default function GrammarPage() {
           />
         ))}
       </div>
+      )}
 
-      {filteredGrammar.length === 0 && (
+      {isLoaded && filteredGrammar.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <FileText className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="font-medium">Không có ngữ pháp nào</h3>

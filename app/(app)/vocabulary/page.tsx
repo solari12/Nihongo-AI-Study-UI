@@ -12,11 +12,12 @@ import { cn } from "@/lib/utils"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 import { useAdminContent } from "@/hooks/use-admin-content"
 import { useActivityLog } from "@/hooks/use-activity-log"
+import { ContentErrorAlert, ContentLoadingCard } from "@/components/app/content-state"
 
 export default function VocabularyPage() {
   const [selectedTopic, setSelectedTopic] = useState("Tất cả")
   const [searchQuery, setSearchQuery] = useState("")
-  const { content, topics } = useAdminContent()
+  const { content, topics, isLoaded, error } = useAdminContent()
   const {
     learnedVocabularySet,
     stats,
@@ -49,6 +50,8 @@ export default function VocabularyPage() {
         </p>
       </div>
 
+      {error && <ContentErrorAlert message={error} />}
+
       <div className="grid gap-6 lg:grid-cols-4">
         <div className="lg:col-span-3 space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -79,6 +82,9 @@ export default function VocabularyPage() {
             ))}
           </div>
 
+          {!isLoaded ? (
+            <ContentLoadingCard label="Đang tải từ vựng..." />
+          ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {filteredVocabulary.map((vocab) => (
               <VocabularyCard
@@ -113,8 +119,9 @@ export default function VocabularyPage() {
               />
             ))}
           </div>
+          )}
 
-          {filteredVocabulary.length === 0 && (
+          {isLoaded && filteredVocabulary.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="font-medium">Không tìm thấy từ vựng</h3>
