@@ -99,3 +99,49 @@ export function toQuizQuestionItem(item: DbQuizQuestion): QuizQuestionItem {
       .sort((a, b) => a.id.localeCompare(b.id)),
   }
 }
+
+export function toDbGrammarStatus(status: string) {
+  if (status === "completed" || status.includes("hoÃ n") || status.includes("hoàn")) return "completed" as const
+  if (status === "in_progress" || status.includes("Äang") || status.includes("Đang")) return "in_progress" as const
+  return "not_started" as const
+}
+
+export function toDbDifficulty(difficulty: string) {
+  if (difficulty === "hard" || difficulty.includes("Kh")) return "hard" as const
+  if (difficulty === "medium" || difficulty.includes("Trung")) return "medium" as const
+  return "easy" as const
+}
+
+export function buildVocabularyChunk(item: {
+  japanese: string
+  hiragana: string
+  romaji: string
+  vietnamese: string
+  example: {
+    japanese: string
+    vietnamese: string
+  }
+}) {
+  return `${item.japanese} (${item.hiragana}, ${item.romaji}) means ${item.vietnamese}. Example: ${item.example.japanese} - ${item.example.vietnamese}`
+}
+
+export function buildGrammarChunk(item: {
+  pattern: string
+  meaning: string
+  structure: string
+  usageNote: string
+  example: {
+    japanese: string
+    vietnamese: string
+  }
+}) {
+  return `${item.pattern}: ${item.meaning}. Structure: ${item.structure}. Usage: ${item.usageNote}. Example: ${item.example.japanese} - ${item.example.vietnamese}`
+}
+
+export function buildQuizChunk(item: {
+  question: string
+  correctAnswer: string
+  explanation: string
+}) {
+  return `${item.question}. Correct answer: ${item.correctAnswer}. Explanation: ${item.explanation}`
+}

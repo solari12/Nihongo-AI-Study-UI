@@ -26,6 +26,12 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - `GET /api/quiz` doc bang `quiz_questions` va `quiz_answers`.
   - `POST /api/quiz/submit` cham diem dua tren dap an trong database.
 - Da chuyen `useAdminContent` sang load du lieu ban dau tu cac API tren, nen cac man Vocabulary, Grammar, Quiz va danh sach Admin bat dau doc noi dung tu PostgreSQL thay vi chi doc seed/localStorage.
+- Da them Admin CRUD ghi PostgreSQL:
+  - `POST/PUT/DELETE /api/vocabulary`
+  - `POST/PUT/DELETE /api/grammar`
+  - `POST/PUT/DELETE /api/quiz`
+  - Cac mutation kiem tra session va role `admin` tren server.
+  - Khi them/sua noi dung, bang `knowledge_chunks` duoc tao/cap nhat de phuc vu RAG.
 
 ## 2. Quyet dinh ve database
 
@@ -259,7 +265,7 @@ limit 5;
 5. Tao migration cho cac bang chinh.
 6. Seed du lieu tu `lib/data/nihongo-study.ts` vao PostgreSQL.
 7. Thay cac API route doc seed data/localStorage bang truy van database.
-8. Thay Admin CRUD ghi database that thay vi chi cap nhat state/localStorage phia client.
+8. Chuyen progress, quiz attempt va activity log sang PostgreSQL.
 9. Luu knowledge chunk va embedding dang JSONB de demo RAG co nguon du lieu.
 10. Cai `pgvector` cho PostgreSQL local neu can vector search that.
 11. Tao script generate embedding.

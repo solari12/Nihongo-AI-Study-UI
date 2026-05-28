@@ -36,6 +36,10 @@ type QuizApiResponse = {
   items: QuizQuestionItem[]
 }
 
+type ItemApiResponse<T> = {
+  item: T
+}
+
 function readContent(): AdminContent {
   if (typeof window === "undefined") return defaultContent
 
@@ -76,8 +80,20 @@ async function fetchContent(signal: AbortSignal): Promise<AdminContent> {
   }
 }
 
-function nextId<T extends { id: number }>(items: T[]) {
-  return Math.max(0, ...items.map((item) => item.id)) + 1
+async function mutateJson<T>(url: string, method: "POST" | "PUT" | "DELETE", body: unknown) {
+  const response = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to ${method} ${url}`)
+  }
+
+  return (await response.json()) as T
 }
 
 export function isAdminContent(value: unknown): value is AdminContent {
@@ -125,63 +141,78 @@ export function useAdminContent() {
     return ["Tất cả", ...uniqueTopics]
   }, [content.vocabulary])
 
-  const addVocabulary = (item: Omit<VocabularyItem, "id">) => {
+  const addVocabulary = async (item: Omit<VocabularyItem, "id">) => {
+    const result = await mutateJson<ItemApiResponse<VocabularyItem>>("/api/vocabulary", "POST", item)
     setContent((current) => ({
       ...current,
-      vocabulary: [...current.vocabulary, { ...item, id: nextId(current.vocabulary) }],
+      vocabulary: [...current.vocabulary, result.item],
     }))
+    return result.item
   }
 
-  const updateVocabulary = (item: VocabularyItem) => {
+  const updateVocabulary = async (item: VocabularyItem) => {
+    const result = await mutateJson<ItemApiResponse<VocabularyItem>>("/api/vocabulary", "PUT", item)
     setContent((current) => ({
       ...current,
-      vocabulary: current.vocabulary.map((entry) => (entry.id === item.id ? item : entry)),
+      vocabulary: current.vocabulary.map((entry) => (entry.id === item.id ? result.item : entry)),
     }))
+    return result.item
   }
 
-  const deleteVocabulary = (id: number) => {
+  const deleteVocabulary = async (id: number) => {
+    await mutateJson<{ ok: boolean }>("/api/vocabulary", "DELETE", { id })
     setContent((current) => ({
       ...current,
       vocabulary: current.vocabulary.filter((item) => item.id !== id),
     }))
   }
 
-  const addGrammar = (item: Omit<GrammarItem, "id">) => {
+  const addGrammar = async (item: Omit<GrammarItem, "id">) => {
+    const result = await mutateJson<ItemApiResponse<GrammarItem>>("/api/grammar", "POST", item)
     setContent((current) => ({
       ...current,
-      grammar: [...current.grammar, { ...item, id: nextId(current.grammar) }],
+      grammar: [...current.grammar, result.item],
     }))
+    return result.item
   }
 
-  const updateGrammar = (item: GrammarItem) => {
+  const updateGrammar = async (item: GrammarItem) => {
+    const result = await mutateJson<ItemApiResponse<GrammarItem>>("/api/grammar", "PUT", item)
     setContent((current) => ({
       ...current,
-      grammar: current.grammar.map((entry) => (entry.id === item.id ? item : entry)),
+      grammar: current.grammar.map((entry) => (entry.id === item.id ? result.item : entry)),
     }))
+    return result.item
   }
 
-  const deleteGrammar = (id: number) => {
+  const deleteGrammar = async (id: number) => {
+    await mutateJson<{ ok: boolean }>("/api/grammar", "DELETE", { id })
     setContent((current) => ({
       ...current,
       grammar: current.grammar.filter((item) => item.id !== id),
     }))
   }
 
-  const addQuizQuestion = (item: Omit<QuizQuestionItem, "id">) => {
+  const addQuizQuestion = async (item: Omit<QuizQuestionItem, "id">) => {
+    const result = await mutateJson<ItemApiResponse<QuizQuestionItem>>("/api/quiz", "POST", item)
     setContent((current) => ({
       ...current,
-      quiz: [...current.quiz, { ...item, id: nextId(current.quiz) }],
+      quiz: [...current.quiz, result.item],
     }))
+    return result.item
   }
 
-  const updateQuizQuestion = (item: QuizQuestionItem) => {
+  const updateQuizQuestion = async (item: QuizQuestionItem) => {
+    const result = await mutateJson<ItemApiResponse<QuizQuestionItem>>("/api/quiz", "PUT", item)
     setContent((current) => ({
       ...current,
-      quiz: current.quiz.map((entry) => (entry.id === item.id ? item : entry)),
+      quiz: current.quiz.map((entry) => (entry.id === item.id ? result.item : entry)),
     }))
+    return result.item
   }
 
-  const deleteQuizQuestion = (id: number) => {
+  const deleteQuizQuestion = async (id: number) => {
+    await mutateJson<{ ok: boolean }>("/api/quiz", "DELETE", { id })
     setContent((current) => ({
       ...current,
       quiz: current.quiz.filter((item) => item.id !== id),

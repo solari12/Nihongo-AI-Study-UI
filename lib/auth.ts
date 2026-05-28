@@ -112,6 +112,16 @@ export async function getCurrentUser() {
   })
 }
 
+export async function requireAdminUser() {
+  const user = await getCurrentUser()
+
+  if (!user || user.role !== "admin") {
+    return null
+  }
+
+  return user
+}
+
 export async function clearSession() {
   const cookieStore = await cookies()
   const token = cookieStore.get(AUTH_COOKIE_NAME)?.value

@@ -137,14 +137,19 @@ export default function AdminPage() {
     setVocabularyDialogOpen(true)
   }
 
-  const saveVocabulary = (event: FormEvent) => {
+  const saveVocabulary = async (event: FormEvent) => {
     event.preventDefault()
-    if ("id" in vocabularyForm) {
-      updateVocabulary(vocabularyForm)
-    } else {
-      addVocabulary(vocabularyForm)
+    try {
+      if ("id" in vocabularyForm) {
+        await updateVocabulary(vocabularyForm)
+      } else {
+        await addVocabulary(vocabularyForm)
+      }
+      setVocabularyDialogOpen(false)
+      setImportMessage("Đã lưu từ vựng vào PostgreSQL.")
+    } catch {
+      setImportMessage("Không lưu được từ vựng. Hãy kiểm tra quyền admin hoặc dữ liệu nhập.")
     }
-    setVocabularyDialogOpen(false)
   }
 
   const openNewGrammar = () => {
@@ -159,14 +164,19 @@ export default function AdminPage() {
     setGrammarDialogOpen(true)
   }
 
-  const saveGrammar = (event: FormEvent) => {
+  const saveGrammar = async (event: FormEvent) => {
     event.preventDefault()
-    if ("id" in grammarForm) {
-      updateGrammar(grammarForm)
-    } else {
-      addGrammar(grammarForm)
+    try {
+      if ("id" in grammarForm) {
+        await updateGrammar(grammarForm)
+      } else {
+        await addGrammar(grammarForm)
+      }
+      setGrammarDialogOpen(false)
+      setImportMessage("Đã lưu ngữ pháp vào PostgreSQL.")
+    } catch {
+      setImportMessage("Không lưu được ngữ pháp. Hãy kiểm tra quyền admin hoặc dữ liệu nhập.")
     }
-    setGrammarDialogOpen(false)
   }
 
   const openNewQuiz = () => {
@@ -181,14 +191,19 @@ export default function AdminPage() {
     setQuizDialogOpen(true)
   }
 
-  const saveQuiz = (event: FormEvent) => {
+  const saveQuiz = async (event: FormEvent) => {
     event.preventDefault()
-    if ("id" in quizForm) {
-      updateQuizQuestion(quizForm)
-    } else {
-      addQuizQuestion(quizForm)
+    try {
+      if ("id" in quizForm) {
+        await updateQuizQuestion(quizForm)
+      } else {
+        await addQuizQuestion(quizForm)
+      }
+      setQuizDialogOpen(false)
+      setImportMessage("Đã lưu câu hỏi quiz vào PostgreSQL.")
+    } catch {
+      setImportMessage("Không lưu được câu hỏi quiz. Hãy kiểm tra quyền admin hoặc dữ liệu nhập.")
     }
-    setQuizDialogOpen(false)
   }
 
   const exportContent = () => {
@@ -202,6 +217,33 @@ export default function AdminPage() {
     anchor.click()
     URL.revokeObjectURL(url)
     setImportMessage("Đã xuất dữ liệu nội dung N5.")
+  }
+
+  const removeVocabulary = async (id: number) => {
+    try {
+      await deleteVocabulary(id)
+      setImportMessage("Đã xóa từ vựng khỏi PostgreSQL.")
+    } catch {
+      setImportMessage("Không xóa được từ vựng.")
+    }
+  }
+
+  const removeGrammar = async (id: number) => {
+    try {
+      await deleteGrammar(id)
+      setImportMessage("Đã xóa ngữ pháp khỏi PostgreSQL.")
+    } catch {
+      setImportMessage("Không xóa được ngữ pháp.")
+    }
+  }
+
+  const removeQuiz = async (id: number) => {
+    try {
+      await deleteQuizQuestion(id)
+      setImportMessage("Đã xóa câu hỏi quiz khỏi PostgreSQL.")
+    } catch {
+      setImportMessage("Không xóa được câu hỏi quiz.")
+    }
   }
 
   const importContent = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -331,7 +373,7 @@ export default function AdminPage() {
                     <span>{item.topic}</span>
                     <RowActions
                       onEdit={() => openEditVocabulary(item)}
-                      onDelete={() => deleteVocabulary(item.id)}
+                      onDelete={() => void removeVocabulary(item.id)}
                     />
                   </div>
                 ))}
@@ -372,7 +414,7 @@ export default function AdminPage() {
                     <span>{item.status}</span>
                     <RowActions
                       onEdit={() => openEditGrammar(item)}
-                      onDelete={() => deleteGrammar(item.id)}
+                      onDelete={() => void removeGrammar(item.id)}
                     />
                   </div>
                 ))}
@@ -413,7 +455,7 @@ export default function AdminPage() {
                     <span>{item.topic}</span>
                     <RowActions
                       onEdit={() => openEditQuiz(item)}
-                      onDelete={() => deleteQuizQuestion(item.id)}
+                      onDelete={() => void removeQuiz(item.id)}
                     />
                   </div>
                 ))}
