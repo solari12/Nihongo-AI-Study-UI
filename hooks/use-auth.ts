@@ -21,7 +21,6 @@ type RegisterPayload = {
   fullName: string
   email: string
   password: string
-  goal?: string
 }
 
 async function parseAuthResponse(response: Response) {

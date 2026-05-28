@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-import { z } from "zod"
 import { createSession, verifyPassword } from "@/lib/auth"
+import { formatZodError, loginSchema, readJsonRequest } from "@/lib/auth-validation"
 import { prisma } from "@/lib/prisma"
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-})
-
 export async function POST(request: NextRequest) {
-  const parsed = loginSchema.safeParse(await request.json())
+  const body = await readJsonRequest(request)
+  const parsed = loginSchema.safeParse(body)
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Email hoặc mật khẩu không hợp lệ." }, { status: 400 })
+    return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 })
   }
 
-  const email = parsed.data.email.toLowerCase().trim()
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: parsed.data.email },
   })
 
   if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {

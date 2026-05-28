@@ -1,25 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
-import { z } from "zod"
 import { createSession, hashPassword } from "@/lib/auth"
+import { formatZodError, readJsonRequest, registerSchema } from "@/lib/auth-validation"
 import { prisma } from "@/lib/prisma"
 
-const registerSchema = z.object({
-  fullName: z.string().trim().min(2),
-  email: z.string().email(),
-  password: z.string().min(8),
-  goal: z.string().trim().min(1).optional(),
-})
-
 export async function POST(request: NextRequest) {
-  const parsed = registerSchema.safeParse(await request.json())
+  const body = await readJsonRequest(request)
+  const parsed = registerSchema.safeParse(body)
 
   if (!parsed.success) {
-    return NextResponse.json({ error: "Thông tin đăng ký không hợp lệ." }, { status: 400 })
+    return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 })
   }
 
-  const email = parsed.data.email.toLowerCase().trim()
   const existingUser = await prisma.user.findUnique({
-    where: { email },
+    where: { email: parsed.data.email },
   })
 
   if (existingUser) {
@@ -29,7 +22,7 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.create({
     data: {
       fullName: parsed.data.fullName,
-      email,
+      email: parsed.data.email,
       passwordHash: hashPassword(parsed.data.password),
       role: "learner",
     },

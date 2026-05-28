@@ -5,9 +5,9 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
 ## 1. Tinh trang hien tai
 
 - Ung dung dang la MVP chay duoc bang Next.js App Router.
-- Cac man hinh chinh da co: landing page, login/register demo, dashboard, vocabulary, grammar, quiz, history, learning path, placement test, profile, admin va chatbot.
+- Cac man hinh chinh da co: landing page, login/register that, dashboard, vocabulary, grammar, quiz, history, learning path, placement test, profile, admin va chatbot.
 - Cac API route da co: `/api/vocabulary`, `/api/grammar`, `/api/quiz`, `/api/quiz/submit`, `/api/chat`.
-- Du lieu hien tai dang dung seed data trong `lib/data/nihongo-study.ts` va luu tien do hoc tap bang `localStorage`.
+- Du lieu hoc tap, tai khoan, session, tien do, activity va chat log da duoc chuyen sang PostgreSQL; mot so hook van giu fallback localStorage khi API loi.
 - Build production da chay thanh cong bang lenh `corepack pnpm run build`.
 - Script lint hien tai chua chay duoc vi project co script `lint` nhung chua cai dependency `eslint`.
 - Da cai PostgreSQL 17 local tren Windows.
@@ -36,7 +36,7 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - `GET/POST /api/progress` doc/ghi `user_vocabulary_progress` va `quiz_attempts` theo user dang dang nhap.
   - `GET/POST/DELETE /api/activity` doc/ghi/xoa `activity_logs` theo user dang dang nhap.
   - `useStudyProgress` va `useActivityLog` load tu API DB, fallback localStorage neu API loi.
-  - Seed script tao progress mau cho `demo-learner`.
+  - Seed script tao progress mau cho user hoc thu nghiem.
 - Da nang cap chatbot/RAG sang PostgreSQL:
   - `/api/chat` truy xuat nguon tu bang `knowledge_chunks`.
   - Neu DB khong co nguon phu hop, route fallback ve retriever seed cu.
@@ -351,6 +351,16 @@ Cap nhat UI moi nhat:
 - Vocabulary, Grammar, Quiz hien thong bao khi dang tai du lieu hoac khi API/DB loi.
 - Admin hien loading/error rieng, khoa nut import/export/reset/them moi khi du lieu chua tai xong.
 - Admin khoa nut luu/xoa trong luc request dang chay de tranh bam lap.
+```
+
+Cap nhat auth moi nhat:
+
+```text
+- Bo prefill tai khoan demo va nut chon tai khoan mau tren trang dang nhap.
+- Bo thong bao mat khau demo mac dinh tren UI dang nhap.
+- Dang ky tao tai khoan that, validate ho ten/email/mat khau va xac nhan mat khau o client.
+- API login/register validate input bang Zod, tra loi JSON loi ro rang va khong crash khi body JSON rong/sai.
+- Database bat buoc user phai co password_hash, migration da apply tren PostgreSQL local.
 ```
 
 Tai khoan seed hien tai:
