@@ -32,6 +32,11 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - `POST/PUT/DELETE /api/quiz`
   - Cac mutation kiem tra session va role `admin` tren server.
   - Khi them/sua noi dung, bang `knowledge_chunks` duoc tao/cap nhat de phuc vu RAG.
+- Da chuyen progress, quiz attempt va activity log sang PostgreSQL:
+  - `GET/POST /api/progress` doc/ghi `user_vocabulary_progress` va `quiz_attempts` theo user dang dang nhap.
+  - `GET/POST/DELETE /api/activity` doc/ghi/xoa `activity_logs` theo user dang dang nhap.
+  - `useStudyProgress` va `useActivityLog` load tu API DB, fallback localStorage neu API loi.
+  - Seed script tao progress mau cho `demo-learner`.
 
 ## 2. Quyet dinh ve database
 
@@ -265,8 +270,8 @@ limit 5;
 5. Tao migration cho cac bang chinh.
 6. Seed du lieu tu `lib/data/nihongo-study.ts` vao PostgreSQL.
 7. Thay cac API route doc seed data/localStorage bang truy van database.
-8. Chuyen progress, quiz attempt va activity log sang PostgreSQL.
-9. Luu knowledge chunk va embedding dang JSONB de demo RAG co nguon du lieu.
+8. Nang cap chatbot/RAG doc `knowledge_chunks` tu PostgreSQL.
+9. Luu chat log vao PostgreSQL.
 10. Cai `pgvector` cho PostgreSQL local neu can vector search that.
 11. Tao script generate embedding.
 12. Nang cap chatbot tu keyword retrieval sang vector retrieval.

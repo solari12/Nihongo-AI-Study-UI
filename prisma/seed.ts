@@ -95,6 +95,51 @@ async function main() {
     })
   }
 
+  for (const vocabularyId of [1, 2, 5, 8]) {
+    await prisma.userVocabularyProgress.upsert({
+      where: {
+        userId_vocabularyId: {
+          userId: "demo-learner",
+          vocabularyId,
+        },
+      },
+      update: {
+        status: "learned",
+        lastReviewedAt: new Date(),
+        nextReviewAt: null,
+      },
+      create: {
+        userId: "demo-learner",
+        vocabularyId,
+        status: "learned",
+        lastReviewedAt: new Date(),
+      },
+    })
+  }
+
+  for (const vocabularyId of [3, 6]) {
+    await prisma.userVocabularyProgress.upsert({
+      where: {
+        userId_vocabularyId: {
+          userId: "demo-learner",
+          vocabularyId,
+        },
+      },
+      update: {
+        status: "review",
+        lastReviewedAt: new Date(),
+        nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+      create: {
+        userId: "demo-learner",
+        vocabularyId,
+        status: "review",
+        lastReviewedAt: new Date(),
+        nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    })
+  }
+
   for (const item of grammarData) {
     await prisma.grammar.upsert({
       where: { id: item.id },

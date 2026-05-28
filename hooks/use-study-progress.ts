@@ -42,13 +42,76 @@ function readProgress(): StudyProgress {
   }
 }
 
+async function fetchProgress() {
+  const response = await fetch("/api/progress")
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch progress")
+  }
+
+  return (await response.json()) as StudyProgress
+}
+
+async function saveVocabularyProgress(vocabularyId: number, status: "learned" | "review") {
+  const response = await fetch("/api/progress", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "vocabulary",
+      vocabularyId,
+      status,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to save vocabulary progress")
+  }
+}
+
+async function saveQuizAttempt(
+  quizType: string,
+  result: { score: number; total: number; percentage: number }
+) {
+  const response = await fetch("/api/progress", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "quiz_attempt",
+      quizType,
+      ...result,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to save quiz attempt")
+  }
+}
+
 export function useStudyProgress() {
   const [progress, setProgress] = useState<StudyProgress>(defaultProgress)
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    setProgress(readProgress())
-    setIsLoaded(true)
+    const controller = new AbortController()
+
+    fetchProgress()
+      .then((nextProgress) => {
+        if (!controller.signal.aborted) setProgress(nextProgress)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setProgress(readProgress())
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoaded(true)
+      })
+
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   useEffect(() => {
@@ -102,6 +165,7 @@ export function useStudyProgress() {
         : [...current.learnedVocabularyIds, id],
       reviewVocabularyIds: current.reviewVocabularyIds.filter((itemId) => itemId !== id),
     }))
+    void saveVocabularyProgress(id, "learned")
   }
 
   const addVocabularyToReview = (id: number) => {
@@ -111,6 +175,7 @@ export function useStudyProgress() {
         ? current.reviewVocabularyIds
         : [...current.reviewVocabularyIds, id],
     }))
+    void saveVocabularyProgress(id, "review")
   }
 
   const submitQuizAttempt = (
@@ -157,6 +222,7 @@ export function useStudyProgress() {
         },
       ],
     }))
+    void saveQuizAttempt(quizType, result)
   }
 
   return {

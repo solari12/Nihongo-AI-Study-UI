@@ -28,13 +28,69 @@ function readActivities(): LearningActivity[] {
   }
 }
 
+async function fetchActivities() {
+  const response = await fetch("/api/activity")
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch activities")
+  }
+
+  const data = (await response.json()) as {
+    items: LearningActivity[]
+  }
+  return data.items
+}
+
+async function saveActivity(activity: Omit<LearningActivity, "id" | "createdAt">) {
+  const response = await fetch("/api/activity", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(activity),
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to save activity")
+  }
+
+  const data = (await response.json()) as {
+    item: LearningActivity
+  }
+  return data.item
+}
+
+async function deleteActivities() {
+  const response = await fetch("/api/activity", {
+    method: "DELETE",
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to clear activities")
+  }
+}
+
 export function useActivityLog() {
   const [activities, setActivities] = useState<LearningActivity[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    setActivities(readActivities())
-    setIsLoaded(true)
+    const controller = new AbortController()
+
+    fetchActivities()
+      .then((nextActivities) => {
+        if (!controller.signal.aborted) setActivities(nextActivities)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setActivities(readActivities())
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoaded(true)
+      })
+
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   useEffect(() => {
@@ -43,18 +99,27 @@ export function useActivityLog() {
   }, [activities, isLoaded])
 
   const addActivity = (activity: Omit<LearningActivity, "id" | "createdAt">) => {
+    const optimisticActivity = {
+      ...activity,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    }
+
     setActivities((current) => [
-      {
-        ...activity,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-      },
+      optimisticActivity,
       ...current,
     ])
+
+    void saveActivity(activity).then((savedActivity) => {
+      setActivities((current) =>
+        current.map((entry) => (entry.id === optimisticActivity.id ? savedActivity : entry))
+      )
+    })
   }
 
   const clearActivities = () => {
     setActivities([])
+    void deleteActivities()
   }
 
   return {
