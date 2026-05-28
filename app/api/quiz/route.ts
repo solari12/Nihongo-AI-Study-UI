@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server"
-import { quizQuestions } from "@/lib/data/nihongo-study"
+import { prisma } from "@/lib/prisma"
+import { toQuizQuestionItem } from "@/lib/mappers/study-content"
 
-export function GET() {
+export async function GET() {
+  const quizQuestions = await prisma.quizQuestion.findMany({
+    include: {
+      answers: true,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  })
+
   return NextResponse.json({
-    items: quizQuestions,
+    items: quizQuestions.map(toQuizQuestionItem),
   })
 }

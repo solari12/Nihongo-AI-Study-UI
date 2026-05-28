@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server"
-import { grammarData, grammarFilters } from "@/lib/data/nihongo-study"
+import { prisma } from "@/lib/prisma"
+import { toGrammarItem } from "@/lib/mappers/study-content"
 
-export function GET() {
+export async function GET() {
+  const grammar = await prisma.grammar.findMany({
+    orderBy: {
+      id: "asc",
+    },
+  })
+
   return NextResponse.json({
-    filters: grammarFilters,
-    items: grammarData,
+    filters: ["Tất cả", "Chưa học", "Đang học", "Đã hoàn thành"],
+    items: grammar.map(toGrammarItem),
   })
 }

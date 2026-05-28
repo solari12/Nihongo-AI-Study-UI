@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { quizQuestions } from "@/lib/data/nihongo-study"
+import { prisma } from "@/lib/prisma"
 
 type SubmitQuizBody = {
   quizType?: string
@@ -10,10 +10,19 @@ type SubmitQuizBody = {
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as SubmitQuizBody
   const answerMap = body.answers ?? {}
-  const questionIds = new Set(body.questionIds ?? [])
-  const questions = questionIds.size
-    ? quizQuestions.filter((question) => questionIds.has(question.id))
-    : quizQuestions
+  const questionIds = body.questionIds ?? []
+  const questions = await prisma.quizQuestion.findMany({
+    where: questionIds.length
+      ? {
+          id: {
+            in: questionIds,
+          },
+        }
+      : undefined,
+    orderBy: {
+      id: "asc",
+    },
+  })
 
   const details = questions.map((question) => {
     const selectedAnswer = answerMap[String(question.id)]

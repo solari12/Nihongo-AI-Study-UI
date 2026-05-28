@@ -20,6 +20,11 @@ Tai lieu nay ghi lai cac quyet dinh ky thuat va cac buoc trien khai de phuc vu b
   - Cookie session la `httpOnly`, `sameSite=lax`.
   - Layout trong `app/(app)` kiem tra session tren server va redirect ve `/login` neu chua dang nhap.
   - Role `admin`/`learner` lay tu bang `users`.
+- Da chuyen cac API noi dung hoc sang doc PostgreSQL thong qua Prisma:
+  - `GET /api/vocabulary` doc bang `vocabulary`.
+  - `GET /api/grammar` doc bang `grammar`.
+  - `GET /api/quiz` doc bang `quiz_questions` va `quiz_answers`.
+  - `POST /api/quiz/submit` cham diem dua tren dap an trong database.
 
 ## 2. Quyet dinh ve database
 
@@ -253,12 +258,13 @@ limit 5;
 5. Tao migration cho cac bang chinh.
 6. Seed du lieu tu `lib/data/nihongo-study.ts` vao PostgreSQL.
 7. Thay cac API route doc seed data/localStorage bang truy van database.
-8. Luu knowledge chunk va embedding dang JSONB de demo RAG co nguon du lieu.
-9. Cai `pgvector` cho PostgreSQL local neu can vector search that.
-10. Tao bang `knowledge_chunks` va script generate embedding.
-11. Nang cap chatbot tu keyword retrieval sang vector retrieval.
-12. Them fallback khi API embedding/LLM loi hoac mat mang.
-13. Cap nhat tai lieu bao cao va test plan.
+8. Thay cac page hoc tap goi API/DB thay vi doc hook localStorage/seed truc tiep.
+9. Luu knowledge chunk va embedding dang JSONB de demo RAG co nguon du lieu.
+10. Cai `pgvector` cho PostgreSQL local neu can vector search that.
+11. Tao script generate embedding.
+12. Nang cap chatbot tu keyword retrieval sang vector retrieval.
+13. Them fallback khi API embedding/LLM loi hoac mat mang.
+14. Cap nhat tai lieu bao cao va test plan.
 
 ## 7. Ghi chu cai dat moi truong local
 
@@ -309,6 +315,13 @@ Prisma schema valid.
 Database schema is up to date.
 Seed thanh cong.
 Build production thanh cong.
+```
+
+Kiem tra moi nhat:
+
+```text
+TypeScript noEmit thanh cong.
+Next production build thanh cong.
 ```
 
 Tai khoan seed hien tai:
