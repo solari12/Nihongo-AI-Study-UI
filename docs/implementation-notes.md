@@ -364,6 +364,15 @@ Cap nhat auth moi nhat:
 - Nut dang xuat trong sidebar da goi API logout that thay vi chi chuyen ve trang chu.
 ```
 
+Cap nhat da ngon ngu moi nhat:
+
+```text
+- Them i18n provider client-side voi 3 ngon ngu: tieng Viet, English va 日本語.
+- Lua chon ngon ngu duoc luu vao localStorage va cap nhat `document.documentElement.lang`.
+- Them language switcher vao login, register, header trong app va sidebar.
+- Da ap dung dich cho auth flow, header, sidebar/navigation va cac thong diep thao tac chinh.
+```
+
 Tai khoan seed hien tai:
 
 ```text

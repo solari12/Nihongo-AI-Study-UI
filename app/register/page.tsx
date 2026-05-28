@@ -10,12 +10,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
+import { LanguageSwitcher } from "@/components/app/language-switcher"
 import { useAuth } from "@/hooks/use-auth"
+import { useI18n } from "@/lib/i18n"
+import { cn } from "@/lib/utils"
 
 export default function RegisterPage() {
   const router = useRouter()
   const { activeUser, isLoaded, register } = useAuth()
+  const { t } = useI18n()
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -31,12 +34,12 @@ export default function RegisterPage() {
 
   const passwordChecks = useMemo(
     () => [
-      { label: "Ít nhất 8 ký tự", valid: password.length >= 8 },
-      { label: "Có chữ cái", valid: /[A-Za-z]/.test(password) },
-      { label: "Có chữ số", valid: /[0-9]/.test(password) },
-      { label: "Xác nhận khớp", valid: confirmPassword.length > 0 && password === confirmPassword },
+      { label: t("auth.passwordCheckLength"), valid: password.length >= 8 },
+      { label: t("auth.passwordCheckLetter"), valid: /[A-Za-z]/.test(password) },
+      { label: t("auth.passwordCheckNumber"), valid: /[0-9]/.test(password) },
+      { label: t("auth.passwordCheckMatch"), valid: confirmPassword.length > 0 && password === confirmPassword },
     ],
-    [confirmPassword, password]
+    [confirmPassword, password, t]
   )
 
   const canSubmit =
@@ -49,7 +52,7 @@ export default function RegisterPage() {
     setError("")
 
     if (!canSubmit) {
-      setError("Vui lòng kiểm tra lại họ tên, email và mật khẩu.")
+      setError(t("auth.invalidRegisterForm"))
       return
     }
 
@@ -64,7 +67,7 @@ export default function RegisterPage() {
       router.push("/onboarding")
       router.refresh()
     } catch (registerError) {
-      setError(registerError instanceof Error ? registerError.message : "Không thể tạo tài khoản.")
+      setError(registerError instanceof Error ? registerError.message : t("auth.registerFallbackError"))
     } finally {
       setIsSubmitting(false)
     }
@@ -75,24 +78,22 @@ export default function RegisterPage() {
       <section className="hidden border-r bg-muted/40 lg:flex lg:items-center lg:justify-center lg:p-12">
         <div className="max-w-xl space-y-8">
           <div className="space-y-3">
-            <p className="text-sm font-medium text-primary">Tạo tài khoản học N5</p>
-            <h1 className="text-4xl font-bold text-balance">Mỗi người học có dữ liệu và tiến độ riêng.</h1>
-            <p className="text-muted-foreground text-balance">
-              Sau khi đăng ký, hệ thống tạo user trong PostgreSQL, hash mật khẩu và mở phiên đăng nhập tự động.
-            </p>
+            <p className="text-sm font-medium text-primary">{t("auth.registerSideKicker")}</p>
+            <h1 className="text-4xl font-bold text-balance">{t("auth.registerSideTitle")}</h1>
+            <p className="text-muted-foreground text-balance">{t("auth.registerSideDescription")}</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-lg border bg-card p-4">
               <UserPlus className="mb-3 h-5 w-5 text-primary" />
-              <p className="text-sm font-medium">Tài khoản thật</p>
+              <p className="text-sm font-medium">{t("auth.realAccount")}</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <LockKeyhole className="mb-3 h-5 w-5 text-primary" />
-              <p className="text-sm font-medium">Mật khẩu hash</p>
+              <p className="text-sm font-medium">{t("auth.hashedPassword")}</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <GraduationCap className="mb-3 h-5 w-5 text-primary" />
-              <p className="text-sm font-medium">Onboarding riêng</p>
+              <p className="text-sm font-medium">{t("auth.privateOnboarding")}</p>
             </div>
           </div>
         </div>
@@ -101,12 +102,15 @@ export default function RegisterPage() {
       <section className="flex items-center justify-center px-6 py-10">
         <Card className="w-full max-w-md border shadow-sm">
           <CardHeader className="space-y-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="text-xl font-bold">日</span>
+            <div className="flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <span className="text-xl font-bold">日</span>
+              </div>
+              <LanguageSwitcher />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold">Đăng ký</CardTitle>
-              <CardDescription>Tạo tài khoản người học mới.</CardDescription>
+              <CardTitle className="text-2xl font-bold">{t("auth.registerTitle")}</CardTitle>
+              <CardDescription>{t("auth.registerDescription")}</CardDescription>
             </div>
           </CardHeader>
           <form onSubmit={handleRegister}>
@@ -118,10 +122,10 @@ export default function RegisterPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="fullName">Họ và tên</Label>
+                <Label htmlFor="fullName">{t("auth.fullName")}</Label>
                 <Input
                   id="fullName"
-                  placeholder="Nguyễn Văn A"
+                  placeholder={t("auth.namePlaceholder")}
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
                   autoComplete="name"
@@ -130,11 +134,11 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="ban@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
@@ -143,12 +147,12 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Mật khẩu</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Ít nhất 8 ký tự"
+                    placeholder={t("auth.newPasswordPlaceholder")}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
@@ -161,7 +165,7 @@ export default function RegisterPage() {
                     size="icon"
                     className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
                     onClick={() => setShowPassword((value) => !value)}
-                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -169,11 +173,11 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+                <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
                 <Input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder={t("auth.confirmPasswordPlaceholder")}
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   autoComplete="new-password"
@@ -194,19 +198,19 @@ export default function RegisterPage() {
                 {isSubmitting ? (
                   <>
                     <Spinner className="mr-2 h-4 w-4" />
-                    Đang tạo tài khoản...
+                    {t("auth.registerLoading")}
                   </>
                 ) : (
-                  "Tạo tài khoản"
+                  t("auth.registerButton")
                 )}
               </Button>
             </CardContent>
           </form>
           <CardFooter>
             <p className="w-full text-center text-sm text-muted-foreground">
-              Đã có tài khoản?{" "}
+              {t("auth.hasAccount")}{" "}
               <Link href="/login" className="font-medium text-primary hover:underline">
-                Đăng nhập
+                {t("auth.login")}
               </Link>
             </p>
           </CardFooter>

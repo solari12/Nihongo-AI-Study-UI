@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { LanguageSwitcher } from "@/components/app/language-switcher"
+import { useI18n } from "@/lib/i18n"
 
 const features = [
   {
@@ -84,6 +86,8 @@ const adminRows = [
 ]
 
 export default function LandingPage() {
+  const { t } = useI18n()
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
@@ -109,6 +113,7 @@ export default function LandingPage() {
             </a>
           </nav>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher compact />
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Đăng nhập</Link>
             </Button>
