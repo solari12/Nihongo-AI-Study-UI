@@ -1,6 +1,8 @@
 "use client"
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
+import i18next from "i18next"
+import { I18nextProvider, initReactI18next, useTranslation } from "react-i18next"
 
 export type Locale = "vi" | "en" | "ja"
 
@@ -441,16 +443,28 @@ const globalTextTranslations: Record<string, Partial<Record<Locale, string>>> = 
   },
 }
 
-type I18nContextValue = {
-  locale: Locale
-  setLocale: (locale: Locale) => void
-  t: (key: TranslationKey) => string
-}
-
-const I18nContext = createContext<I18nContextValue | null>(null)
-
 function isLocale(value: string | null): value is Locale {
   return value === "vi" || value === "en" || value === "ja"
+}
+
+const resources = {
+  vi: { translation: dictionaries.vi },
+  en: { translation: dictionaries.en },
+  ja: { translation: dictionaries.ja },
+}
+
+if (!i18next.isInitialized) {
+  void i18next.use(initReactI18next).init({
+    resources,
+    lng: "vi",
+    fallbackLng: "vi",
+    interpolation: {
+      escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
+    },
+  })
 }
 
 function translateStaticText(original: string, locale: Locale) {
@@ -528,7 +542,21 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     const stored = window.localStorage.getItem(storageKey)
     if (isLocale(stored)) {
       setLocaleState(stored)
+      void i18next.changeLanguage(stored)
       document.documentElement.lang = stored
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleLanguageChanged = (nextLocale: string) => {
+      if (isLocale(nextLocale)) {
+        setLocaleState(nextLocale)
+      }
+    }
+
+    i18next.on("languageChanged", handleLanguageChanged)
+    return () => {
+      i18next.off("languageChanged", handleLanguageChanged)
     }
   }, [])
 
@@ -547,26 +575,28 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const setLocale = (nextLocale: Locale) => {
     setLocaleState(nextLocale)
+    void i18next.changeLanguage(nextLocale)
     window.localStorage.setItem(storageKey, nextLocale)
     document.documentElement.lang = nextLocale
   }
 
-  const value = useMemo<I18nContextValue>(
-    () => ({
-      locale,
-      setLocale,
-      t: (key) => dictionaries[locale][key] ?? dictionaries.vi[key],
-    }),
-    [locale]
-  )
-
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
+  return <I18nextProvider i18n={i18next}>{children}</I18nextProvider>
 }
 
 export function useI18n() {
-  const context = useContext(I18nContext)
-  if (!context) {
-    throw new Error("useI18n must be used inside I18nProvider")
+  const { i18n, t: translate } = useTranslation()
+  const locale = isLocale(i18n.language) ? i18n.language : "vi"
+
+  const setLocale = (nextLocale: Locale) => {
+    void i18n.changeLanguage(nextLocale)
+    window.localStorage.setItem(storageKey, nextLocale)
+    document.documentElement.lang = nextLocale
+    translateStaticDom(nextLocale)
   }
-  return context
+
+  return {
+    locale,
+    setLocale,
+    t: (key: TranslationKey) => translate(key),
+  }
 }

@@ -368,6 +368,7 @@ Cap nhat da ngon ngu moi nhat:
 
 ```text
 - Them i18n provider client-side voi 3 ngon ngu: tieng Viet, English va 日本語.
+- Da chuyen provider/hook sang thu vien `i18next` va `react-i18next` de quan ly resources va language state on dinh hon.
 - Lua chon ngon ngu duoc luu vao localStorage va cap nhat `document.documentElement.lang`.
 - Them language switcher vao login, register, header trong app va sidebar.
 - Da ap dung dich cho auth flow, header, sidebar/navigation va cac thong diep thao tac chinh.
