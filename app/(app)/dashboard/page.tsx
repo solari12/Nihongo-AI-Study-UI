@@ -110,45 +110,61 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-5 shadow-sm">
+      <div className="relative overflow-hidden rounded-lg border border-[#dfb6aa] bg-[#fff8f1] p-5 shadow-sm">
+        <Image
+          src="/assets/sakura-blossom.png"
+          alt=""
+          width={180}
+          height={90}
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-8 -top-4 h-24 w-44 rotate-12 object-contain opacity-20"
+        />
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex h-28 w-32 shrink-0 items-end justify-center overflow-hidden rounded-lg bg-gradient-to-br from-amber-50 via-sky-50 to-emerald-50">
+            <div className="relative flex h-28 w-40 shrink-0 items-end justify-center overflow-hidden rounded-lg bg-[#f9eee4]">
               <Image
-                src="/dashboard-hero-torii.png"
+                src="/assets/sakura-torii.png"
                 alt="Minh họa cổng torii và sách học tiếng Nhật"
-                width={180}
-                height={180}
+                width={150}
+                height={132}
                 priority
-                className="h-28 w-28 object-contain"
+                className="h-24 w-28 object-contain"
+              />
+              <Image
+                src="/assets/sakura-book.png"
+                alt=""
+                width={70}
+                height={78}
+                aria-hidden="true"
+                className="absolute bottom-2 right-2 h-14 w-14 object-contain"
               />
             </div>
             <div>
-              <Badge variant="outline" className="mb-3 border-primary/30 bg-primary/10 text-primary">
+              <Badge variant="outline" className="mb-3 border-[#d89a92] bg-[#f3c8bd]/45 text-[#8f4742]">
                 Dashboard học N5
               </Badge>
               <h1 className="text-2xl font-bold">Bắt đầu lộ trình học của bạn</h1>
-              <p className="max-w-2xl text-sm leading-6 text-muted-foreground/80">
+              <p className="max-w-2xl text-sm leading-6 text-[#6f5952]">
                 Dashboard chỉ hiển thị tiến độ thật của tài khoản hiện tại. Nếu bạn vừa tạo tài khoản mới, hãy hoàn tất hồ sơ học tập và placement test trước.
               </p>
             </div>
           </div>
-          <div className="grid min-w-[260px] gap-3 rounded-lg border border-primary/15 bg-background/80 p-4 shadow-sm">
+          <div className="grid min-w-[260px] gap-3 rounded-lg border border-[#dfb6aa] bg-[#fffdf8]/90 p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Tiến độ N5 tổng hợp</span>
-              <span className="text-3xl font-extrabold tracking-tight text-primary">{n5Progress}%</span>
+              <span className="text-3xl font-extrabold tracking-tight text-[#a34d48]">{n5Progress}%</span>
             </div>
             <Progress value={n5Progress} className="h-1.5" />
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/75">Từ vựng 45% · Ngữ pháp 35% · Quiz 20%</p>
-              <p className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">Cold-start {coldStartLabel}</p>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-[#7a625a]/75">Từ vựng 45% · Ngữ pháp 35% · Quiz 20%</p>
+              <p className="shrink-0 rounded-full bg-[#f3c8bd]/55 px-2 py-0.5 text-[11px] font-semibold text-[#8f4742]">Cold-start {coldStartLabel}</p>
             </div>
           </div>
         </div>
       </div>
 
       {!hasProgress && (
-        <Card className="border border-primary/20 bg-primary/5 shadow-sm">
+        <Card className="border border-[#dfb6aa] bg-[#fff8f1] shadow-sm">
           <CardHeader>
             <CardTitle>Tài khoản mới chưa có dữ liệu học</CardTitle>
             <CardDescription className="text-muted-foreground/80">
@@ -168,26 +184,20 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {nextSteps.map((step) => (
-          <Card
-            key={step.title}
-            className={step.done
-              ? "border border-emerald-200/70 bg-emerald-50/60 shadow-sm transition-all hover:bg-emerald-50"
-              : "border border-border/60 bg-card shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5"
-            }
-          >
+          <Card key={step.title} className="border border-[#d7b2a5] bg-[#fff8f1] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#fff2ea]">
             <CardContent className="flex h-full flex-col gap-4 p-5">
               <div className="flex items-center gap-3">
-                <div className={step.done ? "flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100" : "flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10"}>
+                <div className={step.done ? "flex h-9 w-9 items-center justify-center rounded-full bg-[#c8ead6]" : "flex h-9 w-9 items-center justify-center rounded-full bg-[#f3c8bd]/60"}>
                   {step.done ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                    <CheckCircle2 className="h-5 w-5 text-[#3f9b68]" />
                   ) : (
-                    <Circle className="h-5 w-5 text-primary" strokeWidth={1.75} />
+                    <Circle className="h-5 w-5 text-[#a34d48]" strokeWidth={1.75} />
                   )}
                 </div>
                 <p className="font-semibold">{step.title}</p>
               </div>
-              <p className="flex-1 text-sm leading-6 text-muted-foreground/80">{step.description}</p>
-              <Link href={step.href} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+              <p className="flex-1 text-sm leading-6 text-[#6f5952]">{step.description}</p>
+              <Link href={step.href} className="inline-flex items-center gap-1 text-xs font-semibold text-[#a34d48] hover:underline">
                 Tiếp tục
                 <ArrowRight className="h-3 w-3" />
               </Link>
@@ -201,10 +211,10 @@ export default function DashboardPage() {
           title="Từ vựng đã học"
           value={stats.learnedVocabulary}
           subtitle={`hoàn thành / ${totalVocabulary} từ`}
-          icon={<BookOpen className="h-10 w-10" />}
-          className="relative border border-border/60 bg-card shadow-sm"
+          icon={<Image src="/assets/sakura-book.png" alt="" width={70} height={78} aria-hidden="true" className="h-14 w-14 object-contain" />}
+          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
           contentClassName="p-4 pr-20"
-          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
+          iconClassName="absolute right-3 top-3 bg-transparent p-0 opacity-70"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
@@ -212,10 +222,10 @@ export default function DashboardPage() {
           title="Ngữ pháp đã học"
           value={completedGrammar}
           subtitle={`hoàn thành / ${totalGrammar} mẫu`}
-          icon={<FileText className="h-10 w-10" />}
-          className="relative border border-border/60 bg-card shadow-sm"
+          icon={<Image src="/assets/sakura-fan-books.png" alt="" width={86} height={45} aria-hidden="true" className="h-12 w-20 object-contain" />}
+          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
           contentClassName="p-4 pr-20"
-          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
+          iconClassName="absolute right-2 top-4 bg-transparent p-0 opacity-70"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
@@ -223,10 +233,10 @@ export default function DashboardPage() {
           title="Quiz đã làm"
           value={stats.quizAttempts}
           subtitle="bài kiểm tra"
-          icon={<HelpCircle className="h-10 w-10" />}
-          className="relative border border-border/60 bg-card shadow-sm"
+          icon={<Image src="/assets/sakura-brush.png" alt="" width={54} height={70} aria-hidden="true" className="h-14 w-11 object-contain" />}
+          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
           contentClassName="p-4 pr-20"
-          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
+          iconClassName="absolute right-5 top-4 bg-transparent p-0 opacity-70"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
@@ -234,10 +244,10 @@ export default function DashboardPage() {
           title="Điểm trung bình"
           value={`${stats.averageQuizScore}%`}
           subtitle="tất cả quiz"
-          icon={<TrendingUp className="h-10 w-10" />}
-          className="relative border border-border/60 bg-card shadow-sm"
+          icon={<Image src="/assets/sakura-blossom.png" alt="" width={82} height={42} aria-hidden="true" className="h-12 w-20 object-contain" />}
+          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
           contentClassName="p-4 pr-20"
-          iconClassName="absolute right-4 top-4 bg-primary/10 p-3 text-primary/25"
+          iconClassName="absolute right-2 top-4 bg-transparent p-0 opacity-65"
           valueClassName="text-2xl font-bold tracking-tight"
           subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
         />
