@@ -115,7 +115,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-lg border border-[#dfb6aa] bg-[#fff8f1] p-5 shadow-sm" style={paperCardStyle}>
+      <div className="relative overflow-hidden rounded-lg border border-[#dfb6aa] bg-[#fff8f1] p-5 shadow-sm">
         <Image
           src="/assets/hero-torii.png"
           alt=""
@@ -146,7 +146,7 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="grid min-w-[260px] gap-3 rounded-lg border border-[#dfb6aa] bg-[#fffdf8]/90 p-4 shadow-sm" style={paperCardStyle}>
+          <div className="grid min-w-[260px] gap-3 rounded-lg border border-[#dfb6aa] bg-[#fffdf8]/90 p-4 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full border-4 border-[#e7cdbd] bg-[#fff8f1] shadow-inner">
                 <div className="text-center">
@@ -168,7 +168,7 @@ export default function DashboardPage() {
       </div>
 
       {!hasProgress && (
-        <Card className="border border-[#dfb6aa] bg-[#fff8f1] shadow-sm" style={paperCardStyle}>
+        <Card className="border border-[#dfb6aa] bg-[#fff8f1] shadow-sm">
           <CardHeader>
             <CardTitle>Tài khoản mới chưa có dữ liệu học</CardTitle>
             <CardDescription className="text-muted-foreground/80">
@@ -267,7 +267,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card className="border border-[#dfb6aa] shadow-sm" style={paperCardStyle}>
+          <Card className="border border-[#dfb6aa] bg-card shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
@@ -296,7 +296,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-[#dfb6aa] shadow-sm" style={paperCardStyle}>
+          <Card className="border border-[#dfb6aa] bg-card shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-success" />
@@ -336,7 +336,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card className="border border-[#dfb6aa] shadow-sm" style={paperCardStyle}>
+        <Card className="border border-[#dfb6aa] bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-muted-foreground" />
