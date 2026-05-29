@@ -19,6 +19,7 @@ interface StatsCardProps {
   titleClassName?: string
   valueClassName?: string
   subtitleClassName?: string
+  style?: React.CSSProperties
 }
 
 export function StatsCard({
@@ -33,9 +34,10 @@ export function StatsCard({
   titleClassName,
   valueClassName,
   subtitleClassName,
+  style,
 }: StatsCardProps) {
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn("overflow-hidden", className)} style={style}>
       <CardContent className={cn("p-6", contentClassName)}>
         <div className="flex items-start justify-between">
           <div className="space-y-2">

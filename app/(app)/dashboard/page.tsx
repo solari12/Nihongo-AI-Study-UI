@@ -25,8 +25,9 @@ import { useStudyProgress } from "@/hooks/use-study-progress"
 
 const weekdayLabels = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
 const paperCardStyle = {
-  backgroundImage: "linear-gradient(rgba(255, 253, 248, 0.9), rgba(255, 253, 248, 0.9)), url('/assets/paper-card-bg.png')",
+  backgroundImage: "linear-gradient(rgba(255, 253, 248, 0.72), rgba(255, 253, 248, 0.72)), url('/assets/paper-card-bg.png')",
   backgroundSize: "cover",
+  backgroundPosition: "center",
 } as const
 
 function buildWeeklyData(activities: ReturnType<typeof useActivityLog>["activities"]) {
@@ -216,6 +217,7 @@ export default function DashboardPage() {
           subtitle={`hoàn thành / ${totalVocabulary} từ`}
           icon={<Image src="/assets/vocab-card.png" alt="" width={96} height={96} aria-hidden="true" className="h-16 w-16 object-contain" />}
           className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          style={paperCardStyle}
           contentClassName="p-4 pr-24"
           iconClassName="absolute right-2 top-2 bg-transparent p-0 opacity-85"
           valueClassName="text-2xl font-bold tracking-tight"
@@ -227,6 +229,7 @@ export default function DashboardPage() {
           subtitle={`hoàn thành / ${totalGrammar} mẫu`}
           icon={<Image src="/assets/grammar-card.png" alt="" width={96} height={96} aria-hidden="true" className="h-16 w-16 object-contain" />}
           className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          style={paperCardStyle}
           contentClassName="p-4 pr-24"
           iconClassName="absolute right-2 top-2 bg-transparent p-0 opacity-85"
           valueClassName="text-2xl font-bold tracking-tight"
@@ -238,6 +241,7 @@ export default function DashboardPage() {
           subtitle="bài kiểm tra"
           icon={<Image src="/assets/quiz-card.png" alt="" width={96} height={96} aria-hidden="true" className="h-16 w-16 object-contain" />}
           className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          style={paperCardStyle}
           contentClassName="p-4 pr-24"
           iconClassName="absolute right-2 top-2 bg-transparent p-0 opacity-85"
           valueClassName="text-2xl font-bold tracking-tight"
@@ -253,6 +257,7 @@ export default function DashboardPage() {
             </div>
           }
           className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          style={paperCardStyle}
           contentClassName="p-4 pr-24"
           iconClassName="absolute right-3 top-3 bg-transparent p-0"
           valueClassName="text-2xl font-bold tracking-tight"
@@ -262,7 +267,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card className="border border-border/60 shadow-sm">
+          <Card className="border border-[#dfb6aa] shadow-sm" style={paperCardStyle}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
@@ -291,7 +296,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/60 shadow-sm">
+          <Card className="border border-[#dfb6aa] shadow-sm" style={paperCardStyle}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-success" />
@@ -331,7 +336,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card className="border border-border/60 shadow-sm">
+        <Card className="border border-[#dfb6aa] shadow-sm" style={paperCardStyle}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-muted-foreground" />
