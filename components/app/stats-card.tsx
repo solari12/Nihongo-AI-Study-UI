@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 interface StatsCardProps {
   title: string
   value: string | number
+  description?: string
   subtitle?: string
   icon: React.ReactNode
   trend?: {
@@ -17,6 +18,7 @@ interface StatsCardProps {
   contentClassName?: string
   iconClassName?: string
   titleClassName?: string
+  descriptionClassName?: string
   valueClassName?: string
   subtitleClassName?: string
   style?: React.CSSProperties
@@ -25,6 +27,7 @@ interface StatsCardProps {
 export function StatsCard({
   title,
   value,
+  description,
   subtitle,
   icon,
   trend,
@@ -32,6 +35,7 @@ export function StatsCard({
   contentClassName,
   iconClassName,
   titleClassName,
+  descriptionClassName,
   valueClassName,
   subtitleClassName,
   style,
@@ -42,6 +46,9 @@ export function StatsCard({
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <p className={cn("text-sm font-medium text-muted-foreground", titleClassName)}>{title}</p>
+            {description && (
+              <p className={cn("text-sm text-muted-foreground", descriptionClassName)}>{description}</p>
+            )}
             <p className={cn("text-3xl font-bold", valueClassName)}>{value}</p>
             {subtitle && (
               <p className={cn("text-sm text-muted-foreground", subtitleClassName)}>{subtitle}</p>

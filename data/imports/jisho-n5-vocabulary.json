@@ -1,0 +1,7160 @@
+{
+  "vocabulary": [
+    {
+      "japanese": "上げる",
+      "hiragana": "あげる",
+      "romaji": "ageru",
+      "vietnamese": "[Cần dịch] to raise; to elevate; to move something (to a higher place)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "上げる",
+        "url": "https://jisho.org/search/%E4%B8%8A%E3%81%92%E3%82%8B",
+        "englishDefinitions": [
+          "to raise",
+          "to elevate",
+          "to move something (to a higher place)",
+          "to put onto (e.g. a shelf)",
+          "to increase (price, quality, status, etc.)",
+          "to raise (a wage)",
+          "to show someone (into a room)",
+          "to let in (e.g. a guest)",
+          "to give",
+          "to enrol (one's child in school)",
+          "to enroll",
+          "to send (one's child; e.g. to college)",
+          "to develop (talent, skill, etc.)",
+          "to improve",
+          "to earn (something desirable)",
+          "to achieve (e.g. a good result)",
+          "to obtain",
+          "to promote (someone)",
+          "to complete",
+          "to finish",
+          "to make (a loud sound)",
+          "to raise (one's voice)",
+          "to raise (one's gaze)",
+          "to lift up (one's face)",
+          "to look up",
+          "to do up (one's hair)",
+          "to offer up (incense, a prayer, etc.) to the gods (or Buddha, etc.)",
+          "to praise",
+          "to commend",
+          "to flatter",
+          "to make do (with less expenses than expected)",
+          "to cover expenses (with a given amount)",
+          "to set costs",
+          "to finish (one's studies)",
+          "to complete (a lesson)",
+          "to pass (e.g. a class)",
+          "to upload (e.g. an image)",
+          "to publish (on the internet)",
+          "to post",
+          "to raise someone's spirits",
+          "to cheer someone up",
+          "to enhance a mood",
+          "(of the tide) to come in",
+          "to rise",
+          "to increase (of market price)",
+          "to rise (of stock prices)",
+          "to vomit",
+          "to throw up",
+          "to do for (the sake of someone else)",
+          "to complete ...",
+          "to humbly do ...",
+          "Deep frying"
+        ],
+        "partsOfSpeech": [
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Transitive verb",
+          "Auxiliary verb",
+          "Ichidan verb",
+          "Suffix",
+          "Ichidan verb",
+          "Suffix",
+          "Ichidan verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "赤",
+      "hiragana": "あか",
+      "romaji": "aka",
+      "vietnamese": "[Cần dịch] red; crimson; scarlet",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "赤",
+        "url": "https://jisho.org/search/%E8%B5%A4",
+        "englishDefinitions": [
+          "red",
+          "crimson",
+          "scarlet",
+          "red-containing colour (e.g. brown, pink, orange)",
+          "Red (i.e. communist)",
+          "red light (traffic)",
+          "red ink (i.e. in finance or proof-reading)",
+          "(in) the red",
+          "complete",
+          "total",
+          "perfect",
+          "obvious",
+          "copper",
+          "red 5-point card",
+          "Aka",
+          "Red"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Noun",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "雨",
+      "hiragana": "あめ",
+      "romaji": "ame",
+      "vietnamese": "[Cần dịch] rain; rainy day; rainy weather",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "雨",
+        "url": "https://jisho.org/search/%E9%9B%A8",
+        "englishDefinitions": [
+          "rain",
+          "rainy day",
+          "rainy weather",
+          "the November suit (in hanafuda)",
+          "Rain"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "飴",
+      "hiragana": "あめ",
+      "romaji": "ame",
+      "vietnamese": "[Cần dịch] (hard) candy; toffee; rice-sugar",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "飴",
+        "url": "https://jisho.org/search/%E9%A3%B4",
+        "englishDefinitions": [
+          "(hard) candy",
+          "toffee",
+          "rice-sugar",
+          "sugar made from the starch of rice, potatoes, etc.",
+          "amber",
+          "yellowish-brown",
+          "Yeot"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "姉",
+      "hiragana": "あね",
+      "romaji": "ane",
+      "vietnamese": "[Cần dịch] older sister; elder sister; Ane",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "姉",
+        "url": "https://jisho.org/search/%E5%A7%89",
+        "englishDefinitions": [
+          "older sister",
+          "elder sister",
+          "Ane"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Place"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "青",
+      "hiragana": "あお",
+      "romaji": "ao",
+      "vietnamese": "[Cần dịch] blue; azure; green",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "青",
+        "url": "https://jisho.org/search/%E9%9D%92",
+        "englishDefinitions": [
+          "blue",
+          "azure",
+          "green",
+          "green light (traffic)",
+          "black (horse coat color)",
+          "blue 5-point card",
+          "immature",
+          "unripe",
+          "young",
+          "Blue"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Prefix",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "有る",
+      "hiragana": "ある",
+      "romaji": "aru",
+      "vietnamese": "[Cần dịch] to be; to exist; to live",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "在る",
+        "url": "https://jisho.org/search/%E5%9C%A8%E3%82%8B",
+        "englishDefinitions": [
+          "to be",
+          "to exist",
+          "to live",
+          "to have",
+          "to be located",
+          "to be equipped with",
+          "to happen",
+          "to come about",
+          "to exist (in a completed state)",
+          "to be (something unchanged in its current state)"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'ru' ending (irregular verb)",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending (irregular verb)",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending (irregular verb)",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending (irregular verb)",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending (irregular verb)",
+          "Intransitive verb",
+          "Auxiliary verb",
+          "Godan verb with 'ru' ending (irregular verb)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "朝",
+      "hiragana": "あさ",
+      "romaji": "asa",
+      "vietnamese": "[Cần dịch] morning; breakfast; Morning",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "朝",
+        "url": "https://jisho.org/search/%E6%9C%9D",
+        "englishDefinitions": [
+          "morning",
+          "breakfast",
+          "Morning"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "足",
+      "hiragana": "あし",
+      "romaji": "ashi",
+      "vietnamese": "[Cần dịch] foot; paw; arm (of an octopus, squid, etc.)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "足",
+        "url": "https://jisho.org/search/%E8%B6%B3",
+        "englishDefinitions": [
+          "foot",
+          "paw",
+          "arm (of an octopus, squid, etc.)",
+          "leg",
+          "gait",
+          "pace",
+          "lower radical of a kanji",
+          "means of transportation",
+          "(one's) ride",
+          "money",
+          "coin",
+          "Foot"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "明日",
+      "hiragana": "あした",
+      "romaji": "ashita",
+      "vietnamese": "[Cần dịch] tomorrow; near future",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "明日",
+        "url": "https://jisho.org/search/%E6%98%8E%E6%97%A5",
+        "englishDefinitions": [
+          "tomorrow",
+          "near future"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Adverb (fukushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "頭",
+      "hiragana": "あたま",
+      "romaji": "atama",
+      "vietnamese": "[Cần dịch] head; hair (on one's head); mind",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "頭-1",
+        "url": "https://jisho.org/search/%E9%A0%AD-1",
+        "englishDefinitions": [
+          "head",
+          "hair (on one's head)",
+          "mind",
+          "brains",
+          "intellect",
+          "leader",
+          "chief",
+          "boss",
+          "captain",
+          "top",
+          "tip",
+          "beginning",
+          "start",
+          "head",
+          "person",
+          "down payment",
+          "deposit",
+          "top structural component of a kanji",
+          "pair",
+          "Neck"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "新しい",
+      "hiragana": "あたらしい",
+      "romaji": "atarashii",
+      "vietnamese": "[Cần dịch] new; novel; fresh",
+      "type": "Tính từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "新しい",
+        "url": "https://jisho.org/search/%E6%96%B0%E3%81%97%E3%81%84",
+        "englishDefinitions": [
+          "new",
+          "novel",
+          "fresh",
+          "recent",
+          "latest",
+          "up-to-date",
+          "modern"
+        ],
+        "partsOfSpeech": [
+          "I-adjective (keiyoushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "勉強",
+      "hiragana": "べんきょう",
+      "romaji": "benkyou",
+      "vietnamese": "[Cần dịch] study; diligence; working hard",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "勉強",
+        "url": "https://jisho.org/search/%E5%8B%89%E5%BC%B7",
+        "englishDefinitions": [
+          "study",
+          "diligence",
+          "working hard",
+          "experience",
+          "knowledge",
+          "lesson (for the future)",
+          "discount",
+          "price reduction"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Noun",
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Intransitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "帽子",
+      "hiragana": "ぼうし",
+      "romaji": "boushi",
+      "vietnamese": "[Cần dịch] hat; cap; cap (move)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "帽子",
+        "url": "https://jisho.org/search/%E5%B8%BD%E5%AD%90",
+        "englishDefinitions": [
+          "hat",
+          "cap",
+          "cap (move)",
+          "Headgear"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "豚肉",
+      "hiragana": "ぶたにく",
+      "romaji": "butaniku",
+      "vietnamese": "[Cần dịch] pork; Pork",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "豚肉",
+        "url": "https://jisho.org/search/%E8%B1%9A%E8%82%89",
+        "englishDefinitions": [
+          "pork",
+          "Pork"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "病院",
+      "hiragana": "びょういん",
+      "romaji": "byouin",
+      "vietnamese": "[Cần dịch] hospital; clinic; doctor's office",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "病院",
+        "url": "https://jisho.org/search/%E7%97%85%E9%99%A2",
+        "englishDefinitions": [
+          "hospital",
+          "clinic",
+          "doctor's office",
+          "doctor's surgery",
+          "infirmary",
+          "Hospital"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "病気",
+      "hiragana": "びょうき",
+      "romaji": "byouki",
+      "vietnamese": "[Cần dịch] illness (usu. excluding minor ailments, e.g. common cold); disease; sickness",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "病気",
+        "url": "https://jisho.org/search/%E7%97%85%E6%B0%97",
+        "englishDefinitions": [
+          "illness (usu. excluding minor ailments, e.g. common cold)",
+          "disease",
+          "sickness",
+          "bad habit",
+          "bad behaviour",
+          "weakness",
+          "failing",
+          "crazy",
+          "insane",
+          "disturbed",
+          "sick in the head",
+          "Disease"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "茶色",
+      "hiragana": "ちゃいろ",
+      "romaji": "chairo",
+      "vietnamese": "[Cần dịch] brown; light brown; tawny",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "茶色",
+        "url": "https://jisho.org/search/%E8%8C%B6%E8%89%B2",
+        "englishDefinitions": [
+          "brown",
+          "light brown",
+          "tawny",
+          "Brown"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "茶碗",
+      "hiragana": "ちゃわん",
+      "romaji": "chawan",
+      "vietnamese": "[Cần dịch] rice bowl; tea cup; teacup",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "茶わん",
+        "url": "https://jisho.org/search/%E8%8C%B6%E3%82%8F%E3%82%93",
+        "englishDefinitions": [
+          "rice bowl",
+          "tea cup",
+          "teacup",
+          "Chawan"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "地下鉄",
+      "hiragana": "ちかてつ",
+      "romaji": "chikatetsu",
+      "vietnamese": "[Cần dịch] subway; metro; underground (railway)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "地下鉄",
+        "url": "https://jisho.org/search/%E5%9C%B0%E4%B8%8B%E9%89%84",
+        "englishDefinitions": [
+          "subway",
+          "metro",
+          "underground (railway)",
+          "Rapid transit"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "地図",
+      "hiragana": "ちず",
+      "romaji": "chizu",
+      "vietnamese": "[Cần dịch] map; atlas; chart",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "地図",
+        "url": "https://jisho.org/search/%E5%9C%B0%E5%9B%B3",
+        "englishDefinitions": [
+          "map",
+          "atlas",
+          "chart",
+          "plan",
+          "Map"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "台所",
+      "hiragana": "だいどころ",
+      "romaji": "daidokoro",
+      "vietnamese": "[Cần dịch] kitchen; financial situation; finances",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "台所",
+        "url": "https://jisho.org/search/%E5%8F%B0%E6%89%80",
+        "englishDefinitions": [
+          "kitchen",
+          "financial situation",
+          "finances",
+          "Kitchen"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "大学",
+      "hiragana": "だいがく",
+      "romaji": "daigaku",
+      "vietnamese": "[Cần dịch] university; college; former imperial university of Japan (established under the ritsuryō system for the training of government administrators)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "大学",
+        "url": "https://jisho.org/search/%E5%A4%A7%E5%AD%A6",
+        "englishDefinitions": [
+          "university",
+          "college",
+          "former imperial university of Japan (established under the ritsuryō system for the training of government administrators)",
+          "the Great Learning (one of the Four Books)",
+          "University"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "誰",
+      "hiragana": "だれ",
+      "romaji": "dare",
+      "vietnamese": "[Cần dịch] who",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "誰",
+        "url": "https://jisho.org/search/%E8%AA%B0",
+        "englishDefinitions": [
+          "who"
+        ],
+        "partsOfSpeech": [
+          "Pronoun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "出来る",
+      "hiragana": "できる",
+      "romaji": "dekiru",
+      "vietnamese": "[Cần dịch] to be able to do; to be possible; to be permitted (to do)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "出来る",
+        "url": "https://jisho.org/search/%E5%87%BA%E6%9D%A5%E3%82%8B",
+        "englishDefinitions": [
+          "to be able to do",
+          "to be possible",
+          "to be permitted (to do)",
+          "to be good at",
+          "to do well",
+          "to be proficient (in)",
+          "to be capable",
+          "to come into existence",
+          "to form",
+          "to appear",
+          "to come up (of a matter)",
+          "to be born",
+          "to make (a friend)",
+          "to get (a girlfriend, free time, etc.)",
+          "to be made",
+          "to be built",
+          "to be constructed",
+          "to be formed",
+          "to be established",
+          "to be set up",
+          "to be finished",
+          "to be completed",
+          "to be done",
+          "to be ready",
+          "to grow (of a crop)",
+          "to be produced",
+          "to be mature and well-balanced",
+          "to be of fine character",
+          "to be by nature",
+          "to be born ...",
+          "to become (sexually) involved (with)",
+          "to become intimate (with)",
+          "to take up (with someone)",
+          "to get pregnant"
+        ],
+        "partsOfSpeech": [
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "電気",
+      "hiragana": "でんき",
+      "romaji": "denki",
+      "vietnamese": "[Cần dịch] electricity; (electric) light; Electricity",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "電気",
+        "url": "https://jisho.org/search/%E9%9B%BB%E6%B0%97",
+        "englishDefinitions": [
+          "electricity",
+          "(electric) light",
+          "Electricity"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "電車",
+      "hiragana": "でんしゃ",
+      "romaji": "densha",
+      "vietnamese": "[Cần dịch] train; electric train; Electric multiple unit",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "電車",
+        "url": "https://jisho.org/search/%E9%9B%BB%E8%BB%8A",
+        "englishDefinitions": [
+          "train",
+          "electric train",
+          "Electric multiple unit"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "電話",
+      "hiragana": "でんわ",
+      "romaji": "denwa",
+      "vietnamese": "[Cần dịch] telephone call; phone call; telephone (device)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "電話",
+        "url": "https://jisho.org/search/%E9%9B%BB%E8%A9%B1",
+        "englishDefinitions": [
+          "telephone call",
+          "phone call",
+          "telephone (device)",
+          "phone",
+          "Telephony"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Intransitive verb",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "出る",
+      "hiragana": "でる",
+      "romaji": "deru",
+      "vietnamese": "[Cần dịch] to leave; to exit; to go out",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "出る",
+        "url": "https://jisho.org/search/%E5%87%BA%E3%82%8B",
+        "englishDefinitions": [
+          "to leave",
+          "to exit",
+          "to go out",
+          "to come out",
+          "to get out",
+          "to leave (on a journey)",
+          "to depart",
+          "to start out",
+          "to set out",
+          "to move forward",
+          "to come to",
+          "to get to",
+          "to lead to",
+          "to reach",
+          "to appear",
+          "to come out",
+          "to emerge",
+          "to surface",
+          "to come forth",
+          "to turn up",
+          "to be found",
+          "to be detected",
+          "to be discovered",
+          "to be exposed",
+          "to show",
+          "to be exhibited",
+          "to be on display",
+          "to appear (in print)",
+          "to be published",
+          "to be announced",
+          "to be issued",
+          "to be listed",
+          "to come out",
+          "to attend",
+          "to participate",
+          "to take part",
+          "to enter (an event)",
+          "to play in",
+          "to perform",
+          "to be stated",
+          "to be expressed",
+          "to come up",
+          "to be brought up",
+          "to be raised",
+          "to sell",
+          "to exceed",
+          "to go over",
+          "to stick out",
+          "to protrude",
+          "to break out",
+          "to occur",
+          "to start",
+          "to originate",
+          "to be produced",
+          "to come from",
+          "to be derived from",
+          "to be given",
+          "to get",
+          "to receive",
+          "to be offered",
+          "to be provided",
+          "to be presented",
+          "to be submitted",
+          "to be handed in",
+          "to be turned in",
+          "to be paid",
+          "to answer (phone, door, etc.)",
+          "to get",
+          "to assume (an attitude)",
+          "to act",
+          "to behave",
+          "to pick up (speed, etc.)",
+          "to gain",
+          "to flow (e.g. tears)",
+          "to run",
+          "to bleed",
+          "to graduate",
+          "to ejaculate",
+          "to cum"
+        ],
+        "partsOfSpeech": [
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb",
+          "Ichidan verb",
+          "Intransitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "動物",
+      "hiragana": "どうぶつ",
+      "romaji": "doubutsu",
+      "vietnamese": "[Cần dịch] animal; Animal",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "動物",
+        "url": "https://jisho.org/search/%E5%8B%95%E7%89%A9",
+        "englishDefinitions": [
+          "animal",
+          "Animal"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "土曜日",
+      "hiragana": "どようび",
+      "romaji": "doyoubi",
+      "vietnamese": "[Cần dịch] Saturday; Saturday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "土曜日",
+        "url": "https://jisho.org/search/%E5%9C%9F%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Saturday",
+          "Saturday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "映画",
+      "hiragana": "えいが",
+      "romaji": "eiga",
+      "vietnamese": "[Cần dịch] movie; film; motion picture",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "映画",
+        "url": "https://jisho.org/search/%E6%98%A0%E7%94%BB",
+        "englishDefinitions": [
+          "movie",
+          "film",
+          "motion picture",
+          "Film"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "映画館",
+      "hiragana": "えいがかん",
+      "romaji": "eigakan",
+      "vietnamese": "[Cần dịch] movie theatre; movie theater; cinema",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "映画館",
+        "url": "https://jisho.org/search/%E6%98%A0%E7%94%BB%E9%A4%A8",
+        "englishDefinitions": [
+          "movie theatre",
+          "movie theater",
+          "cinema",
+          "Movie theater"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "英語",
+      "hiragana": "えいご",
+      "romaji": "eigo",
+      "vietnamese": "[Cần dịch] English (language); English language",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "英語",
+        "url": "https://jisho.org/search/%E8%8B%B1%E8%AA%9E",
+        "englishDefinitions": [
+          "English (language)",
+          "English language"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "駅",
+      "hiragana": "えき",
+      "romaji": "eki",
+      "vietnamese": "[Cần dịch] railway station; train station; staging post on a highway (in pre-modern Japan)",
+      "type": "Lượng từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "駅",
+        "url": "https://jisho.org/search/%E9%A7%85",
+        "englishDefinitions": [
+          "railway station",
+          "train station",
+          "staging post on a highway (in pre-modern Japan)",
+          "counter for railway stations and bus stations"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Counter"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "鉛筆",
+      "hiragana": "えんぴつ",
+      "romaji": "enpitsu",
+      "vietnamese": "[Cần dịch] (wooden) pencil; Pencil",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "鉛筆",
+        "url": "https://jisho.org/search/%E9%89%9B%E7%AD%86",
+        "englishDefinitions": [
+          "(wooden) pencil",
+          "Pencil"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "風呂",
+      "hiragana": "ふろ",
+      "romaji": "furo",
+      "vietnamese": "[Cần dịch] bath; bathing; bathtub",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "風呂",
+        "url": "https://jisho.org/search/%E9%A2%A8%E5%91%82",
+        "englishDefinitions": [
+          "bath",
+          "bathing",
+          "bathtub",
+          "bathroom",
+          "bathhouse",
+          "public bath",
+          "room for drying lacquerware",
+          "base (wooden joint connecting the blade of a hoe, spade, etc., to the handle)",
+          "Bathtub"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "封筒",
+      "hiragana": "ふうとう",
+      "romaji": "fuutou",
+      "vietnamese": "[Cần dịch] envelope; Envelope",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "封筒",
+        "url": "https://jisho.org/search/%E5%B0%81%E7%AD%92",
+        "englishDefinitions": [
+          "envelope",
+          "Envelope"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "冬",
+      "hiragana": "ふゆ",
+      "romaji": "fuyu",
+      "vietnamese": "[Cần dịch] winter; Winter",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "冬",
+        "url": "https://jisho.org/search/%E5%86%AC",
+        "englishDefinitions": [
+          "winter",
+          "Winter"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "外国人",
+      "hiragana": "がいこくじん",
+      "romaji": "gaikokujin",
+      "vietnamese": "[Cần dịch] foreigner; foreign citizen; foreign national",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "外国人",
+        "url": "https://jisho.org/search/%E5%A4%96%E5%9B%BD%E4%BA%BA",
+        "englishDefinitions": [
+          "foreigner",
+          "foreign citizen",
+          "foreign national",
+          "alien",
+          "non-Japanese",
+          "Alien (law)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "学校",
+      "hiragana": "がっこう",
+      "romaji": "gakkou",
+      "vietnamese": "[Cần dịch] school; Gakkou; School",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "学校",
+        "url": "https://jisho.org/search/%E5%AD%A6%E6%A0%A1",
+        "englishDefinitions": [
+          "school",
+          "Gakkou",
+          "School"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "玄関",
+      "hiragana": "げんかん",
+      "romaji": "genkan",
+      "vietnamese": "[Cần dịch] entrance; front door; entryway",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "玄関",
+        "url": "https://jisho.org/search/%E7%8E%84%E9%96%A2",
+        "englishDefinitions": [
+          "entrance",
+          "front door",
+          "entryway",
+          "entranceway",
+          "entry hall",
+          "vestibule",
+          "porch",
+          "foyer",
+          "mud room",
+          "Genkan"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "月曜日",
+      "hiragana": "げつようび",
+      "romaji": "getsuyoubi",
+      "vietnamese": "[Cần dịch] Monday; Monday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "月曜日",
+        "url": "https://jisho.org/search/%E6%9C%88%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Monday",
+          "Monday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "銀行",
+      "hiragana": "ぎんこう",
+      "romaji": "ginkou",
+      "vietnamese": "[Cần dịch] bank; banking institution; Bank",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "銀行",
+        "url": "https://jisho.org/search/%E9%8A%80%E8%A1%8C",
+        "englishDefinitions": [
+          "bank",
+          "banking institution",
+          "Bank"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "牛肉",
+      "hiragana": "ぎゅうにく",
+      "romaji": "gyuuniku",
+      "vietnamese": "[Cần dịch] beef; Beef",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "牛肉",
+        "url": "https://jisho.org/search/%E7%89%9B%E8%82%89",
+        "englishDefinitions": [
+          "beef",
+          "Beef"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "歯",
+      "hiragana": "は",
+      "romaji": "ha",
+      "vietnamese": "[Cần dịch] tooth; teeth; tooth (of a comb, saw, etc.)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "歯",
+        "url": "https://jisho.org/search/%E6%AD%AF",
+        "englishDefinitions": [
+          "tooth",
+          "teeth",
+          "tooth (of a comb, saw, etc.)",
+          "cog",
+          "support (of a geta)",
+          "Human tooth"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "灰皿",
+      "hiragana": "はいざら",
+      "romaji": "haizara",
+      "vietnamese": "[Cần dịch] ashtray; Ashtray",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "灰皿",
+        "url": "https://jisho.org/search/%E7%81%B0%E7%9A%BF",
+        "englishDefinitions": [
+          "ashtray",
+          "Ashtray"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "箱",
+      "hiragana": "はこ",
+      "romaji": "hako",
+      "vietnamese": "[Cần dịch] box; case; chest",
+      "type": "Lượng từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "箱",
+        "url": "https://jisho.org/search/%E7%AE%B1",
+        "englishDefinitions": [
+          "box",
+          "case",
+          "chest",
+          "package",
+          "pack",
+          "crate",
+          "car (of a train, etc.)",
+          "shamisen case",
+          "shamisen",
+          "public building",
+          "community building",
+          "man who carries a geisha's shamisen",
+          "receptacle for human waste",
+          "feces (faeces)",
+          "counter for boxes (or boxed objects)",
+          "Box"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Suffix",
+          "Counter",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "花",
+      "hiragana": "はな",
+      "romaji": "hana",
+      "vietnamese": "[Cần dịch] flower; blossom; bloom",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "花",
+        "url": "https://jisho.org/search/%E8%8A%B1",
+        "englishDefinitions": [
+          "flower",
+          "blossom",
+          "bloom",
+          "petal",
+          "cherry blossom",
+          "beauty",
+          "blooming (esp. of cherry blossoms)",
+          "ikebana",
+          "hanafuda",
+          "(the) best",
+          "glorious",
+          "lovely",
+          "Flower"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "鼻",
+      "hiragana": "はな",
+      "romaji": "hana",
+      "vietnamese": "[Cần dịch] nose; Nose",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "鼻",
+        "url": "https://jisho.org/search/%E9%BC%BB",
+        "englishDefinitions": [
+          "nose",
+          "Nose"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "話",
+      "hiragana": "はなし",
+      "romaji": "hanashi",
+      "vietnamese": "[Cần dịch] talk; speech; chat",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "話",
+        "url": "https://jisho.org/search/%E8%A9%B1",
+        "englishDefinitions": [
+          "talk",
+          "speech",
+          "chat",
+          "conversation",
+          "topic",
+          "subject",
+          "discussions",
+          "negotiation",
+          "argument",
+          "rumor",
+          "talk",
+          "hearsay",
+          "tale",
+          "story",
+          "fable",
+          "circumstances",
+          "particulars"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "話す",
+      "hiragana": "はなす",
+      "romaji": "hanasu",
+      "vietnamese": "[Cần dịch] to talk; to speak; to converse",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "話す",
+        "url": "https://jisho.org/search/%E8%A9%B1%E3%81%99",
+        "englishDefinitions": [
+          "to talk",
+          "to speak",
+          "to converse",
+          "to chat",
+          "to tell",
+          "to explain",
+          "to narrate",
+          "to mention",
+          "to describe",
+          "to discuss",
+          "to speak (a language)"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'su' ending",
+          "Transitive verb",
+          "Godan verb with 'su' ending",
+          "Transitive verb",
+          "Godan verb with 'su' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "春",
+      "hiragana": "はる",
+      "romaji": "haru",
+      "vietnamese": "[Cần dịch] spring; springtime; New Year",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "春",
+        "url": "https://jisho.org/search/%E6%98%A5",
+        "englishDefinitions": [
+          "spring",
+          "springtime",
+          "New Year",
+          "prime (of life)",
+          "height (of one's prosperity)",
+          "heyday",
+          "adolescence",
+          "puberty",
+          "sexuality",
+          "sexual desire",
+          "Spring (season)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "橋",
+      "hiragana": "はし",
+      "romaji": "hashi",
+      "vietnamese": "[Cần dịch] bridge; Bridge",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "橋",
+        "url": "https://jisho.org/search/%E6%A9%8B",
+        "englishDefinitions": [
+          "bridge",
+          "Bridge"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "箸",
+      "hiragana": "はし",
+      "romaji": "hashi",
+      "vietnamese": "[Cần dịch] chopsticks; Chopsticks",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "箸",
+        "url": "https://jisho.org/search/%E7%AE%B8",
+        "englishDefinitions": [
+          "chopsticks",
+          "Chopsticks"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "走る",
+      "hiragana": "はしる",
+      "romaji": "hashiru",
+      "vietnamese": "[Cần dịch] to run; to run (of a vehicle); to drive",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "走る",
+        "url": "https://jisho.org/search/%E8%B5%B0%E3%82%8B",
+        "englishDefinitions": [
+          "to run",
+          "to run (of a vehicle)",
+          "to drive",
+          "to travel",
+          "to move",
+          "to sail",
+          "to rush (to)",
+          "to dash",
+          "to race",
+          "to retreat",
+          "to flee",
+          "to defect (to)",
+          "to run away",
+          "to abscond",
+          "to elope",
+          "to flash (of lightning)",
+          "to streak",
+          "to shoot (through; e.g. of pain)",
+          "to run (through)",
+          "to flare",
+          "to flit (e.g. across one's face)",
+          "to spread quickly (of news, shock, etc.)",
+          "to go (e.g. bad, to extremes)",
+          "to become",
+          "to turn",
+          "to take to (e.g. crime)",
+          "to get carried away by (e.g. one's emotions)",
+          "to get involved in",
+          "to get wrapped up in",
+          "to run (through; of a road, street, etc.)",
+          "to extend (e.g. of a mountain range)",
+          "to stretch",
+          "to lie",
+          "Running"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "辺",
+      "hiragana": "へん",
+      "romaji": "hen",
+      "vietnamese": "[Cần dịch] area; vicinity; region",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "辺",
+        "url": "https://jisho.org/search/%E8%BE%BA",
+        "englishDefinitions": [
+          "area",
+          "vicinity",
+          "region",
+          "side",
+          "edge",
+          "circumstances",
+          "Edge (geometry)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "部屋",
+      "hiragana": "へや",
+      "romaji": "heya",
+      "vietnamese": "[Cần dịch] room; chamber; apartment",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "部屋",
+        "url": "https://jisho.org/search/%E9%83%A8%E5%B1%8B",
+        "englishDefinitions": [
+          "room",
+          "chamber",
+          "apartment",
+          "flat",
+          "pad",
+          "stable",
+          "Room"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "飛行機",
+      "hiragana": "ひこうき",
+      "romaji": "hikouki",
+      "vietnamese": "[Cần dịch] airplane; aeroplane; plane",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "飛行機",
+        "url": "https://jisho.org/search/%E9%A3%9B%E8%A1%8C%E6%A9%9F",
+        "englishDefinitions": [
+          "airplane",
+          "aeroplane",
+          "plane",
+          "aircraft",
+          "Fixed-wing aircraft"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "昼",
+      "hiragana": "ひる",
+      "romaji": "hiru",
+      "vietnamese": "[Cần dịch] noon; midday; daytime",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "昼",
+        "url": "https://jisho.org/search/%E6%98%BC",
+        "englishDefinitions": [
+          "noon",
+          "midday",
+          "daytime",
+          "lunch",
+          "Daylight"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "本棚",
+      "hiragana": "ほんだな",
+      "romaji": "hondana",
+      "vietnamese": "[Cần dịch] bookshelves; bookshelf; bookcase",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "本棚",
+        "url": "https://jisho.org/search/%E6%9C%AC%E6%A3%9A",
+        "englishDefinitions": [
+          "bookshelves",
+          "bookshelf",
+          "bookcase",
+          "Bookcase"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "百",
+      "hiragana": "ひゃく",
+      "romaji": "hyaku",
+      "vietnamese": "[Cần dịch] hundred; 100; Hyaku",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "百",
+        "url": "https://jisho.org/search/%E7%99%BE",
+        "englishDefinitions": [
+          "hundred",
+          "100",
+          "Hyaku"
+        ],
+        "partsOfSpeech": [
+          "Numeric",
+          "Place"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "一番",
+      "hiragana": "いちばん",
+      "romaji": "ichiban",
+      "vietnamese": "[Cần dịch] number one; first; first place",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "一番",
+        "url": "https://jisho.org/search/%E4%B8%80%E7%95%AA",
+        "englishDefinitions": [
+          "number one",
+          "first",
+          "first place",
+          "best",
+          "most",
+          "game",
+          "round",
+          "bout",
+          "as a test",
+          "as an experiment",
+          "by way of experiment",
+          "by way of trial",
+          "tentatively",
+          "song (e.g. in noh)",
+          "piece",
+          "Ichiban"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Adverb (fukushi)",
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Place"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "池",
+      "hiragana": "いけ",
+      "romaji": "ike",
+      "vietnamese": "[Cần dịch] pond; Pond",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "池",
+        "url": "https://jisho.org/search/%E6%B1%A0",
+        "englishDefinitions": [
+          "pond",
+          "Pond"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "今",
+      "hiragana": "いま",
+      "romaji": "ima",
+      "vietnamese": "[Cần dịch] now; the present time; just now",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "今",
+        "url": "https://jisho.org/search/%E4%BB%8A",
+        "englishDefinitions": [
+          "now",
+          "the present time",
+          "just now",
+          "soon",
+          "immediately",
+          "another",
+          "more"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Adverb (fukushi)",
+          "Adverb (fukushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "意味",
+      "hiragana": "いみ",
+      "romaji": "imi",
+      "vietnamese": "[Cần dịch] meaning; significance; sense",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "意味",
+        "url": "https://jisho.org/search/%E6%84%8F%E5%91%B3",
+        "englishDefinitions": [
+          "meaning",
+          "significance",
+          "sense",
+          "Meaning (linguistics)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "犬",
+      "hiragana": "いぬ",
+      "romaji": "inu",
+      "vietnamese": "[Cần dịch] dog (Canis (lupus) familiaris); canine; squealer",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "犬",
+        "url": "https://jisho.org/search/%E7%8A%AC",
+        "englishDefinitions": [
+          "dog (Canis (lupus) familiaris)",
+          "canine",
+          "squealer",
+          "rat",
+          "snitch",
+          "informer",
+          "informant",
+          "spy",
+          "loser",
+          "asshole",
+          "counterfeit",
+          "inferior",
+          "useless",
+          "wasteful"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun, used as a prefix"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "色",
+      "hiragana": "いろ",
+      "romaji": "iro",
+      "vietnamese": "[Cần dịch] colour; color; hue",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "色",
+        "url": "https://jisho.org/search/%E8%89%B2",
+        "englishDefinitions": [
+          "colour",
+          "color",
+          "hue",
+          "tint",
+          "tinge",
+          "shade",
+          "complexion",
+          "skin colour",
+          "skin color",
+          "look (on one's face)",
+          "expression",
+          "appearance",
+          "air",
+          "feeling",
+          "personality",
+          "character",
+          "tone (of one's voice, etc.)",
+          "tune",
+          "sound",
+          "ring",
+          "love",
+          "lust",
+          "sensuality",
+          "love affair",
+          "lover",
+          "paramour",
+          "beauty",
+          "sexiness",
+          "physical appeal",
+          "kind",
+          "type",
+          "variety",
+          "Color"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "椅子",
+      "hiragana": "いす",
+      "romaji": "isu",
+      "vietnamese": "[Cần dịch] chair; seat; stool",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "椅子",
+        "url": "https://jisho.org/search/%E6%A4%85%E5%AD%90",
+        "englishDefinitions": [
+          "chair",
+          "seat",
+          "stool",
+          "bench",
+          "post",
+          "position",
+          "seat",
+          "office",
+          "Chair"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "言う",
+      "hiragana": "いう",
+      "romaji": "iu",
+      "vietnamese": "[Cần dịch] to say; to utter; to declare",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "言う",
+        "url": "https://jisho.org/search/%E8%A8%80%E3%81%86",
+        "englishDefinitions": [
+          "to say",
+          "to utter",
+          "to declare",
+          "to name",
+          "to call",
+          "to go (e.g. \"the alarm went ping\")",
+          "to make a noise"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Intransitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "自分",
+      "hiragana": "じぶん",
+      "romaji": "jibun",
+      "vietnamese": "[Cần dịch] myself; yourself; oneself",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "自分",
+        "url": "https://jisho.org/search/%E8%87%AA%E5%88%86",
+        "englishDefinitions": [
+          "myself",
+          "yourself",
+          "oneself",
+          "himself",
+          "herself",
+          "I",
+          "me",
+          "you"
+        ],
+        "partsOfSpeech": [
+          "Pronoun",
+          "Pronoun",
+          "Pronoun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "自動車",
+      "hiragana": "じどうしゃ",
+      "romaji": "jidousha",
+      "vietnamese": "[Cần dịch] car; automobile; motorcar",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "自動車",
+        "url": "https://jisho.org/search/%E8%87%AA%E5%8B%95%E8%BB%8A",
+        "englishDefinitions": [
+          "car",
+          "automobile",
+          "motorcar",
+          "motor vehicle",
+          "auto",
+          "Automobile"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "時間",
+      "hiragana": "じかん",
+      "romaji": "jikan",
+      "vietnamese": "[Cần dịch] time; hour; period",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "時間",
+        "url": "https://jisho.org/search/%E6%99%82%E9%96%93",
+        "englishDefinitions": [
+          "time",
+          "hour",
+          "period",
+          "class",
+          "lesson",
+          "Time"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "自転車",
+      "hiragana": "じてんしゃ",
+      "romaji": "jitensha",
+      "vietnamese": "[Cần dịch] bicycle; bike; Bicycle",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "自転車",
+        "url": "https://jisho.org/search/%E8%87%AA%E8%BB%A2%E8%BB%8A",
+        "englishDefinitions": [
+          "bicycle",
+          "bike",
+          "Bicycle"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "授業",
+      "hiragana": "じゅぎょう",
+      "romaji": "jugyou",
+      "vietnamese": "[Cần dịch] lesson; class; teaching",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "授業",
+        "url": "https://jisho.org/search/%E6%8E%88%E6%A5%AD",
+        "englishDefinitions": [
+          "lesson",
+          "class",
+          "teaching",
+          "instruction",
+          "classwork",
+          "schoolwork",
+          "Lesson"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "鞄",
+      "hiragana": "かばん",
+      "romaji": "kaban",
+      "vietnamese": "[Cần dịch] bag; satchel; briefcase",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "鞄",
+        "url": "https://jisho.org/search/%E9%9E%84",
+        "englishDefinitions": [
+          "bag",
+          "satchel",
+          "briefcase",
+          "basket",
+          "Paper bag"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "花瓶",
+      "hiragana": "かびん",
+      "romaji": "kabin",
+      "vietnamese": "[Cần dịch] (flower) vase; Vase",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "花瓶",
+        "url": "https://jisho.org/search/%E8%8A%B1%E7%93%B6",
+        "englishDefinitions": [
+          "(flower) vase",
+          "Vase"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "鍵",
+      "hiragana": "かぎ",
+      "romaji": "kagi",
+      "vietnamese": "[Cần dịch] key; lock; key (to a problem, success, etc.)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "鍵",
+        "url": "https://jisho.org/search/%E9%8D%B5",
+        "englishDefinitions": [
+          "key",
+          "lock",
+          "key (to a problem, success, etc.)",
+          "clue",
+          "Key (lock)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "買い物",
+      "hiragana": "かいもの",
+      "romaji": "kaimono",
+      "vietnamese": "[Cần dịch] shopping; purchased goods; Shopping",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "買い物",
+        "url": "https://jisho.org/search/%E8%B2%B7%E3%81%84%E7%89%A9",
+        "englishDefinitions": [
+          "shopping",
+          "purchased goods",
+          "Shopping"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "会社",
+      "hiragana": "かいしゃ",
+      "romaji": "kaisha",
+      "vietnamese": "[Cần dịch] company; corporation; firm",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "会社",
+        "url": "https://jisho.org/search/%E4%BC%9A%E7%A4%BE",
+        "englishDefinitions": [
+          "company",
+          "corporation",
+          "firm",
+          "one's workplace",
+          "Company"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "紙",
+      "hiragana": "かみ",
+      "romaji": "kami",
+      "vietnamese": "[Cần dịch] paper; Paper",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "紙",
+        "url": "https://jisho.org/search/%E7%B4%99",
+        "englishDefinitions": [
+          "paper",
+          "Paper"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "漢字",
+      "hiragana": "かんじ",
+      "romaji": "kanji",
+      "vietnamese": "[Cần dịch] kanji; Chinese character; Chinese characters",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "漢字",
+        "url": "https://jisho.org/search/%E6%BC%A2%E5%AD%97",
+        "englishDefinitions": [
+          "kanji",
+          "Chinese character",
+          "Chinese characters"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "傘",
+      "hiragana": "かさ",
+      "romaji": "kasa",
+      "vietnamese": "[Cần dịch] umbrella; parasol; something shaped like an umbrella or a conical hat",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "傘",
+        "url": "https://jisho.org/search/%E5%82%98",
+        "englishDefinitions": [
+          "umbrella",
+          "parasol",
+          "something shaped like an umbrella or a conical hat",
+          "shade (of a lamp)",
+          "mushroom cap",
+          "pileus",
+          "Umbrella"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "家庭",
+      "hiragana": "かてい",
+      "romaji": "katei",
+      "vietnamese": "[Cần dịch] home; household; family",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "家庭",
+        "url": "https://jisho.org/search/%E5%AE%B6%E5%BA%AD",
+        "englishDefinitions": [
+          "home",
+          "household",
+          "family",
+          "hearth",
+          "Home"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "買う",
+      "hiragana": "かう",
+      "romaji": "kau",
+      "vietnamese": "[Cần dịch] to buy; to purchase; to value (highly)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "買う",
+        "url": "https://jisho.org/search/%E8%B2%B7%E3%81%86",
+        "englishDefinitions": [
+          "to buy",
+          "to purchase",
+          "to value (highly)",
+          "to think highly of",
+          "to have a high opinion of",
+          "to appreciate",
+          "to recognize",
+          "to incur (someone's anger, displeasure, etc.)",
+          "to elicit (e.g. sneers)",
+          "to invite (e.g. scorn)",
+          "to evoke",
+          "to arouse",
+          "to win (someone's favour)",
+          "to accept",
+          "to take on",
+          "to take up",
+          "to pay for (a prostitute, geisha, etc.)"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "川",
+      "hiragana": "かわ",
+      "romaji": "kawa",
+      "vietnamese": "[Cần dịch] river; stream; River",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "川",
+        "url": "https://jisho.org/search/%E5%B7%9D",
+        "englishDefinitions": [
+          "river",
+          "stream",
+          "River",
+          "the ... river",
+          "Gawa",
+          "River"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suffix",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "可愛い",
+      "hiragana": "かわいい",
+      "romaji": "kawaii",
+      "vietnamese": "[Cần dịch] cute; adorable; charming",
+      "type": "Tính từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "可愛い",
+        "url": "https://jisho.org/search/%E5%8F%AF%E6%84%9B%E3%81%84",
+        "englishDefinitions": [
+          "cute",
+          "adorable",
+          "charming",
+          "lovely",
+          "pretty",
+          "dear",
+          "precious",
+          "darling",
+          "pet",
+          "innocent",
+          "childlike",
+          "childish",
+          "lovable",
+          "dainty",
+          "little",
+          "tiny",
+          "Kawaii"
+        ],
+        "partsOfSpeech": [
+          "I-adjective (keiyoushi)",
+          "I-adjective (keiyoushi)",
+          "I-adjective (keiyoushi)",
+          "I-adjective (keiyoushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "火曜日",
+      "hiragana": "かようび",
+      "romaji": "kayoubi",
+      "vietnamese": "[Cần dịch] Tuesday; Tuesday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "火曜日",
+        "url": "https://jisho.org/search/%E7%81%AB%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Tuesday",
+          "Tuesday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "風邪",
+      "hiragana": "かぜ",
+      "romaji": "kaze",
+      "vietnamese": "[Cần dịch] (common) cold; influenza; flu",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "風邪",
+        "url": "https://jisho.org/search/%E9%A2%A8%E9%82%AA",
+        "englishDefinitions": [
+          "(common) cold",
+          "influenza",
+          "flu",
+          "ague",
+          "inflammatory respiratory system illness (in general)",
+          "Common cold"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "家族",
+      "hiragana": "かぞく",
+      "romaji": "kazoku",
+      "vietnamese": "[Cần dịch] family; Family",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "家族",
+        "url": "https://jisho.org/search/%E5%AE%B6%E6%97%8F",
+        "englishDefinitions": [
+          "family",
+          "Family"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "結婚",
+      "hiragana": "けっこん",
+      "romaji": "kekkon",
+      "vietnamese": "[Cần dịch] marriage; Marriage",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "結婚",
+        "url": "https://jisho.org/search/%E7%B5%90%E5%A9%9A",
+        "englishDefinitions": [
+          "marriage",
+          "Marriage"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "木",
+      "hiragana": "き",
+      "romaji": "ki",
+      "vietnamese": "[Cần dịch] tree; shrub; bush",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "木",
+        "url": "https://jisho.org/search/%E6%9C%A8",
+        "englishDefinitions": [
+          "tree",
+          "shrub",
+          "bush",
+          "wood",
+          "timber",
+          "wooden clappers (signalling the beginning or end of a performance)",
+          "Tree"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "黄色",
+      "hiragana": "きいろ",
+      "romaji": "kiiro",
+      "vietnamese": "[Cần dịch] yellow; amber; Yellow",
+      "type": "Tính từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "黄色",
+        "url": "https://jisho.org/search/%E9%BB%84%E8%89%B2",
+        "englishDefinitions": [
+          "yellow",
+          "amber",
+          "Yellow"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Na-adjective (keiyodoshi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "昨日",
+      "hiragana": "きのう",
+      "romaji": "kinou",
+      "vietnamese": "[Cần dịch] yesterday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "昨日",
+        "url": "https://jisho.org/search/%E6%98%A8%E6%97%A5",
+        "englishDefinitions": [
+          "yesterday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "金曜日",
+      "hiragana": "きんようび",
+      "romaji": "kinyoubi",
+      "vietnamese": "[Cần dịch] Friday; Friday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "金曜日",
+        "url": "https://jisho.org/search/%E9%87%91%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Friday",
+          "Friday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "切符",
+      "hiragana": "きっぷ",
+      "romaji": "kippu",
+      "vietnamese": "[Cần dịch] ticket; Ticket",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "切符",
+        "url": "https://jisho.org/search/%E5%88%87%E7%AC%A6",
+        "englishDefinitions": [
+          "ticket",
+          "Ticket"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "喫茶店",
+      "hiragana": "きっさてん",
+      "romaji": "kissaten",
+      "vietnamese": "[Cần dịch] coffee shop; tearoom; coffee lounge",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "喫茶店",
+        "url": "https://jisho.org/search/%E5%96%AB%E8%8C%B6%E5%BA%97",
+        "englishDefinitions": [
+          "coffee shop",
+          "tearoom",
+          "coffee lounge",
+          "coffeehouse",
+          "cafe",
+          "kissaten",
+          "traditional type of coffee shop with a retro atmosphere",
+          "Kissaten"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "北",
+      "hiragana": "きた",
+      "romaji": "kita",
+      "vietnamese": "[Cần dịch] north; the North; northern territories",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "北",
+        "url": "https://jisho.org/search/%E5%8C%97",
+        "englishDefinitions": [
+          "north",
+          "the North",
+          "northern territories",
+          "North Korea",
+          "north wind",
+          "North"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "切手",
+      "hiragana": "きって",
+      "romaji": "kitte",
+      "vietnamese": "[Cần dịch] stamp (postage); merchandise certificate; Postage stamp",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "切手",
+        "url": "https://jisho.org/search/%E5%88%87%E6%89%8B",
+        "englishDefinitions": [
+          "stamp (postage)",
+          "merchandise certificate",
+          "Postage stamp"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "子供",
+      "hiragana": "こども",
+      "romaji": "kodomo",
+      "vietnamese": "[Cần dịch] child; children; Child",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "子供",
+        "url": "https://jisho.org/search/%E5%AD%90%E4%BE%9B",
+        "englishDefinitions": [
+          "child",
+          "children",
+          "Child"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "声",
+      "hiragana": "こえ",
+      "romaji": "koe",
+      "vietnamese": "[Cần dịch] voice; singing (of a bird); chirping (of an insect)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "声",
+        "url": "https://jisho.org/search/%E5%A3%B0",
+        "englishDefinitions": [
+          "voice",
+          "singing (of a bird)",
+          "chirping (of an insect)",
+          "hoot",
+          "voice",
+          "opinion (as expressed in words)",
+          "view",
+          "wish",
+          "attitude",
+          "will",
+          "sound",
+          "sense (of something's arrival)",
+          "feeling",
+          "voice",
+          "voiced sound",
+          "Human voice"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "此の",
+      "hiragana": "この",
+      "romaji": "kono",
+      "vietnamese": "[Cần dịch] this; last (couple of years, etc.); these",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "此の",
+        "url": "https://jisho.org/search/%E6%AD%A4%E3%81%AE",
+        "englishDefinitions": [
+          "this",
+          "last (couple of years, etc.)",
+          "these",
+          "past",
+          "this",
+          "you (as in \"you liar\")"
+        ],
+        "partsOfSpeech": [
+          "Pre-noun adjectival (rentaishi)",
+          "Pre-noun adjectival (rentaishi)",
+          "Pre-noun adjectival (rentaishi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "言葉",
+      "hiragana": "ことば",
+      "romaji": "kotoba",
+      "vietnamese": "[Cần dịch] language; dialect; word",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "言葉",
+        "url": "https://jisho.org/search/%E8%A8%80%E8%91%89",
+        "englishDefinitions": [
+          "language",
+          "dialect",
+          "word",
+          "phrase",
+          "expression",
+          "term",
+          "speech",
+          "(manner of) speaking",
+          "(use of) language",
+          "words",
+          "remark",
+          "statement",
+          "comment",
+          "learning to speak",
+          "language acquisition",
+          "Ci (poetry)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "交番",
+      "hiragana": "こうばん",
+      "romaji": "kouban",
+      "vietnamese": "[Cần dịch] police box; koban; small neighborhood police station",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "交番",
+        "url": "https://jisho.org/search/%E4%BA%A4%E7%95%AA",
+        "englishDefinitions": [
+          "police box",
+          "koban",
+          "small neighborhood police station",
+          "alternation",
+          "alternating (current, stress, etc.)",
+          "Kōban"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun or verb acting prenominally",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "紅茶",
+      "hiragana": "こうちゃ",
+      "romaji": "koucha",
+      "vietnamese": "[Cần dịch] black tea; Black tea",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "紅茶",
+        "url": "https://jisho.org/search/%E7%B4%85%E8%8C%B6",
+        "englishDefinitions": [
+          "black tea",
+          "Black tea"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "公園",
+      "hiragana": "こうえん",
+      "romaji": "kouen",
+      "vietnamese": "[Cần dịch] (public) park; Park",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "公園",
+        "url": "https://jisho.org/search/%E5%85%AC%E5%9C%92",
+        "englishDefinitions": [
+          "(public) park",
+          "Park"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "交差点",
+      "hiragana": "こうさてん",
+      "romaji": "kousaten",
+      "vietnamese": "[Cần dịch] crossing; intersection; Intersection (road)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "交差点",
+        "url": "https://jisho.org/search/%E4%BA%A4%E5%B7%AE%E7%82%B9",
+        "englishDefinitions": [
+          "crossing",
+          "intersection",
+          "Intersection (road)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "口",
+      "hiragana": "くち",
+      "romaji": "kuchi",
+      "vietnamese": "[Cần dịch] mouth; opening; hole",
+      "type": "Lượng từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "口",
+        "url": "https://jisho.org/search/%E5%8F%A3",
+        "englishDefinitions": [
+          "mouth",
+          "opening",
+          "hole",
+          "gap",
+          "orifice",
+          "mouth (of a bottle)",
+          "spout",
+          "nozzle",
+          "mouthpiece",
+          "gate",
+          "door",
+          "entrance",
+          "exit",
+          "speaking",
+          "speech",
+          "talk (i.e. gossip)",
+          "taste",
+          "palate",
+          "mouth (to feed)",
+          "opening (i.e. vacancy)",
+          "available position",
+          "invitation",
+          "summons",
+          "kind",
+          "sort",
+          "type",
+          "opening (i.e. beginning)",
+          "counter for mouthfuls, shares (of money) and stove burners",
+          "counter for swords, blades, etc.",
+          "Mouth"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Suffix",
+          "Counter",
+          "Suffix",
+          "Counter",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "下さい",
+      "hiragana": "ください",
+      "romaji": "kudasai",
+      "vietnamese": "[Cần dịch] please (give me); please (do for me)",
+      "type": "Cụm từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "下さい",
+        "url": "https://jisho.org/search/%E4%B8%8B%E3%81%95%E3%81%84",
+        "englishDefinitions": [
+          "please (give me)",
+          "please (do for me)"
+        ],
+        "partsOfSpeech": [
+          "Expressions (phrases, clauses, etc.)",
+          "Expressions (phrases, clauses, etc.)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "曇り",
+      "hiragana": "くもり",
+      "romaji": "kumori",
+      "vietnamese": "[Cần dịch] cloudiness; cloudy weather; fog (on a mirror, glasses, etc.)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "曇り",
+        "url": "https://jisho.org/search/%E6%9B%87%E3%82%8A",
+        "englishDefinitions": [
+          "cloudiness",
+          "cloudy weather",
+          "fog (on a mirror, glasses, etc.)",
+          "cloud (e.g. in marble)",
+          "blur",
+          "mist",
+          "shadow",
+          "dimness",
+          "gloom",
+          "dejection",
+          "Overcast"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "黒",
+      "hiragana": "くろ",
+      "romaji": "kuro",
+      "vietnamese": "[Cần dịch] black; black stone; guilt",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "黒",
+        "url": "https://jisho.org/search/%E9%BB%92",
+        "englishDefinitions": [
+          "black",
+          "black stone",
+          "guilt",
+          "guilty person",
+          "Black"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "車",
+      "hiragana": "くるま",
+      "romaji": "kuruma",
+      "vietnamese": "[Cần dịch] car; automobile; vehicle",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "車",
+        "url": "https://jisho.org/search/%E8%BB%8A",
+        "englishDefinitions": [
+          "car",
+          "automobile",
+          "vehicle",
+          "wheel",
+          "castor",
+          "caster"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "靴",
+      "hiragana": "くつ",
+      "romaji": "kutsu",
+      "vietnamese": "[Cần dịch] shoe; shoes; boots",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "靴",
+        "url": "https://jisho.org/search/%E9%9D%B4",
+        "englishDefinitions": [
+          "shoe",
+          "shoes",
+          "boots",
+          "footwear",
+          "footgear",
+          "Shoe"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "靴下",
+      "hiragana": "くつした",
+      "romaji": "kutsushita",
+      "vietnamese": "[Cần dịch] socks; sock; stockings",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "靴下",
+        "url": "https://jisho.org/search/%E9%9D%B4%E4%B8%8B",
+        "englishDefinitions": [
+          "socks",
+          "sock",
+          "stockings",
+          "stocking",
+          "Sock"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "今日",
+      "hiragana": "きょう",
+      "romaji": "kyou",
+      "vietnamese": "[Cần dịch] today; this day; these days",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "今日",
+        "url": "https://jisho.org/search/%E4%BB%8A%E6%97%A5",
+        "englishDefinitions": [
+          "today",
+          "this day",
+          "these days",
+          "recently",
+          "nowadays"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Adverb (fukushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "教室",
+      "hiragana": "きょうしつ",
+      "romaji": "kyoushitsu",
+      "vietnamese": "[Cần dịch] classroom; lecture room; department (in a university)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "教室",
+        "url": "https://jisho.org/search/%E6%95%99%E5%AE%A4",
+        "englishDefinitions": [
+          "classroom",
+          "lecture room",
+          "department (in a university)",
+          "class",
+          "lessons",
+          "course",
+          "school (for a particular discipline)",
+          "teaching establishment",
+          "Classroom"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "町",
+      "hiragana": "まち",
+      "romaji": "machi",
+      "vietnamese": "[Cần dịch] town; block; neighbourhood",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "町",
+        "url": "https://jisho.org/search/%E7%94%BA",
+        "englishDefinitions": [
+          "town",
+          "block",
+          "neighbourhood",
+          "neighborhood",
+          "downtown",
+          "main street",
+          "street",
+          "road"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "窓",
+      "hiragana": "まど",
+      "romaji": "mado",
+      "vietnamese": "[Cần dịch] window; Window",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "窓",
+        "url": "https://jisho.org/search/%E7%AA%93",
+        "englishDefinitions": [
+          "window",
+          "Window"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "毎日",
+      "hiragana": "まいにち",
+      "romaji": "mainichi",
+      "vietnamese": "[Cần dịch] every day; daily; Every Single Day (band)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "毎日",
+        "url": "https://jisho.org/search/%E6%AF%8E%E6%97%A5",
+        "englishDefinitions": [
+          "every day",
+          "daily",
+          "Every Single Day (band)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "万年筆",
+      "hiragana": "まんねんひつ",
+      "romaji": "mannenhitsu",
+      "vietnamese": "[Cần dịch] fountain pen; Fountain pen",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "万年筆",
+        "url": "https://jisho.org/search/%E4%B8%87%E5%B9%B4%E7%AD%86",
+        "englishDefinitions": [
+          "fountain pen",
+          "Fountain pen"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "待つ",
+      "hiragana": "まつ",
+      "romaji": "matsu",
+      "vietnamese": "[Cần dịch] to wait; to await; to look forward to",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "待つ",
+        "url": "https://jisho.org/search/%E5%BE%85%E3%81%A4",
+        "englishDefinitions": [
+          "to wait",
+          "to await",
+          "to look forward to",
+          "to anticipate",
+          "to depend on",
+          "to need"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Intransitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Intransitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Intransitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "目",
+      "hiragana": "め",
+      "romaji": "me",
+      "vietnamese": "[Cần dịch] eye; eyeball; eyesight",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "目",
+        "url": "https://jisho.org/search/%E7%9B%AE",
+        "englishDefinitions": [
+          "eye",
+          "eyeball",
+          "eyesight",
+          "sight",
+          "vision",
+          "look",
+          "stare",
+          "gaze",
+          "glance",
+          "notice",
+          "attention",
+          "observation",
+          "eyes (of the world, public, etc.)",
+          "an experience",
+          "viewpoint",
+          "discrimination",
+          "discernment",
+          "judgement",
+          "eye (e.g. for quality)",
+          "(an) appearance",
+          "chance (of success)",
+          "possibility (of a good result)",
+          "spacing (between crossed strands of a net, mesh, etc.)",
+          "opening",
+          "stitch",
+          "texture",
+          "weave",
+          "grain (of wood, paper)",
+          "eye (of a storm, needle, etc.)",
+          "intersection (on a go board)",
+          "square (on a chessboard)",
+          "dot (on a dice)",
+          "pip",
+          "rolled number",
+          "graduation",
+          "division (of a scale)",
+          "tooth (of a saw, comb, etc.)",
+          "ordinal number suffix",
+          "somewhat",
+          "-ish",
+          "point (e.g. of change)",
+          "eye (empty space inside a group of stones)",
+          "Eye"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Suffix",
+          "Suffix",
+          "Suffix",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "メガネ",
+      "hiragana": "めがね",
+      "romaji": "megane",
+      "vietnamese": "[Cần dịch] glasses; eyeglasses; spectacles",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "眼鏡",
+        "url": "https://jisho.org/search/%E7%9C%BC%E9%8F%A1",
+        "englishDefinitions": [
+          "glasses",
+          "eyeglasses",
+          "spectacles",
+          "judgment",
+          "judgement",
+          "discrimination",
+          "discernment",
+          "insight",
+          "four-eyes",
+          "Megane",
+          "Glasses"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "道",
+      "hiragana": "みち",
+      "romaji": "michi",
+      "vietnamese": "[Cần dịch] road; path; street",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "道",
+        "url": "https://jisho.org/search/%E9%81%93",
+        "englishDefinitions": [
+          "road",
+          "path",
+          "street",
+          "lane",
+          "passage",
+          "route",
+          "way",
+          "distance",
+          "journey",
+          "road (e.g. to victory)",
+          "course",
+          "way (of living, proper conduct, etc.)",
+          "moral principles",
+          "teachings (esp. Confucian or Buddhist)",
+          "dogma",
+          "field (e.g. of medicine)",
+          "subject",
+          "speciality",
+          "means",
+          "way",
+          "method",
+          "Diameter"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "緑",
+      "hiragana": "みどり",
+      "romaji": "midori",
+      "vietnamese": "[Cần dịch] green; greenery; verdure",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "緑",
+        "url": "https://jisho.org/search/%E7%B7%91",
+        "englishDefinitions": [
+          "green",
+          "greenery",
+          "verdure",
+          "Green"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "耳",
+      "hiragana": "みみ",
+      "romaji": "mimi",
+      "vietnamese": "[Cần dịch] ear; hearing; ear (for music, etc.)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "耳",
+        "url": "https://jisho.org/search/%E8%80%B3",
+        "englishDefinitions": [
+          "ear",
+          "hearing",
+          "ear (for music, etc.)",
+          "edge",
+          "crust",
+          "heel (of bread or cheese)",
+          "selvedge (of woven fabric)",
+          "selvage",
+          "ear (of a pot, jug, etc.)",
+          "handle",
+          "Ear"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "皆",
+      "hiragana": "みな",
+      "romaji": "mina",
+      "vietnamese": "[Cần dịch] everyone; everybody; all",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "皆",
+        "url": "https://jisho.org/search/%E7%9A%86",
+        "englishDefinitions": [
+          "everyone",
+          "everybody",
+          "all",
+          "everything",
+          "all"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Pronoun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Adverb (fukushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "南",
+      "hiragana": "みなみ",
+      "romaji": "minami",
+      "vietnamese": "[Cần dịch] south; South",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "南",
+        "url": "https://jisho.org/search/%E5%8D%97",
+        "englishDefinitions": [
+          "south",
+          "South"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "見る",
+      "hiragana": "みる",
+      "romaji": "miru",
+      "vietnamese": "[Cần dịch] to see; to look; to watch",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "見る",
+        "url": "https://jisho.org/search/%E8%A6%8B%E3%82%8B",
+        "englishDefinitions": [
+          "to see",
+          "to look",
+          "to watch",
+          "to view",
+          "to observe",
+          "to examine",
+          "to look over",
+          "to assess",
+          "to check",
+          "to judge",
+          "to look after",
+          "to attend to",
+          "to take care of",
+          "to keep an eye on",
+          "to experience",
+          "to meet with (misfortune, success, etc.)",
+          "to try ...",
+          "to have a go at ...",
+          "to give ... a try",
+          "to see (that) ...",
+          "to find (that) ..."
+        ],
+        "partsOfSpeech": [
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Ichidan verb",
+          "Transitive verb",
+          "Auxiliary verb",
+          "Ichidan verb",
+          "Auxiliary verb",
+          "Ichidan verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "水",
+      "hiragana": "みず",
+      "romaji": "mizu",
+      "vietnamese": "[Cần dịch] water (esp. cool or cold); fluid (esp. in an animal tissue); liquid",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "水",
+        "url": "https://jisho.org/search/%E6%B0%B4",
+        "englishDefinitions": [
+          "water (esp. cool or cold)",
+          "fluid (esp. in an animal tissue)",
+          "liquid",
+          "flood",
+          "floodwaters",
+          "water offered to wrestlers just prior to a bout",
+          "break granted to wrestlers engaged in a prolonged bout",
+          "Water"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "木曜日",
+      "hiragana": "もくようび",
+      "romaji": "mokuyoubi",
+      "vietnamese": "[Cần dịch] Thursday; Thursday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "木曜日",
+        "url": "https://jisho.org/search/%E6%9C%A8%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Thursday",
+          "Thursday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "問題",
+      "hiragana": "もんだい",
+      "romaji": "mondai",
+      "vietnamese": "[Cần dịch] question (e.g. on a test); problem; problem (e.g. societal, political)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "問題",
+        "url": "https://jisho.org/search/%E5%95%8F%E9%A1%8C",
+        "englishDefinitions": [
+          "question (e.g. on a test)",
+          "problem",
+          "problem (e.g. societal, political)",
+          "question",
+          "issue",
+          "subject (e.g. of research)",
+          "case",
+          "matter",
+          "question (i.e. doubt)",
+          "public discussion",
+          "controversy",
+          "trouble",
+          "problem",
+          "inconvenience",
+          "difficulty",
+          "Problem"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "持つ",
+      "hiragana": "もつ",
+      "romaji": "motsu",
+      "vietnamese": "[Cần dịch] to hold (in one's hand); to take; to carry",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "持つ",
+        "url": "https://jisho.org/search/%E6%8C%81%E3%81%A4",
+        "englishDefinitions": [
+          "to hold (in one's hand)",
+          "to take",
+          "to carry",
+          "to possess",
+          "to have",
+          "to own",
+          "to maintain",
+          "to keep",
+          "to last",
+          "to be durable",
+          "to keep",
+          "to survive",
+          "to take charge of",
+          "to be in charge of",
+          "to hold (meeting, etc.)",
+          "to have (opportunity, etc.)",
+          "to have \"it\"",
+          "to have that special something",
+          "to be blessed with good luck"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Godan verb with 'tsu' ending",
+          "Transitive verb",
+          "Intransitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "村",
+      "hiragana": "むら",
+      "romaji": "mura",
+      "vietnamese": "[Cần dịch] village; Village",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "村",
+        "url": "https://jisho.org/search/%E6%9D%91",
+        "englishDefinitions": [
+          "village",
+          "Village"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "名前",
+      "hiragana": "なまえ",
+      "romaji": "namae",
+      "vietnamese": "[Cần dịch] name; given name; first name",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "名前",
+        "url": "https://jisho.org/search/%E5%90%8D%E5%89%8D",
+        "englishDefinitions": [
+          "name",
+          "given name",
+          "first name",
+          "Name"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "何",
+      "hiragana": "なに",
+      "romaji": "nani",
+      "vietnamese": "[Cần dịch] what; you-know-what; that thing",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "何",
+        "url": "https://jisho.org/search/%E4%BD%95",
+        "englishDefinitions": [
+          "what",
+          "you-know-what",
+          "that thing",
+          "whatsit",
+          "whachamacallit",
+          "what's-his-name",
+          "what's-her-name",
+          "penis",
+          "(one's) thing",
+          "dick",
+          "(not) at all",
+          "(not) in the slightest",
+          "what?",
+          "huh?",
+          "hey!",
+          "come on!",
+          "oh, no (it's fine)",
+          "why (it's nothing)",
+          "oh (certainly not)"
+        ],
+        "partsOfSpeech": [
+          "Pronoun",
+          "Pronoun",
+          "Pronoun",
+          "Noun",
+          "Adverb (fukushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "成る",
+      "hiragana": "なる",
+      "romaji": "naru",
+      "vietnamese": "[Cần dịch] to become; to get; to grow",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "成る",
+        "url": "https://jisho.org/search/%E6%88%90%E3%82%8B",
+        "englishDefinitions": [
+          "to become",
+          "to get",
+          "to grow",
+          "to turn",
+          "to reach",
+          "to attain",
+          "to result in",
+          "to turn out",
+          "to end up",
+          "to prove (to be)",
+          "to consist of",
+          "to be composed of",
+          "to be made up of",
+          "to be completed",
+          "to be realized",
+          "to succeed",
+          "to be attained",
+          "to be accomplished",
+          "to change (into)",
+          "to turn (into)",
+          "to transform",
+          "to come (to do)",
+          "to begin (to do)",
+          "to grow (to do)",
+          "to come to",
+          "to amount to",
+          "to add up to",
+          "to make",
+          "to play (the part of)",
+          "to act as",
+          "to be used for",
+          "to be useful for",
+          "to serve as",
+          "to be promoted",
+          "to do ...",
+          "Naru"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Godan verb with 'ru' ending",
+          "Intransitive verb",
+          "Auxiliary verb",
+          "Godan verb with 'ru' ending",
+          "Place"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "夏",
+      "hiragana": "なつ",
+      "romaji": "natsu",
+      "vietnamese": "[Cần dịch] summer; Summer",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "夏",
+        "url": "https://jisho.org/search/%E5%A4%8F",
+        "englishDefinitions": [
+          "summer",
+          "Summer"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "夏休み",
+      "hiragana": "なつやすみ",
+      "romaji": "natsuyasumi",
+      "vietnamese": "[Cần dịch] summer vacation; summer holiday; Summer vacation",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "夏休み",
+        "url": "https://jisho.org/search/%E5%A4%8F%E4%BC%91%E3%81%BF",
+        "englishDefinitions": [
+          "summer vacation",
+          "summer holiday",
+          "Summer vacation"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "猫",
+      "hiragana": "ねこ",
+      "romaji": "neko",
+      "vietnamese": "[Cần dịch] cat (esp. the domestic cat, Felis catus); feline; shamisen",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "猫",
+        "url": "https://jisho.org/search/%E7%8C%AB",
+        "englishDefinitions": [
+          "cat (esp. the domestic cat, Felis catus)",
+          "feline",
+          "shamisen",
+          "geisha",
+          "wheelbarrow",
+          "clay bed-warmer",
+          "bottom (submissive partner of a homosexual relationship)",
+          "Cat"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "日曜日",
+      "hiragana": "にちようび",
+      "romaji": "nichiyoubi",
+      "vietnamese": "[Cần dịch] Sunday; Sunday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "日曜日",
+        "url": "https://jisho.org/search/%E6%97%A5%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Sunday",
+          "Sunday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "肉",
+      "hiragana": "にく",
+      "romaji": "niku",
+      "vietnamese": "[Cần dịch] flesh; meat; flesh (of a fruit)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "肉",
+        "url": "https://jisho.org/search/%E8%82%89",
+        "englishDefinitions": [
+          "flesh",
+          "meat",
+          "flesh (of a fruit)",
+          "pulp",
+          "the physical body (as opposed to the spirit)",
+          "flesh",
+          "thickness",
+          "content",
+          "substance",
+          "flesh",
+          "ink pad",
+          "Flesh"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "西",
+      "hiragana": "にし",
+      "romaji": "nishi",
+      "vietnamese": "[Cần dịch] west; West",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "西",
+        "url": "https://jisho.org/search/%E8%A5%BF",
+        "englishDefinitions": [
+          "west",
+          "West"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "飲む",
+      "hiragana": "のむ",
+      "romaji": "nomu",
+      "vietnamese": "[Cần dịch] to drink; to swallow; to take (medicine)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "飲む",
+        "url": "https://jisho.org/search/%E9%A3%B2%E3%82%80",
+        "englishDefinitions": [
+          "to drink",
+          "to swallow",
+          "to take (medicine)",
+          "to smoke (tobacco)",
+          "to swallow up",
+          "to engulf",
+          "to suppress (one's anger, bitter feelings, etc.)",
+          "to keep down",
+          "to hold back",
+          "to swallow (one's tears)",
+          "to catch (one's breath)",
+          "to accept (a demand, conditions, etc.)",
+          "to agree to",
+          "to make light of (someone)",
+          "to think nothing of",
+          "to overwhelm",
+          "to overawe",
+          "to carry (a concealed dagger, etc.)",
+          "to conceal (up one's sleeve, etc.)",
+          "Drinking"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "お金",
+      "hiragana": "おかね",
+      "romaji": "okane",
+      "vietnamese": "[Cần dịch] money",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "お金",
+        "url": "https://jisho.org/search/%E3%81%8A%E9%87%91",
+        "englishDefinitions": [
+          "money"
+        ],
+        "partsOfSpeech": [
+          "Noun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "音楽",
+      "hiragana": "おんがく",
+      "romaji": "ongaku",
+      "vietnamese": "[Cần dịch] music; Music",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "音楽",
+        "url": "https://jisho.org/search/%E9%9F%B3%E6%A5%BD",
+        "englishDefinitions": [
+          "music",
+          "Music"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "男",
+      "hiragana": "おとこ",
+      "romaji": "otoko",
+      "vietnamese": "[Cần dịch] man; male; fellow",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "男",
+        "url": "https://jisho.org/search/%E7%94%B7",
+        "englishDefinitions": [
+          "man",
+          "male",
+          "fellow",
+          "guy",
+          "chap",
+          "bloke",
+          "male lover",
+          "boyfriend",
+          "man",
+          "manliness",
+          "manly honor",
+          "manly honour",
+          "manly reputation"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun, used as a prefix",
+          "Noun",
+          "Noun",
+          "Noun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "大人",
+      "hiragana": "おとな",
+      "romaji": "otona",
+      "vietnamese": "[Cần dịch] adult; grown-up; Adult",
+      "type": "Tính từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "大人",
+        "url": "https://jisho.org/search/%E5%A4%A7%E4%BA%BA",
+        "englishDefinitions": [
+          "adult",
+          "grown-up",
+          "Adult"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Na-adjective (keiyodoshi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "冷蔵庫",
+      "hiragana": "れいぞうこ",
+      "romaji": "reizouko",
+      "vietnamese": "[Cần dịch] refrigerator; fridge; Refrigerator",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "冷蔵庫",
+        "url": "https://jisho.org/search/%E5%86%B7%E8%94%B5%E5%BA%AB",
+        "englishDefinitions": [
+          "refrigerator",
+          "fridge",
+          "Refrigerator"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "旅行",
+      "hiragana": "りょこう",
+      "romaji": "ryokou",
+      "vietnamese": "[Cần dịch] travel; trip; journey",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "旅行",
+        "url": "https://jisho.org/search/%E6%97%85%E8%A1%8C",
+        "englishDefinitions": [
+          "travel",
+          "trip",
+          "journey",
+          "excursion",
+          "tour",
+          "Travel"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "料理",
+      "hiragana": "りょうり",
+      "romaji": "ryouri",
+      "vietnamese": "[Cần dịch] cooking; cookery; cuisine",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "料理",
+        "url": "https://jisho.org/search/%E6%96%99%E7%90%86",
+        "englishDefinitions": [
+          "cooking",
+          "cookery",
+          "cuisine",
+          "food",
+          "dish",
+          "dealing with (skillfully)",
+          "handling (well)",
+          "managing",
+          "Cuisine"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "財布",
+      "hiragana": "さいふ",
+      "romaji": "saifu",
+      "vietnamese": "[Cần dịch] wallet; purse; coin purse",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "財布",
+        "url": "https://jisho.org/search/%E8%B2%A1%E5%B8%83",
+        "englishDefinitions": [
+          "wallet",
+          "purse",
+          "coin purse",
+          "billfold",
+          "pocketbook",
+          "Wallet"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "作文",
+      "hiragana": "さくぶん",
+      "romaji": "sakubun",
+      "vietnamese": "[Cần dịch] writing (an essay, prose, etc.); composition; formal writing with little real meaning",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "作文",
+        "url": "https://jisho.org/search/%E4%BD%9C%E6%96%87",
+        "englishDefinitions": [
+          "writing (an essay, prose, etc.)",
+          "composition",
+          "formal writing with little real meaning",
+          "Composition (language)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "散歩",
+      "hiragana": "さんぽ",
+      "romaji": "sanpo",
+      "vietnamese": "[Cần dịch] walk; stroll; Strolling",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "散歩",
+        "url": "https://jisho.org/search/%E6%95%A3%E6%AD%A9",
+        "englishDefinitions": [
+          "walk",
+          "stroll",
+          "Strolling"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "砂糖",
+      "hiragana": "さとう",
+      "romaji": "satou",
+      "vietnamese": "[Cần dịch] sugar; Sugar",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "砂糖",
+        "url": "https://jisho.org/search/%E7%A0%82%E7%B3%96",
+        "englishDefinitions": [
+          "sugar",
+          "Sugar"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "背広",
+      "hiragana": "せびろ",
+      "romaji": "sebiro",
+      "vietnamese": "[Cần dịch] business suit; Suit (clothing)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "背広",
+        "url": "https://jisho.org/search/%E8%83%8C%E5%BA%83",
+        "englishDefinitions": [
+          "business suit",
+          "Suit (clothing)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "石鹸",
+      "hiragana": "せっけん",
+      "romaji": "sekken",
+      "vietnamese": "[Cần dịch] soap; Soap",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "石鹸",
+        "url": "https://jisho.org/search/%E7%9F%B3%E9%B9%B8",
+        "englishDefinitions": [
+          "soap",
+          "Soap"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "先生",
+      "hiragana": "せんせい",
+      "romaji": "sensei",
+      "vietnamese": "[Cần dịch] teacher; instructor; master",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "先生",
+        "url": "https://jisho.org/search/%E5%85%88%E7%94%9F",
+        "englishDefinitions": [
+          "teacher",
+          "instructor",
+          "master",
+          "sensei",
+          "title or form of address for a teacher, master, doctor, lawyer, etc.",
+          "intimate or teasing form of address",
+          "one's elder",
+          "Sensei"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun, used as a suffix",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "洗濯",
+      "hiragana": "せんたく",
+      "romaji": "sentaku",
+      "vietnamese": "[Cần dịch] washing; laundry; relaxation",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "洗濯",
+        "url": "https://jisho.org/search/%E6%B4%97%E6%BF%AF",
+        "englishDefinitions": [
+          "washing",
+          "laundry",
+          "relaxation",
+          "rejuvenation",
+          "melting away (of worries, fatigue, etc.)",
+          "Laundry"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "写真",
+      "hiragana": "しゃしん",
+      "romaji": "shashin",
+      "vietnamese": "[Cần dịch] photograph; photo; picture",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "写真",
+        "url": "https://jisho.org/search/%E5%86%99%E7%9C%9F",
+        "englishDefinitions": [
+          "photograph",
+          "photo",
+          "picture",
+          "photography",
+          "moving picture",
+          "movie",
+          "Photography"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "仕事",
+      "hiragana": "しごと",
+      "romaji": "shigoto",
+      "vietnamese": "[Cần dịch] work; job; labor",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "仕事",
+        "url": "https://jisho.org/search/%E4%BB%95%E4%BA%8B",
+        "englishDefinitions": [
+          "work",
+          "job",
+          "labor",
+          "labour",
+          "business",
+          "task",
+          "assignment",
+          "occupation",
+          "employment",
+          "work",
+          "Work"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Intransitive verb",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "新聞",
+      "hiragana": "しんぶん",
+      "romaji": "shinbun",
+      "vietnamese": "[Cần dịch] newspaper; Newspaper",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "新聞",
+        "url": "https://jisho.org/search/%E6%96%B0%E8%81%9E",
+        "englishDefinitions": [
+          "newspaper",
+          "Newspaper"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "塩",
+      "hiragana": "しお",
+      "romaji": "shio",
+      "vietnamese": "[Cần dịch] salt; common salt; table salt",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "塩",
+        "url": "https://jisho.org/search/%E5%A1%A9",
+        "englishDefinitions": [
+          "salt",
+          "common salt",
+          "table salt",
+          "sodium chloride",
+          "hardship",
+          "toil",
+          "trouble",
+          "saltiness",
+          "cold",
+          "unwelcoming",
+          "indifferent",
+          "Salt"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun, used as a prefix",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "白",
+      "hiragana": "しろ",
+      "romaji": "shiro",
+      "vietnamese": "[Cần dịch] white; innocence; innocent person",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "白",
+        "url": "https://jisho.org/search/%E7%99%BD",
+        "englishDefinitions": [
+          "white",
+          "innocence",
+          "innocent person",
+          "blank space",
+          "white stone",
+          "white dragon tile",
+          "skewered grilled pig intestine",
+          "White"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "知る",
+      "hiragana": "しる",
+      "romaji": "shiru",
+      "vietnamese": "[Cần dịch] to know; to be aware (of); to be conscious (of)",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "知る",
+        "url": "https://jisho.org/search/%E7%9F%A5%E3%82%8B",
+        "englishDefinitions": [
+          "to know",
+          "to be aware (of)",
+          "to be conscious (of)",
+          "to learn (of)",
+          "to find out",
+          "to discover",
+          "to sense",
+          "to feel",
+          "to notice",
+          "to realize",
+          "to understand",
+          "to comprehend",
+          "to grasp",
+          "to appreciate",
+          "to remember",
+          "to be familiar with",
+          "to be acquainted with",
+          "to experience",
+          "to go through",
+          "to know (e.g. hardship)",
+          "to get acquainted with (a person)",
+          "to get to know",
+          "to have to do with",
+          "to be concerned with",
+          "to be one's concern",
+          "to be one's responsibility"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "食堂",
+      "hiragana": "しょくどう",
+      "romaji": "shokudou",
+      "vietnamese": "[Cần dịch] dining room; dining hall; cafeteria",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "食堂",
+        "url": "https://jisho.org/search/%E9%A3%9F%E5%A0%82",
+        "englishDefinitions": [
+          "dining room",
+          "dining hall",
+          "cafeteria",
+          "canteen",
+          "messroom",
+          "restaurant",
+          "eatery",
+          "snack bar",
+          "diner",
+          "Dining room"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "宿題",
+      "hiragana": "しゅくだい",
+      "romaji": "shukudai",
+      "vietnamese": "[Cần dịch] homework; assignment; pending issue",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "宿題",
+        "url": "https://jisho.org/search/%E5%AE%BF%E9%A1%8C",
+        "englishDefinitions": [
+          "homework",
+          "assignment",
+          "pending issue",
+          "unresolved problem",
+          "open question",
+          "Homework"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "其の",
+      "hiragana": "その",
+      "romaji": "sono",
+      "vietnamese": "[Cần dịch] that; the; part (as in \"part two\")",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "其の",
+        "url": "https://jisho.org/search/%E5%85%B6%E3%81%AE",
+        "englishDefinitions": [
+          "that",
+          "the",
+          "part (as in \"part two\")",
+          "um ...",
+          "er ...",
+          "uh ..."
+        ],
+        "partsOfSpeech": [
+          "Pre-noun adjectival (rentaishi)",
+          "Pre-noun adjectival (rentaishi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "外",
+      "hiragana": "そと",
+      "romaji": "soto",
+      "vietnamese": "[Cần dịch] outside; exterior; the open (air)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "外",
+        "url": "https://jisho.org/search/%E5%A4%96",
+        "englishDefinitions": [
+          "outside",
+          "exterior",
+          "the open (air)",
+          "other place",
+          "somewhere else",
+          "outside one's group (family, company, etc.)",
+          "To"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Place"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "掃除",
+      "hiragana": "そうじ",
+      "romaji": "souji",
+      "vietnamese": "[Cần dịch] cleaning; sweeping; dusting",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "掃除",
+        "url": "https://jisho.org/search/%E6%8E%83%E9%99%A4",
+        "englishDefinitions": [
+          "cleaning",
+          "sweeping",
+          "dusting",
+          "scrubbing",
+          "Cleanliness"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Suru verb",
+          "Transitive verb",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "水曜日",
+      "hiragana": "すいようび",
+      "romaji": "suiyoubi",
+      "vietnamese": "[Cần dịch] Wednesday; Wednesday",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "水曜日",
+        "url": "https://jisho.org/search/%E6%B0%B4%E6%9B%9C%E6%97%A5",
+        "englishDefinitions": [
+          "Wednesday",
+          "Wednesday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "煙草",
+      "hiragana": "たばこ",
+      "romaji": "tabako",
+      "vietnamese": "[Cần dịch] tobacco; cigarette; cigar",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "煙草",
+        "url": "https://jisho.org/search/%E7%85%99%E8%8D%89",
+        "englishDefinitions": [
+          "tobacco",
+          "cigarette",
+          "cigar",
+          "tobacco plant (Nicotiana tabacum)",
+          "Tabaco",
+          "Tobacco"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "大変",
+      "hiragana": "たいへん",
+      "romaji": "taihen",
+      "vietnamese": "[Cần dịch] very; greatly; terribly",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "大変",
+        "url": "https://jisho.org/search/%E5%A4%A7%E5%A4%89",
+        "englishDefinitions": [
+          "very",
+          "greatly",
+          "terribly",
+          "awfully",
+          "immense",
+          "enormous",
+          "great",
+          "serious",
+          "grave",
+          "dreadful",
+          "terrible",
+          "difficult",
+          "hard",
+          "challenging",
+          "major incident",
+          "disaster"
+        ],
+        "partsOfSpeech": [
+          "Adverb (fukushi)",
+          "Na-adjective (keiyodoshi)",
+          "Noun",
+          "Na-adjective (keiyodoshi)",
+          "Noun",
+          "Na-adjective (keiyodoshi)",
+          "Noun",
+          "Noun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "大使館",
+      "hiragana": "たいしかん",
+      "romaji": "taishikan",
+      "vietnamese": "[Cần dịch] embassy; Diplomatic mission",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "大使館",
+        "url": "https://jisho.org/search/%E5%A4%A7%E4%BD%BF%E9%A4%A8",
+        "englishDefinitions": [
+          "embassy",
+          "Diplomatic mission"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "卵",
+      "hiragana": "たまご",
+      "romaji": "tamago",
+      "vietnamese": "[Cần dịch] eggs; egg; spawn",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "卵",
+        "url": "https://jisho.org/search/%E5%8D%B5",
+        "englishDefinitions": [
+          "eggs",
+          "egg",
+          "spawn",
+          "roe",
+          "(hen's) egg",
+          "a ... in the making",
+          "future (lawyer, doctor, etc.)",
+          "budding ...",
+          "beginning",
+          "origin",
+          "infancy",
+          "Egg (biology)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "誕生日",
+      "hiragana": "たんじょうび",
+      "romaji": "tanjoubi",
+      "vietnamese": "[Cần dịch] birthday; Birthday",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "誕生日",
+        "url": "https://jisho.org/search/%E8%AA%95%E7%94%9F%E6%97%A5",
+        "englishDefinitions": [
+          "birthday",
+          "Birthday"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "手",
+      "hiragana": "て",
+      "romaji": "te",
+      "vietnamese": "[Cần dịch] hand; arm; forepaw",
+      "type": "Lượng từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "手",
+        "url": "https://jisho.org/search/%E6%89%8B",
+        "englishDefinitions": [
+          "hand",
+          "arm",
+          "forepaw",
+          "foreleg",
+          "handle",
+          "hand",
+          "worker",
+          "help",
+          "trouble",
+          "care",
+          "effort",
+          "means",
+          "way",
+          "trick",
+          "move",
+          "technique",
+          "workmanship",
+          "hand",
+          "handwriting",
+          "kind",
+          "type",
+          "sort",
+          "one's hands",
+          "one's possession",
+          "ability to cope",
+          "hand (of cards)",
+          "direction",
+          "move (in go, shogi, etc.)",
+          "Te",
+          "Hand"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun, used as a suffix",
+          "Counter",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "手紙",
+      "hiragana": "てがみ",
+      "romaji": "tegami",
+      "vietnamese": "[Cần dịch] letter; note; Letter (message)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "手紙",
+        "url": "https://jisho.org/search/%E6%89%8B%E7%B4%99",
+        "englishDefinitions": [
+          "letter",
+          "note",
+          "Letter (message)"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "戸",
+      "hiragana": "と",
+      "romaji": "to",
+      "vietnamese": "[Cần dịch] door (esp. Japanese-style); shutter; window shutter",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "戸",
+        "url": "https://jisho.org/search/%E6%88%B8",
+        "englishDefinitions": [
+          "door (esp. Japanese-style)",
+          "shutter",
+          "window shutter",
+          "entrance (to a home)",
+          "narrows",
+          "To",
+          "Gate"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Place",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "時計",
+      "hiragana": "とけい",
+      "romaji": "tokei",
+      "vietnamese": "[Cần dịch] clock; watch; timepiece",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "時計",
+        "url": "https://jisho.org/search/%E6%99%82%E8%A8%88",
+        "englishDefinitions": [
+          "clock",
+          "watch",
+          "timepiece",
+          "Clock"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "取る",
+      "hiragana": "とる",
+      "romaji": "toru",
+      "vietnamese": "[Cần dịch] to take; to pick up; to grab",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "取る",
+        "url": "https://jisho.org/search/%E5%8F%96%E3%82%8B",
+        "englishDefinitions": [
+          "to take",
+          "to pick up",
+          "to grab",
+          "to catch",
+          "to hold",
+          "to pass",
+          "to hand",
+          "to give",
+          "to get",
+          "to obtain",
+          "to acquire",
+          "to win",
+          "to receive",
+          "to earn",
+          "to take (e.g. a vacation)",
+          "to adopt (a method, proposal, etc.)",
+          "to take (a measure, attitude, etc.)",
+          "to choose",
+          "to remove",
+          "to get rid of",
+          "to take off",
+          "to take away",
+          "to steal",
+          "to rob",
+          "to eat",
+          "to have (e.g. lunch)",
+          "to take (e.g. vitamins)",
+          "to pick (e.g. flowers)",
+          "to gather",
+          "to extract (e.g. juice)",
+          "to catch (e.g. fish)",
+          "to harvest (a crop)",
+          "to take up (time, space)",
+          "to occupy",
+          "to spare",
+          "to set aside",
+          "to secure",
+          "to reserve",
+          "to save",
+          "to put aside",
+          "to keep",
+          "to take (e.g. a joke)",
+          "to interpret",
+          "to understand",
+          "to make out",
+          "to grasp",
+          "to record",
+          "to take down",
+          "to subscribe to (e.g. a newspaper)",
+          "to take",
+          "to buy",
+          "to get",
+          "to order",
+          "to have delivered",
+          "to charge",
+          "to fine",
+          "to take (tax)",
+          "to take (e.g. a wife)",
+          "to take on (e.g. an apprentice)",
+          "to adopt",
+          "to accept",
+          "to take control of",
+          "to take (the rudder)",
+          "to compete (in sumo, cards, etc.)",
+          "to play"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "年",
+      "hiragana": "とし",
+      "romaji": "toshi",
+      "vietnamese": "[Cần dịch] year; age; years",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "年",
+        "url": "https://jisho.org/search/%E5%B9%B4",
+        "englishDefinitions": [
+          "year",
+          "age",
+          "years",
+          "past one's prime",
+          "old age",
+          "Year"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "図書館",
+      "hiragana": "としょかん",
+      "romaji": "toshokan",
+      "vietnamese": "[Cần dịch] library; Library",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "図書館",
+        "url": "https://jisho.org/search/%E5%9B%B3%E6%9B%B8%E9%A4%A8",
+        "englishDefinitions": [
+          "library",
+          "Library"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "使う",
+      "hiragana": "つかう",
+      "romaji": "tsukau",
+      "vietnamese": "[Cần dịch] to use (a tool, method, etc.); to make use of; to put to use",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "使う",
+        "url": "https://jisho.org/search/%E4%BD%BF%E3%81%86",
+        "englishDefinitions": [
+          "to use (a tool, method, etc.)",
+          "to make use of",
+          "to put to use",
+          "to use (a person, animal, puppet, etc.)",
+          "to employ",
+          "to handle",
+          "to manage",
+          "to manipulate",
+          "to use (time, money, etc.)",
+          "to spend",
+          "to consume",
+          "to use (language)",
+          "to speak"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb",
+          "Godan verb with 'u' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "机",
+      "hiragana": "つくえ",
+      "romaji": "tsukue",
+      "vietnamese": "[Cần dịch] desk; Desk",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "机",
+        "url": "https://jisho.org/search/%E6%9C%BA",
+        "englishDefinitions": [
+          "desk",
+          "Desk"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "作る",
+      "hiragana": "つくる",
+      "romaji": "tsukuru",
+      "vietnamese": "[Cần dịch] to make; to produce; to manufacture",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "作る",
+        "url": "https://jisho.org/search/%E4%BD%9C%E3%82%8B",
+        "englishDefinitions": [
+          "to make",
+          "to produce",
+          "to manufacture",
+          "to build",
+          "to construct",
+          "to prepare (food)",
+          "to brew (alcohol)",
+          "to raise",
+          "to grow",
+          "to cultivate",
+          "to train",
+          "to till",
+          "to draw up (a document)",
+          "to make out",
+          "to prepare",
+          "to write",
+          "to create (an artistic work, etc.)",
+          "to compose",
+          "to coin (a phrase)",
+          "to organize",
+          "to organise",
+          "to establish",
+          "to found",
+          "to have (a child)",
+          "to make up (one's face, etc.)",
+          "to fabricate (an excuse, etc.)",
+          "to give a (false) appearance",
+          "to feign (a smile, etc.)",
+          "to put on a show of emotion",
+          "to form (a line, etc.)",
+          "to set (a record)",
+          "to commit (a sin, etc.)"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb",
+          "Godan verb with 'ru' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "海",
+      "hiragana": "うみ",
+      "romaji": "umi",
+      "vietnamese": "[Cần dịch] sea; ocean; waters",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "海",
+        "url": "https://jisho.org/search/%E6%B5%B7",
+        "englishDefinitions": [
+          "sea",
+          "ocean",
+          "waters",
+          "Sea"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "後ろ",
+      "hiragana": "うしろ",
+      "romaji": "ushiro",
+      "vietnamese": "[Cần dịch] back; behind; rear",
+      "type": "Trợ từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "後ろ",
+        "url": "https://jisho.org/search/%E5%BE%8C%E3%82%8D",
+        "englishDefinitions": [
+          "back",
+          "behind",
+          "rear"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun which may take the genitive case particle 'no'"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "歌",
+      "hiragana": "うた",
+      "romaji": "uta",
+      "vietnamese": "[Cần dịch] song; singing; classical Japanese poem (esp. tanka)",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "歌",
+        "url": "https://jisho.org/search/%E6%AD%8C",
+        "englishDefinitions": [
+          "song",
+          "singing",
+          "classical Japanese poem (esp. tanka)",
+          "modern poetry",
+          "Song"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "私",
+      "hiragana": "わたし",
+      "romaji": "watashi",
+      "vietnamese": "[Cần dịch] I; me",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "私",
+        "url": "https://jisho.org/search/%E7%A7%81",
+        "englishDefinitions": [
+          "I",
+          "me"
+        ],
+        "partsOfSpeech": [
+          "Pronoun"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "山",
+      "hiragana": "やま",
+      "romaji": "yama",
+      "vietnamese": "[Cần dịch] mountain; hill; mine",
+      "type": "Lượng từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "山",
+        "url": "https://jisho.org/search/%E5%B1%B1",
+        "englishDefinitions": [
+          "mountain",
+          "hill",
+          "mine",
+          "(mountain) forest",
+          "heap",
+          "pile",
+          "stack",
+          "mountain",
+          "protruding or high part of an object",
+          "crown (of a hat)",
+          "thread (of a screw)",
+          "tread (of a tire)",
+          "climax",
+          "peak",
+          "critical point",
+          "guess",
+          "speculation",
+          "gamble",
+          "(criminal) case",
+          "crime",
+          "mountain climbing",
+          "mountaineering",
+          "festival float (esp. one mounted with a decorative halberd)",
+          "deck (from which players draw cards)",
+          "draw pile",
+          "stock",
+          "wall",
+          "wall tile",
+          "wild",
+          "Mountain"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Counter",
+          "Noun",
+          "Counter",
+          "Noun",
+          "Counter",
+          "Noun",
+          "Counter",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun",
+          "Noun, used as a prefix",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "八百屋",
+      "hiragana": "やおや",
+      "romaji": "yaoya",
+      "vietnamese": "[Cần dịch] greengrocer; fruit and vegetable shop; jack of all trades",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "八百屋",
+        "url": "https://jisho.org/search/%E5%85%AB%E7%99%BE%E5%B1%8B",
+        "englishDefinitions": [
+          "greengrocer",
+          "fruit and vegetable shop",
+          "jack of all trades",
+          "Greengrocer"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "野菜",
+      "hiragana": "やさい",
+      "romaji": "yasai",
+      "vietnamese": "[Cần dịch] vegetable; marijuana; cannabis",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "野菜",
+        "url": "https://jisho.org/search/%E9%87%8E%E8%8F%9C",
+        "englishDefinitions": [
+          "vegetable",
+          "marijuana",
+          "cannabis",
+          "Vegetable"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "良い",
+      "hiragana": "よい",
+      "romaji": "yoi",
+      "vietnamese": "[Cần dịch] good; excellent; fine",
+      "type": "Tính từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "良い",
+        "url": "https://jisho.org/search/%E8%89%AF%E3%81%84",
+        "englishDefinitions": [
+          "good",
+          "excellent",
+          "fine",
+          "nice",
+          "pleasant",
+          "agreeable",
+          "sufficient",
+          "enough",
+          "ready",
+          "prepared",
+          "profitable (deal, business offer, etc.)",
+          "beneficial",
+          "OK",
+          "all right",
+          "fine",
+          "no problem",
+          "easy to ..."
+        ],
+        "partsOfSpeech": [
+          "I-adjective (keiyoushi)",
+          "I-adjective (keiyoushi)",
+          "I-adjective (keiyoushi)",
+          "I-adjective (keiyoushi)",
+          "Suffix",
+          "I-adjective (keiyoushi)"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "読む",
+      "hiragana": "よむ",
+      "romaji": "yomu",
+      "vietnamese": "[Cần dịch] to read; to recite (e.g. a sutra); to chant",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "読む",
+        "url": "https://jisho.org/search/%E8%AA%AD%E3%82%80",
+        "englishDefinitions": [
+          "to read",
+          "to recite (e.g. a sutra)",
+          "to chant",
+          "to predict",
+          "to guess",
+          "to forecast",
+          "to read (someone's thoughts)",
+          "to see (e.g. into someone's heart)",
+          "to divine",
+          "to pronounce",
+          "to read (e.g. a kanji)",
+          "to decipher",
+          "to read (a meter, graph, music, etc.)",
+          "to tell (the time)",
+          "to count",
+          "to estimate",
+          "to read (a kanji) with its native Japanese reading"
+        ],
+        "partsOfSpeech": [
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb",
+          "Godan verb with 'mu' ending",
+          "Transitive verb"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "より",
+      "hiragana": "より",
+      "romaji": "yori",
+      "vietnamese": "[Cần dịch] than; rather than; instead of",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "より",
+        "url": "https://jisho.org/search/%E3%82%88%E3%82%8A",
+        "englishDefinitions": [
+          "than",
+          "rather than",
+          "instead of",
+          "over",
+          "above",
+          "from",
+          "out of",
+          "since",
+          "at",
+          "on (and after)",
+          "except",
+          "but",
+          "other than",
+          "more",
+          "Yori (kana)"
+        ],
+        "partsOfSpeech": [
+          "Particle",
+          "Particle",
+          "Particle",
+          "Particle",
+          "Adverb (fukushi)",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "夜",
+      "hiragana": "よる",
+      "romaji": "yoru",
+      "vietnamese": "[Cần dịch] night; evening; dinner",
+      "type": "Động từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "夜",
+        "url": "https://jisho.org/search/%E5%A4%9C",
+        "englishDefinitions": [
+          "night",
+          "evening",
+          "dinner",
+          "Night"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Adverb (fukushi)",
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "雪",
+      "hiragana": "ゆき",
+      "romaji": "yuki",
+      "vietnamese": "[Cần dịch] snow; snowfall; Snow",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "雪",
+        "url": "https://jisho.org/search/%E9%9B%AA",
+        "englishDefinitions": [
+          "snow",
+          "snowfall",
+          "Snow"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "郵便局",
+      "hiragana": "ゆうびんきょく",
+      "romaji": "yuubinkyoku",
+      "vietnamese": "[Cần dịch] post office; Post office",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "郵便局",
+        "url": "https://jisho.org/search/%E9%83%B5%E4%BE%BF%E5%B1%80",
+        "englishDefinitions": [
+          "post office",
+          "Post office"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    },
+    {
+      "japanese": "雑誌",
+      "hiragana": "ざっし",
+      "romaji": "zasshi",
+      "vietnamese": "[Cần dịch] magazine; journal; periodical",
+      "type": "Danh từ",
+      "topic": "JLPT N5",
+      "source": {
+        "provider": "jisho",
+        "slug": "雑誌",
+        "url": "https://jisho.org/search/%E9%9B%91%E8%AA%8C",
+        "englishDefinitions": [
+          "magazine",
+          "journal",
+          "periodical",
+          "Magazine"
+        ],
+        "partsOfSpeech": [
+          "Noun",
+          "Wikipedia definition"
+        ],
+        "isCommon": true
+      },
+      "example": {
+        "japanese": "例文を追加してください。",
+        "vietnamese": "Cần bổ sung ví dụ."
+      }
+    }
+  ]
+}

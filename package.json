@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "data:fetch:jisho-n5-vocab": "tsx scripts/fetch-jisho-n5-vocabulary.ts",
+    "data:import:jisho-n5-vocab": "tsx scripts/import-jisho-n5-vocabulary.ts",
+    "data:categorize:vocab": "tsx scripts/categorize-vocabulary-topics.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

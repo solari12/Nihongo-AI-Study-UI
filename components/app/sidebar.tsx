@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import {
@@ -65,34 +66,44 @@ function SidebarContent({
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+    <div className="relative flex h-full flex-col overflow-hidden bg-[#fae1dc] text-[#2a211f]">
+      <Image
+        src="/assets/sidebar.png"
+        alt=""
+        width={278}
+        height={992}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-95"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/18 via-transparent to-white/16" />
+
+      <div className="relative flex h-16 items-center justify-between border-b border-[#e7bdb4]/70 px-4">
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2a7a2] text-sm font-bold text-white shadow-[0_8px_18px_rgba(143,71,66,0.22)]">
               日
             </div>
-            <span className="font-semibold text-sidebar-foreground">Nihongo AI Study</span>
+            <span className="font-semibold leading-tight text-[#2a211f]">Nihongo AI Study</span>
           </Link>
         )}
         {collapsed && !isMobile && (
           <Link href="/dashboard" className="mx-auto flex items-center justify-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2a7a2] text-sm font-bold text-white shadow-[0_8px_18px_rgba(143,71,66,0.22)]">
               日
             </div>
           </Link>
         )}
         {isMobile && (
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f2a7a2] text-sm font-bold text-white shadow-[0_8px_18px_rgba(143,71,66,0.22)]">
               日
             </div>
-            <span className="font-semibold text-sidebar-foreground">Nihongo AI Study</span>
+            <span className="font-semibold leading-tight text-[#2a211f]">Nihongo AI Study</span>
           </Link>
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3">
+      <nav className="relative flex-1 overflow-y-auto p-3">
         <ul className="space-y-1">
           {visibleNavItems.map((item) => {
             const isActive = pathname === item.href
@@ -103,10 +114,10 @@ function SidebarContent({
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                     isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      ? "bg-[#d86f75] text-white shadow-[0_10px_18px_rgba(143,71,66,0.24)]"
+                      : "text-[#2f2825] hover:bg-white/45 hover:text-[#8f4742]"
                   )}
                   title={collapsed && !isMobile ? label : undefined}
                 >
@@ -119,7 +130,7 @@ function SidebarContent({
         </ul>
       </nav>
 
-      <div className="border-t border-sidebar-border p-3">
+      <div className="relative border-t border-[#e7bdb4]/70 p-3">
         {(!collapsed || isMobile) && (
           <div className="mb-2">
             <LanguageSwitcher />
@@ -131,7 +142,7 @@ function SidebarContent({
             variant="ghost"
             size="sm"
             className={cn(
-              "w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              "w-full justify-start text-[#2f2825] hover:bg-white/45 hover:text-[#8f4742]",
               collapsed && "justify-center px-0"
             )}
             onClick={() => onCollapsedChange?.(!collapsed)}
@@ -152,7 +163,7 @@ function SidebarContent({
           variant="ghost"
           size="sm"
           className={cn(
-            "mt-1 w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive",
+            "mt-1 w-full justify-start text-[#b94d55] hover:bg-[#f3c8bd]/50 hover:text-[#8f4742]",
             collapsed && !isMobile && "justify-center px-0"
           )}
           onClick={handleLogout}
@@ -172,7 +183,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange, role = "learner"
     <>
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 lg:flex",
+          "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-[#e7bdb4]/80 bg-[#fff3ef] transition-all duration-300 lg:flex",
           collapsed ? "w-16" : "w-64"
         )}
       >
@@ -186,7 +197,7 @@ export function Sidebar({ collapsed = false, onCollapsedChange, role = "learner"
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent side="left" className="w-64 border-[#e7bdb4]/80 p-0">
             <SidebarContent isMobile onCollapsedChange={() => setMobileOpen(false)} role={role} />
           </SheetContent>
         </Sheet>
