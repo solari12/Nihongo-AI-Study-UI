@@ -48,8 +48,8 @@ export function QuizQuestion({
   const getAnswerStyle = (answerId: string) => {
     if (!showResult) {
       return selectedAnswer === answerId
-        ? "border-primary bg-primary/5 ring-2 ring-primary"
-        : "border-border hover:border-primary/50 hover:bg-muted/50"
+        ? "border-[#702f2a] bg-[#f4d8d1]/55 ring-2 ring-[#702f2a]/25"
+        : "border-[#dfb6aa] hover:border-[#8f4742] hover:bg-[#fff8f1]"
     }
 
     if (answerId === correctAnswer) {
@@ -65,10 +65,9 @@ export function QuizQuestion({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      {/* Progress header */}
-      <div className="space-y-3">
+      <div className="space-y-3 rounded-xl border border-[#dfb6aa] bg-[#fffdf8]/90 p-4 shadow-sm">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">
+          <span className="font-semibold text-[#702f2a]">
             Câu {questionNumber} / {totalQuestions}
           </span>
           {timeLeft !== undefined && (
@@ -92,14 +91,12 @@ export function QuizQuestion({
         )}
       </div>
 
-      {/* Question */}
-      <Card>
+      <Card className="border-[#dfb6aa] bg-[#fffdf8]/95 shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-xl font-semibold leading-relaxed">{question}</h2>
+          <h2 className="text-xl font-semibold leading-relaxed text-[#2a211f]">{question}</h2>
         </CardContent>
       </Card>
 
-      {/* Answers */}
       <div className="grid gap-3">
         {answers.map((answer, index) => (
           <button
@@ -107,7 +104,7 @@ export function QuizQuestion({
             onClick={() => !showResult && onSelectAnswer(answer.id)}
             disabled={showResult}
             className={cn(
-              "flex items-center gap-4 rounded-lg border-2 p-4 text-left transition-all",
+              "flex items-center gap-4 rounded-xl border-2 bg-[#fffdf8]/85 p-4 text-left shadow-sm transition-all",
               getAnswerStyle(answer.id),
               !showResult && "cursor-pointer"
             )}
@@ -116,8 +113,8 @@ export function QuizQuestion({
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 font-medium",
                 selectedAnswer === answer.id
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-muted-foreground/30"
+                  ? "border-[#702f2a] bg-[#702f2a] text-white"
+                  : "border-[#dfb6aa] text-[#8f4742]"
               )}
             >
               {String.fromCharCode(65 + index)}
@@ -127,17 +124,17 @@ export function QuizQuestion({
         ))}
       </div>
 
-      {/* Navigation */}
       <div className="flex items-center justify-between pt-4">
         <Button
           variant="outline"
           onClick={onPrevious}
           disabled={!canGoPrevious}
+          className="rounded-full border-[#dfb6aa] bg-white/70 text-[#702f2a] hover:bg-white"
         >
           <ChevronLeft className="mr-2 h-4 w-4" />
           Câu trước
         </Button>
-        <Button onClick={onNext} disabled={!canGoNext}>
+        <Button onClick={onNext} disabled={!canGoNext} className="rounded-full bg-[#702f2a] text-white hover:bg-[#5d2723]">
           {questionNumber === totalQuestions ? "Hoàn thành" : "Câu tiếp"}
           <ChevronRight className="ml-2 h-4 w-4" />
         </Button>

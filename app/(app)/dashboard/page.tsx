@@ -2,59 +2,32 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, BookOpen, CheckCircle2, Circle, Clock, FileText, HelpCircle, TrendingUp } from "lucide-react"
+import { ArrowRight, BookOpen, CheckCircle2, Circle, Clock, FileText, TrendingUp } from "lucide-react"
 import { StatsCard } from "@/components/app/stats-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
 import { useActivityLog } from "@/hooks/use-activity-log"
 import { useAdminContent } from "@/hooks/use-admin-content"
 import { useLearnerProfile } from "@/hooks/use-learner-profile"
 import { useRecommendations } from "@/hooks/use-recommendations"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 
-const weekdayLabels = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
 const paperCardStyle = {
-  backgroundImage: "linear-gradient(rgba(255, 253, 248, 0.72), rgba(255, 253, 248, 0.72)), url('/assets/paper-card-bg.png')",
-  backgroundSize: "cover",
+  backgroundColor: "transparent",
+  backgroundImage: "url('/assets/paper-card-bg-clean.png')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "100% 100%",
   backgroundPosition: "center",
 } as const
 
-function buildWeeklyData(activities: ReturnType<typeof useActivityLog>["activities"]) {
-  const today = new Date()
-
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(today)
-    date.setDate(today.getDate() - (6 - index))
-    const dayStart = new Date(date)
-    dayStart.setHours(0, 0, 0, 0)
-    const dayEnd = new Date(date)
-    dayEnd.setHours(23, 59, 59, 999)
-
-    const minutes = activities.reduce((total, activity) => {
-      const createdAt = new Date(activity.createdAt)
-      if (createdAt >= dayStart && createdAt <= dayEnd) {
-        return total + (activity.durationMinutes ?? 0)
-      }
-      return total
-    }, 0)
-
-    return {
-      day: weekdayLabels[date.getDay()],
-      minutes,
-    }
-  })
-}
+const actionCardStyle = {
+  backgroundColor: "transparent",
+  backgroundImage: "url('/assets/image-removebg-preview.png')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "100% 100%",
+  backgroundPosition: "center",
+} as const
 
 function activityLabel(type: string) {
   if (type === "vocabulary") return "Từ vựng"
@@ -72,7 +45,7 @@ export default function DashboardPage() {
 
   const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
   const totalGrammar = content.grammar.length || stats.totalGrammar
-  const completedGrammar = 0
+  const completedGrammar = content.grammar.filter((item) => item.status === "Đã hoàn thành").length
   const safeVocabularyTotal = Math.max(totalVocabulary, 1)
   const safeGrammarTotal = Math.max(totalGrammar, 1)
   const n5Progress = Math.round(
@@ -81,9 +54,8 @@ export default function DashboardPage() {
       (stats.latestQuizScore / 100) * 0.2) *
       100
   )
-  const weeklyData = buildWeeklyData(activities)
   const hasActivity = activities.length > 0
-  const hasProgress = stats.learnedVocabulary > 0 || stats.quizAttempts > 0 || hasActivity
+  const hasProgress = stats.learnedVocabulary > 0 || completedGrammar > 0 || stats.quizAttempts > 0 || hasActivity
   const coldStartLabel = profile.completedOnboarding
     ? `${profile.coldStartScore}/100`
     : "Chưa có"
@@ -95,6 +67,7 @@ export default function DashboardPage() {
         ? `Đã tạo cold-start point ${profile.coldStartScore}/100.`
         : "Tài khoản mới cần mục tiêu, trình độ kana và thời gian học để tạo cold-start point.",
       href: "/onboarding",
+      actionLabel: profile.completedOnboarding ? "Xem hồ sơ" : "Hoàn tất hồ sơ ngay",
       done: profile.completedOnboarding,
     },
     {
@@ -103,67 +76,88 @@ export default function DashboardPage() {
         ? `Đã hoàn tất placement test với ${placement.percentage}%.`
         : "Xác định bạn nên bắt đầu từ kana, từ vựng nền tảng hay ôn tập N5.",
       href: "/placement-test",
+      actionLabel: placement.completed ? "Xem kết quả" : "Bắt đầu kiểm tra",
       done: placement.completed,
     },
     {
       title: "Xem AI gợi ý",
       description: "BKT + SM-2 + cold-start point xếp hạng nội dung cần học tiếp theo.",
       href: "/learning-path",
+      actionLabel: "Xem gợi ý AI",
       done: hasProgress,
     },
   ]
 
   return (
-    <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-lg border border-[#dfb6aa] bg-[#fff8f1] p-5 shadow-sm">
-        <Image
-          src="/assets/hero-torii.png"
-          alt=""
-          width={520}
-          height={320}
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-10 -top-16 h-52 w-72 object-contain opacity-10"
-        />
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex h-32 w-48 shrink-0 items-end justify-center overflow-hidden rounded-lg bg-[#f9eee4]">
-              <Image
-                src="/assets/hero-torii.png"
-                alt="Minh họa cổng torii và sách học tiếng Nhật"
-                width={360}
-                height={240}
-                priority
-                className="h-32 w-44 object-contain"
-              />
-            </div>
-            <div>
-              <Badge variant="outline" className="mb-3 border-[#d89a92] bg-[#f3c8bd]/45 text-[#8f4742]">
-                Dashboard học N5
-              </Badge>
-              <h1 className="text-2xl font-bold">Bắt đầu lộ trình học của bạn</h1>
-              <p className="max-w-2xl text-sm leading-6 text-[#6f5952]">
-                Dashboard chỉ hiển thị tiến độ thật của tài khoản hiện tại. Nếu bạn vừa tạo tài khoản mới, hãy hoàn tất hồ sơ học tập và placement test trước.
-              </p>
-            </div>
+    <div className="-m-6 min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_8%_12%,rgba(243,200,189,0.55),transparent_28%),radial-gradient(circle_at_92%_10%,rgba(255,230,222,0.7),transparent_26%),linear-gradient(135deg,#fff8f1_0%,#fffdf8_48%,#f7d9d2_100%)] p-6">
+      <div className="space-y-8">
+      <div className="relative overflow-hidden rounded-xl bg-[#fff8f1]/80 px-4 pb-4 pt-2">
+        <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)_220px] lg:items-center">
+          <div className="relative flex h-56 items-end justify-center overflow-visible">
+            <Image
+              src="/assets/hero-torii.png"
+              alt="Minh họa cổng torii và sách học tiếng Nhật"
+              width={520}
+              height={320}
+              priority
+              className="h-56 w-full object-contain object-left-bottom"
+            />
           </div>
-          <div className="grid min-w-[260px] gap-3 rounded-lg border border-[#dfb6aa] bg-[#fffdf8]/90 p-4 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full border-4 border-[#e7cdbd] bg-[#fff8f1] shadow-inner">
-                <div className="text-center">
-                  <p className="text-[10px] font-medium leading-3 text-[#7a625a]">Tiến độ</p>
-                  <p className="text-2xl font-extrabold tracking-tight text-[#a34d48]">{n5Progress}%</p>
+
+          <div className="pb-2 text-center lg:text-left">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Bắt đầu lộ trình học của bạn</h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-[#4f403b]">
+              Dashboard chỉ hiển thị tiến độ tài khoản hiện tại. Nếu bạn vừa tạo tài khoản mới, hãy hoàn tất hồ sơ học tập và placement test trước.
+            </p>
+          </div>
+
+          <div className="mx-auto w-full max-w-[220px]">
+            <div className="relative mx-auto h-40 w-40">
+              <Image
+                src="/assets/Flower.png"
+                alt=""
+                width={180}
+                height={180}
+                aria-hidden="true"
+                className="h-full w-full object-contain drop-shadow-[0_8px_16px_rgba(143,71,66,0.18)]"
+              />
+              <div className="absolute inset-0 grid place-items-center text-center">
+                <div className="max-w-24">
+                  <p className="text-xs font-medium leading-4 text-[#6f5952]">Tiến độ N5 tổng hợp</p>
+                  <p className="text-4xl font-semibold tracking-tight text-[#1f1a18]">{n5Progress}%</p>
                 </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <span className="text-sm font-medium">Tiến độ N5 tổng hợp</span>
-                <Progress value={n5Progress} className="mt-2 h-1.5" />
-              </div>
             </div>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-[#7a625a]/75">Từ vựng 45% · Ngữ pháp 35% · Quiz 20%</p>
-              <p className="shrink-0 rounded-full bg-[#f3c8bd]/55 px-2 py-0.5 text-[11px] font-semibold text-[#8f4742]">Cold-start {coldStartLabel}</p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold uppercase text-[#1f1a18]">
+              <span>Từ vựng<br />45%</span>
+              <span>Ngữ pháp<br />35%</span>
+              <span>Quiz<br />20%</span>
             </div>
+            <p className="mt-2 text-center text-[11px] font-medium text-[#8f4742]">Cold-start {coldStartLabel}</p>
           </div>
+        </div>
+
+        <div className="mt-3 grid gap-4 md:grid-cols-3">
+          {nextSteps.map((step) => (
+            <Card key={step.title} className="min-h-32 border-none bg-transparent shadow-none drop-shadow-[0_8px_10px_rgba(87,42,34,0.18)] transition-all hover:-translate-y-0.5 hover:drop-shadow-[0_12px_14px_rgba(87,42,34,0.22)]" style={actionCardStyle}>
+              <CardContent className="flex h-full items-center gap-4 px-8 py-5">
+                <div className={step.done ? "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#c8ead6]" : "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f3c8bd]/60"}>
+                  {step.done ? (
+                    <CheckCircle2 className="h-6 w-6 text-[#3f9b68]" />
+                  ) : (
+                    <Circle className="h-6 w-6 text-[#a34d48]" strokeWidth={1.75} />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-lg font-bold leading-6 text-foreground">{step.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#6f5952]">{step.description}</p>
+                  <Button className="mt-3 h-8 rounded-full bg-[#ee776c] px-4 text-sm text-white shadow-md hover:bg-[#dd675e]" asChild>
+                    <Link href={step.href}>{step.actionLabel}</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
 
@@ -186,114 +180,86 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {nextSteps.map((step) => (
-          <Card key={step.title} className="border border-[#d7b2a5] bg-[#fff8f1] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#fff2ea]" style={paperCardStyle}>
-            <CardContent className="flex h-full flex-col gap-4 p-5">
-              <div className="flex items-center gap-3">
-                <div className={step.done ? "flex h-9 w-9 items-center justify-center rounded-full bg-[#c8ead6]" : "flex h-9 w-9 items-center justify-center rounded-full bg-[#f3c8bd]/60"}>
-                  {step.done ? (
-                    <CheckCircle2 className="h-5 w-5 text-[#3f9b68]" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-[#a34d48]" strokeWidth={1.75} />
-                  )}
-                </div>
-                <p className="font-semibold">{step.title}</p>
-              </div>
-              <p className="flex-1 text-sm leading-6 text-[#6f5952]">{step.description}</p>
-              <Link href={step.href} className="inline-flex items-center gap-1 text-xs font-semibold text-[#a34d48] hover:underline">
-                Tiếp tục
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Từ vựng đã học"
+          title="Vocab"
           value={stats.learnedVocabulary}
-          subtitle={`hoàn thành / ${totalVocabulary} từ`}
-          icon={<Image src="/assets/vocab-card.png" alt="" width={96} height={96} aria-hidden="true" className="h-16 w-16 object-contain" />}
-          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          description="Từ vựng đã học"
+          subtitle="Học từ vựng đầu tiên!"
+          icon={<Image src="/assets/vocab-card-clean.png" alt="" width={220} height={220} aria-hidden="true" className="h-32 w-32 bg-transparent object-contain" style={{ backgroundColor: "transparent" }} />}
+          className="relative min-h-36 overflow-hidden border-none bg-transparent shadow-none"
           style={paperCardStyle}
-          contentClassName="p-4 pr-24"
-          iconClassName="absolute right-2 top-2 bg-transparent p-0 opacity-85"
-          valueClassName="text-2xl font-bold tracking-tight"
-          subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
+          contentClassName="px-7 py-5 pr-40"
+          descriptionClassName="text-sm font-medium text-foreground"
+          iconClassName="absolute right-2 top-3 bg-transparent p-0"
+          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
+          valueClassName="text-4xl font-bold leading-none tracking-tight"
+          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
         />
         <StatsCard
-          title="Ngữ pháp đã học"
+          title="Grammar"
           value={completedGrammar}
-          subtitle={`hoàn thành / ${totalGrammar} mẫu`}
-          icon={<Image src="/assets/grammar-card.png" alt="" width={96} height={96} aria-hidden="true" className="h-16 w-16 object-contain" />}
-          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          description="Ngữ pháp đã học"
+          subtitle="Học từ ngữ pháp đầu tiên!"
+          icon={<Image src="/assets/grammar-card-clean.png" alt="" width={220} height={220} aria-hidden="true" className="h-32 w-32 bg-transparent object-contain" style={{ backgroundColor: "transparent" }} />}
+          className="relative min-h-36 overflow-hidden border-none bg-transparent shadow-none"
           style={paperCardStyle}
-          contentClassName="p-4 pr-24"
-          iconClassName="absolute right-2 top-2 bg-transparent p-0 opacity-85"
-          valueClassName="text-2xl font-bold tracking-tight"
-          subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
+          contentClassName="px-7 py-5 pr-40"
+          descriptionClassName="text-sm font-medium text-foreground"
+          iconClassName="absolute right-2 top-3 bg-transparent p-0"
+          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
+          valueClassName="text-4xl font-bold leading-none tracking-tight"
+          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
         />
         <StatsCard
-          title="Quiz đã làm"
+          title="Quiz"
           value={stats.quizAttempts}
-          subtitle="bài kiểm tra"
-          icon={<Image src="/assets/quiz-card.png" alt="" width={96} height={96} aria-hidden="true" className="h-16 w-16 object-contain" />}
-          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          description="Quiz đã làm"
+          subtitle="Học từ làm đầu tiên!"
+          icon={<Image src="/assets/quiz-card-clean.png" alt="" width={220} height={220} aria-hidden="true" className="h-32 w-32 bg-transparent object-contain" style={{ backgroundColor: "transparent" }} />}
+          className="relative min-h-36 overflow-hidden border-none bg-transparent shadow-none"
           style={paperCardStyle}
-          contentClassName="p-4 pr-24"
-          iconClassName="absolute right-2 top-2 bg-transparent p-0 opacity-85"
-          valueClassName="text-2xl font-bold tracking-tight"
-          subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
+          contentClassName="px-7 py-5 pr-40"
+          descriptionClassName="text-sm font-medium text-foreground"
+          iconClassName="absolute right-2 top-3 bg-transparent p-0"
+          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
+          valueClassName="text-4xl font-bold leading-none tracking-tight"
+          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
         />
         <StatsCard
-          title="Điểm trung bình"
+          title="Avg Score"
           value={`${stats.averageQuizScore}%`}
+          description="Điểm trung bình"
           subtitle="tất cả quiz"
           icon={
             <div className="grid h-16 w-16 place-items-center rounded-full border-[10px] border-[#e6d6bd] bg-[#fff8f1] text-[#c96b6b]">
               <TrendingUp className="h-5 w-5" />
             </div>
           }
-          className="relative border border-[#dfb6aa] bg-[#fffdf8] shadow-sm"
+          className="relative min-h-32 overflow-hidden border-none bg-transparent shadow-none"
           style={paperCardStyle}
-          contentClassName="p-4 pr-24"
+          contentClassName="px-7 py-5 pr-24"
           iconClassName="absolute right-3 top-3 bg-transparent p-0"
-          valueClassName="text-2xl font-bold tracking-tight"
-          subtitleClassName="mt-0.5 text-[12px] text-muted-foreground/60"
+          descriptionClassName="text-sm font-medium text-foreground"
+          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
+          valueClassName="text-4xl font-bold leading-none tracking-tight"
+          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <Card className="border border-[#dfb6aa] bg-card shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Thời gian học 7 ngày qua
-              </CardTitle>
-              <CardDescription className="text-muted-foreground/80">Số phút học được ghi từ activity thật của tài khoản.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={weeklyData}>
-                    <defs>
-                      <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.22} />
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.45)" />
-                    <XAxis dataKey="day" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <Tooltip formatter={(value: number) => [`${value} phút`, "Thời gian học"]} />
-                    <Area type="monotone" dataKey="minutes" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorMinutes)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
+          <Card className="overflow-visible border-none bg-transparent shadow-none">
+            <div className="relative -mx-2 aspect-[1849/929] overflow-visible sm:-mx-4">
+              <Image
+                src="/assets/times.png"
+                alt="Thời gian học 7 ngày qua"
+                width={1849}
+                height={929}
+                className="h-full w-full object-contain"
+              />
+              <div className="sr-only">Thời gian học 7 ngày qua. Số phút học được ghi từ activity thật của tài khoản.</div>
+            </div>
           </Card>
 
           <Card className="border border-[#dfb6aa] bg-card shadow-sm">
@@ -336,14 +302,20 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card className="border border-[#dfb6aa] bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground" />
-              Hoạt động gần đây
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="relative min-h-[520px] overflow-hidden border-none bg-transparent shadow-none">
+          <Image
+            src="/assets/quiz.png"
+            alt=""
+            width={900}
+            height={1400}
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-fill"
+          />
+          <div className="relative z-10 px-8 py-8">
+            <div className="mb-4 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-[#8f4742]" />
+              <h2 className="text-xl font-bold">Hoạt động gần đây</h2>
+            </div>
             {activities.length ? (
               <div className="divide-y divide-border/40">
                 {activities.slice(0, 4).map((activity) => (
@@ -363,8 +335,9 @@ export default function DashboardPage() {
                 Chưa có hoạt động học nào cho tài khoản này.
               </div>
             )}
-          </CardContent>
+          </div>
         </Card>
+      </div>
       </div>
     </div>
   )

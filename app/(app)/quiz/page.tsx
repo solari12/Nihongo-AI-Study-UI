@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useMemo, useState } from "react"
 import { QuizQuestion } from "@/components/app/quiz-question"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,6 +39,14 @@ type SubmitQuizResponse = {
   total: number
   percentage: number
 }
+
+const paperCardStyle = {
+  backgroundColor: "transparent",
+  backgroundImage: "url('/assets/paper-card-bg-clean.png')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "100% 100%",
+  backgroundPosition: "center",
+} as const
 
 export default function QuizPage() {
   const [quizState, setQuizState] = useState<QuizState>("setup")
@@ -133,28 +142,46 @@ export default function QuizPage() {
 
   if (quizState === "setup") {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Quiz N5</h1>
-          <p className="text-muted-foreground">
-            Kiểm tra kiến thức tiếng Nhật của bạn
-          </p>
-        </div>
+      <div className="-m-6 min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_8%_12%,rgba(243,200,189,0.55),transparent_28%),linear-gradient(135deg,#fff8f1_0%,#fffdf8_50%,#f7d9d2_100%)] p-6">
+        <div className="space-y-6">
+          <section className="relative overflow-hidden rounded-xl bg-[#fff8f1]/85 px-6 py-5">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-center">
+              <div className="relative max-w-2xl">
+                <h1 className="text-3xl font-bold tracking-tight text-[#2a211f]">Quiz N5</h1>
+                <p className="mt-2 text-base leading-7 text-[#4f403b]">
+                  Chọn dạng bài, số câu và độ khó để kiểm tra nhanh phần đã học.
+                </p>
+              </div>
+              <div className="hidden h-40 items-center justify-center md:flex">
+                <Image
+                  src="/assets/quiz-card-clean.png"
+                  alt=""
+                  width={260}
+                  height={220}
+                  aria-hidden="true"
+                  className="h-40 w-48 object-contain drop-shadow-[0_10px_18px_rgba(143,71,66,0.18)]"
+                />
+              </div>
+            </div>
+          </section>
 
-        {error && <ContentErrorAlert message={error} />}
+          {error && <ContentErrorAlert message={error} />}
 
         <div className="mx-auto max-w-2xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>Thiết lập bài kiểm tra</CardTitle>
-              <CardDescription>
+          <section
+            className="rounded-xl px-8 py-8 sm:px-10 sm:py-10"
+            style={paperCardStyle}
+          >
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-[#2a211f]">Thiết lập bài kiểm tra</h2>
+              <p className="text-sm leading-6 text-[#6f5952]">
                 Chọn loại quiz và số lượng câu hỏi
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+              </p>
+            </div>
+            <div className="mt-6 space-y-5">
               <div className="space-y-3">
-                <label className="text-sm font-medium">Loại quiz</label>
-                <div className="grid grid-cols-3 gap-3">
+                <label className="text-sm font-semibold text-[#2a211f]">Loại quiz</label>
+                <div className="grid gap-3 sm:grid-cols-3">
                   {[
                     { value: "vocabulary", label: "Từ vựng", icon: BookOpen },
                     { value: "grammar", label: "Ngữ pháp", icon: FileText },
@@ -164,26 +191,26 @@ export default function QuizPage() {
                       key={type.value}
                       onClick={() => setQuizType(type.value)}
                       className={cn(
-                        "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all",
+                        "flex min-h-20 items-center gap-3 rounded-xl border-2 bg-white/55 p-3 text-left transition-all sm:flex-col sm:justify-center sm:text-center",
                         quizType === type.value
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
+                          ? "border-[#702f2a] bg-[#f4d8d1]/55"
+                          : "border-[#dfb6aa] hover:border-[#8f4742]"
                       )}
                     >
                       <type.icon className={cn(
                         "h-6 w-6",
-                        quizType === type.value ? "text-primary" : "text-muted-foreground"
+                        quizType === type.value ? "text-[#702f2a]" : "text-[#8f4742]"
                       )} />
-                      <span className="text-sm font-medium">{type.label}</span>
+                      <span className="text-sm font-medium leading-5">{type.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-medium">Số câu hỏi</label>
+                <label className="text-sm font-semibold text-[#2a211f]">Số câu hỏi</label>
                 <Select value={questionCount} onValueChange={setQuestionCount}>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-[#dfb6aa] bg-white/70">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -195,9 +222,9 @@ export default function QuizPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-medium">Độ khó</label>
+                <label className="text-sm font-semibold text-[#2a211f]">Độ khó</label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-[#dfb6aa] bg-white/70">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -210,7 +237,7 @@ export default function QuizPage() {
 
               <Button
                 onClick={startQuiz}
-                className="w-full"
+                className="w-full rounded-full bg-[#702f2a] text-white hover:bg-[#5d2723]"
                 size="lg"
                 disabled={!isLoaded || activeQuestions.length === 0}
               >
@@ -227,8 +254,9 @@ export default function QuizPage() {
                   Chưa có câu hỏi phù hợp với lựa chọn này.
                 </p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
+        </div>
         </div>
       </div>
     )
@@ -238,9 +266,9 @@ export default function QuizPage() {
     const { score, total, percentage } = finalResult
 
     return (
-      <div className="space-y-6">
+      <div className="-m-6 min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_8%_12%,rgba(243,200,189,0.55),transparent_28%),linear-gradient(135deg,#fff8f1_0%,#fffdf8_50%,#f7d9d2_100%)] p-6">
         <div className="mx-auto max-w-2xl space-y-6">
-          <Card className="text-center">
+          <Card className="border-none bg-transparent text-center shadow-none" style={paperCardStyle}>
             <CardContent className="pt-8 pb-6">
               <div className="mb-6">
                 <Trophy className={cn(
@@ -248,8 +276,8 @@ export default function QuizPage() {
                   percentage >= 80 ? "text-yellow-500" : percentage >= 60 ? "text-gray-400" : "text-orange-400"
                 )} />
               </div>
-              <h2 className="text-3xl font-bold mb-2">Kết quả</h2>
-              <div className="text-6xl font-bold text-primary mb-4">
+              <h2 className="mb-2 text-3xl font-bold">Kết quả</h2>
+              <div className="mb-4 text-6xl font-bold text-[#702f2a]">
                 {percentage}%
               </div>
               <div className="flex items-center justify-center gap-6 text-sm">
@@ -266,7 +294,7 @@ export default function QuizPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#dfb6aa] bg-[#fffdf8]/95 shadow-sm">
             <CardHeader>
               <CardTitle>Chi tiết câu trả lời</CardTitle>
             </CardHeader>
@@ -277,8 +305,8 @@ export default function QuizPage() {
                   <div
                     key={question.id}
                     className={cn(
-                      "rounded-lg border p-4",
-                      isCorrect ? "border-success/50 bg-success/5" : "border-destructive/50 bg-destructive/5"
+                      "rounded-xl border p-4",
+                      isCorrect ? "border-[#9cc8aa] bg-[#dcebd9]/60" : "border-[#e3a8a0] bg-[#f4d8d1]/55"
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -304,13 +332,13 @@ export default function QuizPage() {
           <div className="flex gap-4">
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 rounded-full border-[#dfb6aa] bg-white/70 text-[#702f2a] hover:bg-white"
               onClick={() => setQuizState("setup")}
             >
               <Home className="mr-2 h-4 w-4" />
               Về trang quiz
             </Button>
-            <Button className="flex-1" onClick={startQuiz}>
+            <Button className="flex-1 rounded-full bg-[#702f2a] text-white hover:bg-[#5d2723]" onClick={startQuiz}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Làm lại
             </Button>
@@ -323,7 +351,7 @@ export default function QuizPage() {
   const question = activeQuestions[currentQuestion]
 
   return (
-    <div className="space-y-6">
+    <div className="-m-6 min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_8%_12%,rgba(243,200,189,0.55),transparent_28%),linear-gradient(135deg,#fff8f1_0%,#fffdf8_50%,#f7d9d2_100%)] p-6">
       <QuizQuestion
         questionNumber={currentQuestion + 1}
         totalQuestions={activeQuestions.length}
