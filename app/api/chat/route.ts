@@ -49,6 +49,16 @@ function encodeHeaderJson(value: unknown) {
   return Buffer.from(JSON.stringify(value), "utf8").toString("base64url")
 }
 
+function isUsefulModelText(value: string) {
+  const trimmed = value.trim()
+  if (trimmed.length < 16) return false
+
+  const withoutMarkdown = trimmed.replace(/[#*_`\-\s.。…]+/g, "")
+  if (withoutMarkdown.length < 8) return false
+
+  return /[\p{L}\p{N}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(withoutMarkdown)
+}
+
 function createTextResponse({
   textStream,
   fallbackText,
@@ -82,16 +92,15 @@ function createTextResponse({
           if (result.done) break
 
           finalText += result.value
-          controller.enqueue(encoder.encode(result.value))
           timeoutMs = nextChunkTimeoutMs
         }
 
-        if (finalText.trim().length < 8) {
+        if (!isUsefulModelText(finalText)) {
           await iterator.return?.()
           finalText = fallbackText
-          controller.enqueue(encoder.encode(fallbackText))
         }
 
+        controller.enqueue(encoder.encode(finalText))
         await onComplete(finalText)
       } catch (error) {
         const errorText =
