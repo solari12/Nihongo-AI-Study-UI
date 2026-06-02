@@ -189,32 +189,7 @@ export default function ChatbotPage() {
           },
         ])
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let streamedText = ""
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          const chunk = decoder.decode(value, { stream: true })
-          if (!chunk) continue
-          streamedText += chunk
-
-          setMessages((previous) => {
-            const nextMessages = [...previous]
-            const lastMessage = nextMessages[nextMessages.length - 1]
-
-            if (lastMessage?.role === "assistant" && lastMessage.provider === "openrouter") {
-              nextMessages[nextMessages.length - 1] = {
-                ...lastMessage,
-                content: `${lastMessage.content}${chunk}`,
-              }
-            }
-
-            return nextMessages
-          })
-        }
+        const streamedText = await response.text()
 
         if (streamedText.trim().length < 8) {
           setMessages((previous) => {
@@ -232,7 +207,22 @@ export default function ChatbotPage() {
 
             return nextMessages
           })
+          return
         }
+
+        setMessages((previous) => {
+          const nextMessages = [...previous]
+          const lastMessage = nextMessages[nextMessages.length - 1]
+
+          if (lastMessage?.role === "assistant" && lastMessage.provider === "openrouter") {
+            nextMessages[nextMessages.length - 1] = {
+              ...lastMessage,
+              content: streamedText,
+            }
+          }
+
+          return nextMessages
+        })
 
         return
       }
