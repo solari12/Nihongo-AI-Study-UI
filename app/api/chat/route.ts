@@ -61,18 +61,33 @@ function createTextResponse({
   headers: HeadersInit
 }) {
   const encoder = new TextEncoder()
+  const firstChunkTimeoutMs = 8000
+  const nextChunkTimeoutMs = 12000
+
+  const timeoutResult = (ms: number) =>
+    new Promise<IteratorResult<string>>((resolve) => {
+      setTimeout(() => resolve({ done: true, value: "" }), ms)
+    })
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
       let finalText = ""
+      const iterator = textStream[Symbol.asyncIterator]()
 
       try {
-        for await (const chunk of textStream) {
-          finalText += chunk
-          controller.enqueue(encoder.encode(chunk))
+        let timeoutMs = firstChunkTimeoutMs
+
+        while (true) {
+          const result = await Promise.race([iterator.next(), timeoutResult(timeoutMs)])
+          if (result.done) break
+
+          finalText += result.value
+          controller.enqueue(encoder.encode(result.value))
+          timeoutMs = nextChunkTimeoutMs
         }
 
         if (finalText.trim().length < 8) {
+          await iterator.return?.()
           finalText = fallbackText
           controller.enqueue(encoder.encode(fallbackText))
         }

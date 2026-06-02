@@ -44,6 +44,10 @@ function normalize(value: string) {
     .trim()
 }
 
+function compact(value: string) {
+  return normalize(value).replace(/\s+/g, "")
+}
+
 function splitJapaneseTerms(value: string) {
   return Array.from(value.matchAll(/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+/gu)).map(
     (match) => match[0]
@@ -108,9 +112,7 @@ function typeBoost(type: RagSource["type"], query: string) {
     if (type === "news") return -8
   }
 
-  if (isQuizIntent(query)) {
-    if (type === "quiz") return 20
-  }
+  if (isQuizIntent(query) && type === "quiz") return 20
 
   return 0
 }
@@ -149,12 +151,9 @@ function mapChunkType(sourceType: string): RagSource["type"] {
 }
 
 function vocabularyContent(item: VocabularyItem | DbVocabularyMatch) {
-  const exampleJapanese =
-    "example" in item ? item.example.japanese : item.exampleJapanese
-  const exampleVietnamese =
-    "example" in item ? item.example.vietnamese : item.exampleVietnamese
-  const exampleReading =
-    "example" in item && item.example.hiragana ? item.example.hiragana : null
+  const exampleJapanese = "example" in item ? item.example.japanese : item.exampleJapanese
+  const exampleVietnamese = "example" in item ? item.example.vietnamese : item.exampleVietnamese
+  const exampleReading = "example" in item && item.example.hiragana ? item.example.hiragana : null
 
   return [
     `Từ vựng: ${item.japanese}`,
@@ -249,6 +248,7 @@ export function retrieveSources(
   const vocabularyItems = content.vocabulary ?? vocabularyData
   const grammarItems = content.grammar ?? grammarData
   const quizItems = content.quiz ?? quizQuestions
+  const compactQuery = compact(query)
 
   const sources: RagSource[] = [
     ...vocabularyItems.map((item) => {
@@ -264,13 +264,14 @@ export function retrieveSources(
     }),
     ...grammarItems.map((item) => {
       const content = grammarContent(item)
+      const exactPatternBonus = compactQuery.includes(compact(item.pattern)) ? 50 : 0
 
       return {
         id: `grammar-${item.id}`,
         type: "grammar" as const,
         title: item.pattern,
         content,
-        score: scoreSource(queryTokens, `${item.pattern}\n${item.meaning}\n${content}`),
+        score: scoreSource(queryTokens, `${item.pattern}\n${item.meaning}\n${content}`) + exactPatternBonus,
       }
     }),
     ...quizItems.map((item) => {
@@ -311,9 +312,10 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 6): Pro
     score: scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`),
   }))
 
+  const localSources = retrieveSources(query, limit)
   const deduped = new Map<string, RagSource>()
 
-  for (const source of [...vocabularySources, ...chunkSources]) {
+  for (const source of [...vocabularySources, ...chunkSources, ...localSources]) {
     const existing = deduped.get(source.id)
     if (!existing || existing.score < source.score) {
       deduped.set(source.id, source)
@@ -324,9 +326,7 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 6): Pro
 }
 
 function lineValue(content: string, label: string) {
-  const line = content
-    .split("\n")
-    .find((item) => normalize(item).startsWith(normalize(label)))
+  const line = content.split("\n").find((item) => normalize(item).startsWith(normalize(label)))
 
   return line?.slice(line.indexOf(":") + 1).trim() ?? ""
 }
@@ -399,7 +399,7 @@ export function buildFallbackAnswer(message: string, sources: RagSource[]) {
       `Câu hỏi của bạn: ${message}`,
       "",
       "Bạn có thể hỏi cụ thể hơn bằng tiếng Nhật, hiragana, romaji hoặc tiếng Việt.",
-      "Ví dụ: \"学生 nghĩa là gì?\", \"Giải thích N は N です\", hoặc \"Bài đọc N5 nào có từ 食べる?\".",
+      'Ví dụ: "学生 nghĩa là gì?", "Giải thích N は N です", hoặc "Bài đọc N5 nào có từ 食べる?".',
     ].join("\n")
   }
 
