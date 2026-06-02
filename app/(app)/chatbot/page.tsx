@@ -36,7 +36,7 @@ const suggestedQuestions = [
   "Giải thích mẫu câu N は N です cho người mới học.",
   "Phân biệt これ, それ và あれ.",
   "Tôi hay sai trợ từ は và が, nên ôn gì trước?",
-  "Tóm tắt bài đọc TODAII gần nhất có nguồn liên quan.",
+  "Tôi muốn thi N4 vào tháng 7 nhưng mới xong N5, phải làm sao?",
 ]
 
 const initialMessages: ChatMessageItem[] = [
@@ -82,29 +82,28 @@ function speak(text: string) {
   window.speechSynthesis.speak(utterance)
 }
 
+function decodeHeaderJson<T>(value: string | null, fallback: T) {
+  if (!value) return fallback
+
+  try {
+    const normalized = value.replace(/-/g, "+").replace(/_/g, "/")
+    const decoded = decodeURIComponent(
+      Array.from(atob(normalized))
+        .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, "0")}`)
+        .join("")
+    )
+
+    return JSON.parse(decoded) as T
+  } catch {
+    return fallback
+  }
+}
+
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<ChatMessageItem[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const latestAssistant = [...messages]
-    .reverse()
-    .find((message) => message.role === "assistant" && message.provider)
-  const latestSources = latestAssistant?.sources ?? []
-  const todayQuestions = messages.filter((message) => message.role === "user").length
-  const visibleProviderLabel =
-    latestAssistant?.provider === "openrouter"
-      ? "OpenRouter"
-      : latestAssistant?.provider === "fallback"
-        ? "Fallback nội bộ"
-        : "Chưa có"
-  const providerLabel = latestAssistant?.provider === "openrouter" ? "OpenRouter" : "Fallback nội bộ"
-  const sourceCounts = useMemo(() => {
-    return latestSources.reduce<Record<string, number>>((counts, source) => {
-      counts[source.type] = (counts[source.type] ?? 0) + 1
-      return counts
-    }, {})
-  }, [latestSources])
   const chatStats = useMemo(() => {
     const assistantWithProvider = [...messages]
       .reverse()
@@ -167,8 +166,52 @@ export default function ChatbotPage() {
         },
         body: JSON.stringify({ message, history }),
       })
-      const data = await readJsonResponse<ChatResponse>(response)
 
+      const streamProvider = response.headers.get("x-chat-provider")
+
+      if (streamProvider === "openrouter" && response.body) {
+        const streamedSources = decodeHeaderJson<ChatSource[]>(response.headers.get("x-chat-sources"), [])
+
+        setMessages((previous) => [
+          ...previous,
+          {
+            role: "assistant",
+            content: "",
+            timestamp: formatTime(),
+            provider: "openrouter",
+            sources: streamedSources,
+          },
+        ])
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          if (!chunk) continue
+
+          setMessages((previous) => {
+            const nextMessages = [...previous]
+            const lastMessage = nextMessages[nextMessages.length - 1]
+
+            if (lastMessage?.role === "assistant" && lastMessage.provider === "openrouter") {
+              nextMessages[nextMessages.length - 1] = {
+                ...lastMessage,
+                content: `${lastMessage.content}${chunk}`,
+              }
+            }
+
+            return nextMessages
+          })
+        }
+
+        return
+      }
+
+      const data = await readJsonResponse<ChatResponse>(response)
       const botResponse: ChatMessageItem = {
         role: "assistant",
         content:
@@ -237,13 +280,13 @@ export default function ChatbotPage() {
                 <ChatMessage
                   key={`${message.role}-${index}`}
                   role={message.role}
-                  content={message.content}
+                  content={message.content || (message.provider === "openrouter" ? "Đang trả lời..." : "")}
                   timestamp={message.timestamp}
                   sources={message.sources}
                   onListen={() => speak(message.content)}
                 />
               ))}
-              {isLoading && (
+              {isLoading && !messages[messages.length - 1]?.provider && (
                 <div className="flex gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
                     <span className="text-xs font-bold text-accent-foreground">AI</span>

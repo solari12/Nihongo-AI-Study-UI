@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createOpenAI } from "@ai-sdk/openai"
+import { streamText } from "ai"
 import { getCurrentUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import {
@@ -11,14 +13,6 @@ import { buildFallbackAnswer, retrieveSources, retrieveSourcesFromDatabase } fro
 type ChatRequest = {
   message?: string
   history?: ChatHistoryMessage[]
-}
-
-type OpenRouterResponse = {
-  choices?: {
-    message?: {
-      content?: string
-    }
-  }[]
 }
 
 function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
@@ -41,40 +35,41 @@ function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
     .slice(-6)
 }
 
-async function generateWithOpenRouter(prompt: string) {
-  const apiKey = process.env.OPENROUTER_API_KEY
-  if (!apiKey) return null
+function responseSources(sources: Awaited<ReturnType<typeof retrieveSourcesFromDatabase>>) {
+  return sources.map((source) => ({
+    id: source.id,
+    type: source.type,
+    title: source.title,
+    score: source.score,
+  }))
+}
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-      "X-OpenRouter-Title": "Nihongo AI Study",
+function encodeHeaderJson(value: unknown) {
+  return Buffer.from(JSON.stringify(value), "utf8").toString("base64url")
+}
+
+async function logChat({
+  userId,
+  message,
+  answer,
+  provider,
+  sources,
+}: {
+  userId: string
+  message: string
+  answer: string
+  provider: "openrouter" | "fallback"
+  sources: ReturnType<typeof responseSources>
+}) {
+  await prisma.chatLog.create({
+    data: {
+      userId,
+      message,
+      answer,
+      provider,
+      sourcesJson: sources,
     },
-    body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini",
-      temperature: 0.25,
-      messages: [
-        {
-          role: "system",
-          content: nihongoTutorSystemPrompt,
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    }),
   })
-
-  if (!response.ok) {
-    throw new Error(`OpenRouter request failed: ${response.status}`)
-  }
-
-  const data = (await response.json()) as OpenRouterResponse
-  return data.choices?.[0]?.message?.content?.trim() || null
 }
 
 export async function POST(request: NextRequest) {
@@ -100,41 +95,56 @@ export async function POST(request: NextRequest) {
   }
 
   const prompt = buildChatPrompt(message, sources, history)
+  const sourcePayload = responseSources(sources)
+  const apiKey = process.env.OPENROUTER_API_KEY
 
-  let answer: string | null = null
-  let provider: "openrouter" | "fallback" = "fallback"
-
-  try {
-    answer = await generateWithOpenRouter(prompt)
-    provider = answer ? "openrouter" : "fallback"
-  } catch {
-    answer = null
-  }
-
-  if (!answer) {
-    answer = buildFallbackAnswer(message, sources)
-  }
-
-  const responseSources = sources.map((source) => ({
-    id: source.id,
-    type: source.type,
-    title: source.title,
-    score: source.score,
-  }))
-
-  await prisma.chatLog.create({
-    data: {
+  if (!apiKey) {
+    const answer = buildFallbackAnswer(message, sources)
+    await logChat({
       userId: user.id,
       message,
       answer,
-      provider,
-      sourcesJson: responseSources,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
+
+    return NextResponse.json({
+      answer,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
+  }
+
+  const openrouter = createOpenAI({
+    apiKey,
+    baseURL: "https://openrouter.ai/api/v1",
+    name: "openrouter",
+    headers: {
+      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+      "X-OpenRouter-Title": "Nihongo AI Study",
     },
   })
 
-  return NextResponse.json({
-    answer,
-    provider,
-    sources: responseSources,
+  const result = streamText({
+    model: openrouter(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
+    system: nihongoTutorSystemPrompt,
+    prompt,
+    temperature: 0.25,
+    onFinish: async ({ text }) => {
+      await logChat({
+        userId: user.id,
+        message,
+        answer: text,
+        provider: "openrouter",
+        sources: sourcePayload,
+      })
+    },
+  })
+
+  return result.toTextStreamResponse({
+    headers: {
+      "x-chat-provider": "openrouter",
+      "x-chat-sources": encodeHeaderJson(sourcePayload),
+    },
   })
 }
