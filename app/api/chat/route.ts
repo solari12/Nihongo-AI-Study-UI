@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { buildChatPrompt, nihongoTutorSystemPrompt } from "@/lib/rag/chat-prompt"
+import {
+  buildChatPrompt,
+  nihongoTutorSystemPrompt,
+  type ChatHistoryMessage,
+} from "@/lib/rag/chat-prompt"
 import { buildFallbackAnswer, retrieveSources, retrieveSourcesFromDatabase } from "@/lib/rag/retriever"
 
 type ChatRequest = {
   message?: string
+  history?: ChatHistoryMessage[]
 }
 
 type OpenRouterResponse = {
@@ -16,7 +21,27 @@ type OpenRouterResponse = {
   }[]
 }
 
-async function generateWithOpenRouter(message: string, prompt: string) {
+function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
+  if (!Array.isArray(history)) return []
+
+  return history
+    .filter((item): item is ChatHistoryMessage => {
+      if (!item || typeof item !== "object") return false
+      const candidate = item as Partial<ChatHistoryMessage>
+      return (
+        (candidate.role === "user" || candidate.role === "assistant") &&
+        typeof candidate.content === "string" &&
+        candidate.content.trim().length > 0
+      )
+    })
+    .map((item) => ({
+      role: item.role,
+      content: item.content.trim().slice(0, 1200),
+    }))
+    .slice(-6)
+}
+
+async function generateWithOpenRouter(prompt: string) {
   const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) return null
 
@@ -30,7 +55,7 @@ async function generateWithOpenRouter(message: string, prompt: string) {
     },
     body: JSON.stringify({
       model: process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini",
-      temperature: 0.3,
+      temperature: 0.25,
       messages: [
         {
           role: "system",
@@ -53,34 +78,34 @@ async function generateWithOpenRouter(message: string, prompt: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as ChatRequest
-  const message = body.message?.trim()
-
-  if (!message) {
-    return NextResponse.json(
-      {
-        error: "Message is required",
-      },
-      { status: 400 }
-    )
-  }
-
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
 
-  let sources = await retrieveSourcesFromDatabase(message, 5)
+  const body = (await request.json()) as ChatRequest
+  const message = body.message?.trim()
+  const history = sanitizeHistory(body.history)
 
-  if (!sources.length) {
-    sources = retrieveSources(message, 5)
+  if (!message) {
+    return NextResponse.json({ error: "Message is required" }, { status: 400 })
   }
 
-  const prompt = buildChatPrompt(message, sources)
+  if (message.length > 1500) {
+    return NextResponse.json({ error: "Message is too long" }, { status: 413 })
+  }
+
+  let sources = await retrieveSourcesFromDatabase(message, 6)
+
+  if (!sources.length) {
+    sources = retrieveSources(message, 6)
+  }
+
+  const prompt = buildChatPrompt(message, sources, history)
 
   let answer: string | null = null
   let provider: "openrouter" | "fallback" = "fallback"
 
   try {
-    answer = await generateWithOpenRouter(message, prompt)
+    answer = await generateWithOpenRouter(prompt)
     provider = answer ? "openrouter" : "fallback"
   } catch {
     answer = null
@@ -90,29 +115,26 @@ export async function POST(request: NextRequest) {
     answer = buildFallbackAnswer(message, sources)
   }
 
+  const responseSources = sources.map((source) => ({
+    id: source.id,
+    type: source.type,
+    title: source.title,
+    score: source.score,
+  }))
+
   await prisma.chatLog.create({
     data: {
       userId: user.id,
       message,
       answer,
       provider,
-      sourcesJson: sources.map((source) => ({
-        id: source.id,
-        type: source.type,
-        title: source.title,
-        score: source.score,
-      })),
+      sourcesJson: responseSources,
     },
   })
 
   return NextResponse.json({
     answer,
     provider,
-    sources: sources.map((source) => ({
-      id: source.id,
-      type: source.type,
-      title: source.title,
-      score: source.score,
-    })),
+    sources: responseSources,
   })
 }

@@ -16,6 +16,13 @@ export type RagSource = {
   score: number
 }
 
+const sourceTypeLabels: Record<RagSource["type"], string> = {
+  vocabulary: "Từ vựng",
+  grammar: "Ngữ pháp",
+  quiz: "Quiz",
+  news: "Bài đọc",
+}
+
 function normalize(value: string) {
   return value
     .toLowerCase()
@@ -25,22 +32,84 @@ function normalize(value: string) {
     .trim()
 }
 
+function splitJapaneseCharacters(value: string) {
+  return Array.from(value.matchAll(/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+/gu)).map(
+    (match) => match[0]
+  )
+}
+
 function tokenize(value: string) {
   const normalized = normalize(value)
-  const tokens = normalized.split(" ").filter((token) => token.length >= 2)
+  const wordTokens = normalized.split(" ").filter((token) => token.length >= 2)
+  const japaneseTokens = splitJapaneseCharacters(value).filter((token) => token.length >= 1)
 
-  return Array.from(new Set([normalized, ...tokens].filter(Boolean)))
+  return Array.from(new Set([normalized, ...wordTokens, ...japaneseTokens].filter(Boolean)))
 }
 
 function scoreSource(queryTokens: string[], searchableText: string) {
   const normalizedSearchable = normalize(searchableText)
+  const rawSearchable = searchableText.toLowerCase()
 
   return queryTokens.reduce((score, token) => {
     if (!token) return score
-    if (normalizedSearchable === token) return score + 8
-    if (normalizedSearchable.includes(token)) return score + Math.min(6, Math.max(2, token.length))
+    const normalizedToken = normalize(token)
+    if (!normalizedToken) return score
+
+    if (normalizedSearchable === normalizedToken || rawSearchable === token.toLowerCase()) return score + 12
+    if (normalizedSearchable.includes(normalizedToken)) {
+      return score + Math.min(8, Math.max(2, normalizedToken.length))
+    }
+    if (rawSearchable.includes(token.toLowerCase())) return score + 4
+
     return score
   }, 0)
+}
+
+function mapChunkType(sourceType: string): RagSource["type"] {
+  if (sourceType === "grammar" || sourceType === "n5-grammar") return "grammar"
+  if (sourceType === "quiz") return "quiz"
+  if (sourceType === "todaii-news") return "news"
+  return "vocabulary"
+}
+
+function vocabularyContent(item: VocabularyItem) {
+  return [
+    `Từ vựng: ${item.japanese}`,
+    `Cách đọc: ${item.hiragana}`,
+    `Romaji: ${item.romaji}`,
+    `Nghĩa: ${item.vietnamese}`,
+    `Loại từ: ${item.type}`,
+    `Chủ đề: ${item.topic}`,
+    `Ví dụ: ${item.example.japanese}`,
+    item.example.hiragana ? `Đọc ví dụ: ${item.example.hiragana}` : null,
+    `Dịch ví dụ: ${item.example.vietnamese}`,
+  ]
+    .filter(Boolean)
+    .join("\n")
+}
+
+function grammarContent(item: GrammarItem) {
+  return [
+    `Ngữ pháp: ${item.pattern}`,
+    `Ý nghĩa: ${item.meaning}`,
+    `Cấu trúc: ${item.structure}`,
+    `Ghi chú: ${item.usageNote}`,
+    `Ví dụ: ${item.example.japanese}`,
+    `Dịch ví dụ: ${item.example.vietnamese}`,
+    `Độ khó: ${item.difficulty}`,
+    `Trạng thái: ${item.status}`,
+  ].join("\n")
+}
+
+function quizContent(item: QuizQuestionItem) {
+  return [
+    `Câu hỏi quiz: ${item.question}`,
+    `Chủ đề: ${item.topic}`,
+    `Loại: ${item.type}`,
+    `Độ khó: ${item.difficulty}`,
+    `Đáp án đúng: ${item.answers.find((answer) => answer.id === item.correctAnswer)?.text ?? item.correctAnswer}`,
+    `Giải thích: ${item.explanation}`,
+  ].join("\n")
 }
 
 export function retrieveSources(
@@ -54,63 +123,43 @@ export function retrieveSources(
 ): RagSource[] {
   const queryTokens = tokenize(query)
   if (!queryTokens.length) return []
+
   const vocabularyItems = content.vocabulary ?? vocabularyData
   const grammarItems = content.grammar ?? grammarData
   const quizItems = content.quiz ?? quizQuestions
 
   const sources: RagSource[] = [
     ...vocabularyItems.map((item) => {
-      const content = [
-        `Từ vựng: ${item.japanese}`,
-        `Hiragana: ${item.hiragana}`,
-        `Romaji: ${item.romaji}`,
-        `Nghĩa: ${item.vietnamese}`,
-        `Loại từ: ${item.type}`,
-        `Chủ đề: ${item.topic}`,
-        `Ví dụ: ${item.example.japanese} = ${item.example.vietnamese}`,
-      ].join("\n")
+      const content = vocabularyContent(item)
 
       return {
         id: `vocabulary-${item.id}`,
         type: "vocabulary" as const,
         title: `${item.japanese} (${item.vietnamese})`,
         content,
-        score: scoreSource(queryTokens, content),
+        score: scoreSource(queryTokens, `${item.japanese}\n${item.hiragana}\n${item.romaji}\n${content}`),
       }
     }),
     ...grammarItems.map((item) => {
-      const content = [
-        `Ngữ pháp: ${item.pattern}`,
-        `Ý nghĩa: ${item.meaning}`,
-        `Cấu trúc: ${item.structure}`,
-        `Ghi chú: ${item.usageNote}`,
-        `Ví dụ: ${item.example.japanese} = ${item.example.vietnamese}`,
-        `Độ khó: ${item.difficulty}`,
-      ].join("\n")
+      const content = grammarContent(item)
 
       return {
         id: `grammar-${item.id}`,
         type: "grammar" as const,
         title: item.pattern,
         content,
-        score: scoreSource(queryTokens, content),
+        score: scoreSource(queryTokens, `${item.pattern}\n${item.meaning}\n${content}`),
       }
     }),
     ...quizItems.map((item) => {
-      const content = [
-        `Quiz: ${item.question}`,
-        `Chủ đề: ${item.topic}`,
-        `Loại: ${item.type}`,
-        `Đáp án đúng: ${item.answers.find((answer) => answer.id === item.correctAnswer)?.text ?? item.correctAnswer}`,
-        `Giải thích: ${item.explanation}`,
-      ].join("\n")
+      const content = quizContent(item)
 
       return {
         id: `quiz-${item.id}`,
         type: "quiz" as const,
         title: item.question,
         content,
-        score: scoreSource(queryTokens, content),
+        score: scoreSource(queryTokens, `${item.question}\n${item.topic}\n${content}`),
       }
     }),
   ]
@@ -121,7 +170,7 @@ export function retrieveSources(
     .slice(0, limit)
 }
 
-export async function retrieveSourcesFromDatabase(query: string, limit = 5): Promise<RagSource[]> {
+export async function retrieveSourcesFromDatabase(query: string, limit = 6): Promise<RagSource[]> {
   const queryTokens = tokenize(query)
   if (!queryTokens.length) return []
 
@@ -129,22 +178,16 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 5): Pro
     orderBy: {
       createdAt: "desc",
     },
+    take: 1000,
   })
 
   return chunks
     .map((chunk) => ({
       id: chunk.id,
-      type:
-        chunk.sourceType === "grammar" || chunk.sourceType === "n5-grammar"
-          ? ("grammar" as const)
-          : chunk.sourceType === "quiz"
-            ? ("quiz" as const)
-            : chunk.sourceType === "todaii-news"
-              ? ("news" as const)
-              : ("vocabulary" as const),
+      type: mapChunkType(chunk.sourceType),
       title: chunk.title,
       content: chunk.content,
-      score: scoreSource(queryTokens, `${chunk.title}\n${chunk.content}`),
+      score: scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`),
     }))
     .filter((source) => source.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -154,22 +197,30 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 5): Pro
 export function buildFallbackAnswer(message: string, sources: RagSource[]) {
   if (!sources.length) {
     return [
-      "Mình chưa tìm thấy dữ liệu phù hợp trong kho N5 hiện tại.",
+      "Mình chưa tìm thấy dữ liệu phù hợp trong kho học hiện tại.",
       "",
       `Câu hỏi của bạn: ${message}`,
       "",
-      "Bạn có thể thử hỏi rõ hơn bằng từ khóa tiếng Nhật, hiragana, romaji hoặc tiếng Việt. Ví dụ: \"学生 nghĩa là gì?\" hoặc \"Giải thích N は N です\".",
+      "Bạn có thể hỏi cụ thể hơn bằng tiếng Nhật, hiragana, romaji hoặc tiếng Việt.",
+      "Ví dụ: \"学生 nghĩa là gì?\", \"Giải thích N は N です\", hoặc \"Bài đọc N5 nào có từ 食べる?\".",
     ].join("\n")
   }
 
   const topSource = sources[0]
+  const otherSources = sources.slice(1, 4)
+
   return [
-    `Mình tìm thấy nội dung liên quan nhất: ${topSource.title}.`,
+    `Mình tìm thấy nguồn phù hợp nhất: ${topSource.title}.`,
     "",
     topSource.content,
     "",
-    "Gợi ý học tiếp: đọc ví dụ, tự đặt thêm 1 câu tương tự, rồi làm quiz để kiểm tra lại.",
+    "Cách học tiếp:",
+    "- Đọc lại ví dụ tiếng Nhật.",
+    "- Tự đặt 1 câu tương tự.",
+    "- Hỏi tiếp nếu bạn muốn mình tách nghĩa từng phần.",
     "",
-    `Nguồn dùng để trả lời: ${sources.map((source) => source.title).join(", ")}.`,
+    "Nguồn tham khảo:",
+    `- ${sourceTypeLabels[topSource.type]}: ${topSource.title}`,
+    ...otherSources.map((source) => `- ${sourceTypeLabels[source.type]}: ${source.title}`),
   ].join("\n")
 }
