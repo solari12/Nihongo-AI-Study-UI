@@ -82,31 +82,45 @@ const skillData = [
   { subject: "Quiz", A: 78, fullMark: 100 },
 ]
 
-const strengths = [
-  "Ghi nhớ từ vựng tốt",
-  "Hoàn thành bài tập đúng giờ",
-  "Điểm quiz cao ổn định",
-]
-
-const weaknesses = [
-  "Động từ nhóm 2 còn yếu",
-  "Phân biệt trợ từ は và が",
-  "Ngữ pháp phức tạp cần ôn thêm",
-]
-
 export default function LearningPathPage() {
   const { stats } = useStudyProgress()
   const { content } = useAdminContent()
   const { recommendations } = useRecommendations()
   const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
   const totalGrammar = content.grammar.length || stats.totalGrammar
-  const completedGrammar = content.grammar.filter((item) => item.status === "Đã hoàn thành").length
+  const completedGrammar = stats.completedGrammar
   const vocabularyProgress = Math.round((stats.learnedVocabulary / totalVocabulary) * 100)
   const grammarProgress = Math.round((completedGrammar / totalGrammar) * 100)
+  const hasLearningData = stats.learnedVocabulary > 0 || completedGrammar > 0 || stats.quizAttempts > 0
   const personalizedSteps = learningSteps.map((step) => {
+    const status = hasLearningData ? step.status : step.id === "1" ? "current" as const : "upcoming" as const
+
+    if (step.id === "1") {
+      return {
+        ...step,
+        status,
+        title: "Hoàn tất hồ sơ học tập",
+        reason: "Giúp hệ thống hiểu mục tiêu và thời gian học của bạn",
+        estimatedTime: "2 phút",
+        targetUrl: "/onboarding",
+      }
+    }
+
+    if (step.id === "2") {
+      return {
+        ...step,
+        status,
+        title: "Làm placement test",
+        reason: "Xác định điểm bắt đầu phù hợp trước khi học",
+        estimatedTime: "5 phút",
+        targetUrl: "/placement-test",
+      }
+    }
+
     if (step.id === "3") {
       return {
         ...step,
+        status,
         title: `Từ vựng mới: ${totalVocabulary - stats.learnedVocabulary} từ chưa học`,
         reason: "Dựa trên số từ bạn đã đánh dấu hoàn thành",
       }
@@ -115,6 +129,7 @@ export default function LearningPathPage() {
     if (step.id === "4") {
       return {
         ...step,
+        status,
         title: `Quiz: củng cố kiến thức N5 (${stats.latestQuizScore || "chưa có"}%)`,
         reason: stats.quizAttempts
           ? "Dựa trên kết quả quiz gần nhất"
@@ -122,15 +137,29 @@ export default function LearningPathPage() {
       }
     }
 
-    return step
+    return { ...step, status }
   })
   const skillSnapshot = [
     { subject: "Từ vựng", A: vocabularyProgress, fullMark: 100 },
     { subject: "Ngữ pháp", A: grammarProgress, fullMark: 100 },
-    { subject: "Đọc hiểu", A: 60, fullMark: 100 },
-    { subject: "Ghi nhớ", A: Math.max(50, vocabularyProgress), fullMark: 100 },
-    { subject: "Quiz", A: stats.averageQuizScore || 50, fullMark: 100 },
+    { subject: "Đọc hiểu", A: 0, fullMark: 100 },
+    { subject: "Ghi nhớ", A: vocabularyProgress, fullMark: 100 },
+    { subject: "Quiz", A: stats.averageQuizScore, fullMark: 100 },
   ]
+  const strengths = hasLearningData
+    ? [
+        stats.learnedVocabulary > 0 ? `Đã học ${stats.learnedVocabulary} từ vựng` : null,
+        stats.quizAttempts > 0 ? `Đã làm ${stats.quizAttempts} quiz` : null,
+        stats.averageQuizScore >= 80 ? "Điểm quiz trung bình trên 80%" : null,
+      ].filter(Boolean)
+    : []
+  const weaknesses = hasLearningData
+    ? [
+        stats.reviewVocabulary > 0 ? `${stats.reviewVocabulary} từ đang cần ôn` : null,
+        stats.quizAttempts === 0 ? "Chưa có điểm quiz để đánh giá kỹ năng" : null,
+        completedGrammar === 0 ? "Chưa ghi nhận ngữ pháp đã hoàn thành" : null,
+      ].filter(Boolean)
+    : ["Chưa có dữ liệu học tập. Hãy làm hồ sơ, placement test hoặc học bài đầu tiên để hệ thống đánh giá."]
   const recommendationSteps = recommendations.slice(0, 6).map((recommendation, index) => ({
     id: recommendation.id,
     title: recommendation.title,

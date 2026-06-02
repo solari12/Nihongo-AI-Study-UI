@@ -1,143 +1,196 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useMemo } from "react"
+import {
+  Calendar,
+  Clock,
+  Flame,
+  GraduationCap,
+  Mail,
+  Medal,
+  Pencil,
+  Star,
+  Target,
+  Trophy,
+  User,
+} from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import {
-  User,
-  Mail,
-  GraduationCap,
-  Target,
-  Calendar,
-  Clock,
-  Trophy,
-  Medal,
-  Flame,
-  Star,
-  Pencil,
-} from "lucide-react"
+import { useActivityLog, type LearningActivity } from "@/hooks/use-activity-log"
+import { useAuth } from "@/hooks/use-auth"
+import { useLearnerProfile } from "@/hooks/use-learner-profile"
+import { useStudyProgress } from "@/hooks/use-study-progress"
 
-const achievements = [
-  {
-    id: 1,
-    title: "Bài học đầu tiên",
-    description: "Hoàn thành bài học đầu tiên",
-    icon: Star,
-    earned: true,
-    date: "15/04/2026",
-  },
-  {
-    id: 2,
-    title: "7 ngày streak",
-    description: "Học liên tục 7 ngày",
-    icon: Flame,
-    earned: true,
-    date: "22/04/2026",
-  },
-  {
-    id: 3,
-    title: "Quiz trên 80%",
-    description: "Đạt điểm quiz trên 80%",
-    icon: Trophy,
-    earned: true,
-    date: "01/05/2026",
-  },
-  {
-    id: 4,
-    title: "100 từ vựng",
-    description: "Học được 100 từ vựng",
-    icon: Medal,
-    earned: true,
-    date: "10/05/2026",
-  },
-  {
-    id: 5,
-    title: "30 ngày streak",
-    description: "Học liên tục 30 ngày",
-    icon: Flame,
-    earned: false,
-    date: null,
-  },
-  {
-    id: 6,
-    title: "Hoàn thành N5",
-    description: "Hoàn thành toàn bộ nội dung N5",
-    icon: GraduationCap,
-    earned: false,
-    date: null,
-  },
-]
+function initials(name?: string) {
+  if (!name) return "U"
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(-2)
+    .toUpperCase()
+}
+
+function formatMinutes(minutes: number) {
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+
+  if (!hours) return `${remainingMinutes} phút`
+  return `${hours} giờ ${remainingMinutes} phút`
+}
+
+function buildStudyStreak(activities: LearningActivity[]) {
+  const activeDays = new Set(activities.map((activity) => activity.createdAt.slice(0, 10)))
+  let streak = 0
+  const cursor = new Date()
+
+  while (activeDays.has(cursor.toISOString().slice(0, 10))) {
+    streak += 1
+    cursor.setDate(cursor.getDate() - 1)
+  }
+
+  return streak
+}
 
 export default function ProfilePage() {
+  const { activeUser } = useAuth()
+  const { stats } = useStudyProgress()
+  const { activities } = useActivityLog()
+  const { profile, placement } = useLearnerProfile()
+
+  const totalMinutes = useMemo(
+    () => activities.reduce((total, activity) => total + (activity.durationMinutes ?? 0), 0),
+    [activities]
+  )
+  const studyStreak = useMemo(() => buildStudyStreak(activities), [activities])
+  const totalProgress = Math.round(
+    ((stats.learnedVocabulary / Math.max(stats.totalVocabulary, 1)) * 0.45 +
+      (stats.completedGrammar / Math.max(stats.totalGrammar, 1)) * 0.35 +
+      (stats.averageQuizScore / 100) * 0.2) *
+      100
+  )
+
+  const achievements = [
+    {
+      id: 1,
+      title: "Bài học đầu tiên",
+      description: "Ghi nhận hoạt động học đầu tiên",
+      icon: Star,
+      earned: activities.length > 0,
+    },
+    {
+      id: 2,
+      title: "7 ngày streak",
+      description: "Học liên tục 7 ngày",
+      icon: Flame,
+      earned: studyStreak >= 7,
+    },
+    {
+      id: 3,
+      title: "Quiz trên 80%",
+      description: "Đạt điểm quiz trên 80%",
+      icon: Trophy,
+      earned: stats.averageQuizScore >= 80 && stats.quizAttempts > 0,
+    },
+    {
+      id: 4,
+      title: "100 từ vựng",
+      description: "Học được 100 từ vựng",
+      icon: Medal,
+      earned: stats.learnedVocabulary >= 100,
+    },
+    {
+      id: 5,
+      title: "30 ngày streak",
+      description: "Học liên tục 30 ngày",
+      icon: Flame,
+      earned: studyStreak >= 30,
+    },
+    {
+      id: 6,
+      title: "Hoàn thành N5",
+      description: "Hoàn thành toàn bộ nội dung N5",
+      icon: GraduationCap,
+      earned: totalProgress >= 100,
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Hồ sơ cá nhân</h1>
-        <p className="text-muted-foreground">
-          Quản lý thông tin và xem thành tích của bạn
-        </p>
+        <p className="text-muted-foreground">Quản lý thông tin và xem thành tích thật của tài khoản này</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Profile card */}
         <Card className="lg:col-span-1">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 mb-4">
+              <Avatar className="mb-4 h-24 w-24">
                 <AvatarImage src="/avatar.png" alt="Avatar" />
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  NT
+                <AvatarFallback className="bg-primary text-2xl text-primary-foreground">
+                  {initials(activeUser?.name)}
                 </AvatarFallback>
               </Avatar>
-              <h2 className="text-xl font-bold">Nguyễn Văn Tuấn</h2>
-              <p className="text-sm text-muted-foreground">tuan22ce089@example.com</p>
-              <Badge className="mt-2 bg-primary/10 text-primary">N5 Beginner</Badge>
-              
+              <h2 className="text-xl font-bold">{activeUser?.name ?? "Người học mới"}</h2>
+              <p className="text-sm text-muted-foreground">{activeUser?.email ?? "Chưa có email"}</p>
+              <Badge className="mt-2 bg-primary/10 text-primary">
+                {placement.completed ? placement.level.replaceAll("_", " ") : "New learner"}
+              </Badge>
+
               <Separator className="my-6" />
-              
+
               <div className="w-full space-y-4 text-left">
                 <div className="flex items-center gap-3">
                   <GraduationCap className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Lớp</p>
-                    <p className="font-medium">22SE1B</p>
+                    <p className="text-sm text-muted-foreground">Trình độ</p>
+                    <p className="font-medium">{placement.completed ? placement.level.replaceAll("_", " ") : "Chưa kiểm tra"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <User className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Ngành</p>
-                    <p className="font-medium">Kỹ thuật phần mềm</p>
+                    <p className="text-sm text-muted-foreground">Vai trò</p>
+                    <p className="font-medium">{activeUser?.role === "admin" ? "Admin" : "Learner"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Target className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Mục tiêu</p>
-                    <p className="font-medium">Thi JLPT N5</p>
+                    <p className="font-medium">{profile.completedOnboarding ? profile.goal.replaceAll("_", " ") : "Chưa thiết lập"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium">{activeUser?.email ?? "-"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Ngày bắt đầu</p>
-                    <p className="font-medium">15/04/2026</p>
+                    <p className="text-sm text-muted-foreground">Hoạt động đã ghi nhận</p>
+                    <p className="font-medium">{activities.length} hoạt động</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Tổng thời gian học</p>
-                    <p className="font-medium">42 giờ 30 phút</p>
+                    <p className="font-medium">{formatMinutes(totalMinutes)}</p>
                   </div>
                 </div>
               </div>
 
-              <Button className="w-full mt-6" variant="outline">
+              <Button className="mt-6 w-full" variant="outline">
                 <Pencil className="mr-2 h-4 w-4" />
                 Chỉnh sửa hồ sơ
               </Button>
@@ -145,68 +198,67 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Right side */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Progress overview */}
+        <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Tiến độ học tập</CardTitle>
-              <CardDescription>Tổng quan tiến độ N5 của bạn</CardDescription>
+              <CardDescription>Tổng quan tiến độ thật của tài khoản hiện tại</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Tiến độ tổng thể</span>
-                  <span className="text-sm text-muted-foreground">68%</span>
+                  <span className="text-sm text-muted-foreground">{totalProgress}%</span>
                 </div>
-                <Progress value={68} className="h-3" />
+                <Progress value={totalProgress} className="h-3" />
               </div>
-              
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm">Từ vựng</span>
-                    <span className="text-sm font-medium">342/500</span>
+                    <span className="text-sm font-medium">
+                      {stats.learnedVocabulary}/{stats.totalVocabulary}
+                    </span>
                   </div>
-                  <Progress value={68} className="h-2" />
+                  <Progress value={(stats.learnedVocabulary / Math.max(stats.totalVocabulary, 1)) * 100} className="h-2" />
                 </div>
                 <div className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm">Ngữ pháp</span>
-                    <span className="text-sm font-medium">28/45</span>
+                    <span className="text-sm font-medium">
+                      {stats.completedGrammar}/{stats.totalGrammar}
+                    </span>
                   </div>
-                  <Progress value={62} className="h-2" />
+                  <Progress value={(stats.completedGrammar / Math.max(stats.totalGrammar, 1)) * 100} className="h-2" />
                 </div>
                 <div className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm">Quiz đã làm</span>
-                    <span className="text-sm font-medium">45 bài</span>
+                    <span className="text-sm font-medium">{stats.quizAttempts} bài</span>
                   </div>
-                  <div className="text-2xl font-bold text-primary">82%</div>
+                  <div className="text-2xl font-bold text-primary">{stats.averageQuizScore}%</div>
                   <p className="text-xs text-muted-foreground">Điểm trung bình</p>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm">Streak hiện tại</span>
                     <Flame className="h-5 w-5 text-accent" />
                   </div>
-                  <div className="text-2xl font-bold text-accent">7 ngày</div>
-                  <p className="text-xs text-muted-foreground">Kỷ lục: 14 ngày</p>
+                  <div className="text-2xl font-bold text-accent">{studyStreak} ngày</div>
+                  <p className="text-xs text-muted-foreground">Tính từ hoạt động học đã ghi nhận</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Achievements */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-yellow-500" />
                 Thành tích
               </CardTitle>
-              <CardDescription>
-                Các thành tích bạn đã đạt được
-              </CardDescription>
+              <CardDescription>Thành tích chỉ mở khóa khi có dữ liệu học thật</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -214,36 +266,23 @@ export default function ProfilePage() {
                   <div
                     key={achievement.id}
                     className={`rounded-lg border p-4 transition-all ${
-                      achievement.earned
-                        ? "bg-card"
-                        : "bg-muted/50 opacity-60"
+                      achievement.earned ? "bg-card" : "bg-muted/50 opacity-60"
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                          achievement.earned
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "bg-muted text-muted-foreground"
+                          achievement.earned ? "bg-yellow-100 text-yellow-600" : "bg-muted text-muted-foreground"
                         }`}
                       >
                         <achievement.icon className="h-5 w-5" />
                       </div>
                       <div>
                         <p className="font-medium">{achievement.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {achievement.description}
+                        <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                        <p className={achievement.earned ? "mt-1 text-xs text-success" : "mt-1 text-xs text-muted-foreground"}>
+                          {achievement.earned ? "Đã đạt" : "Chưa đạt"}
                         </p>
-                        {achievement.earned && achievement.date && (
-                          <p className="text-xs text-success mt-1">
-                            ✓ {achievement.date}
-                          </p>
-                        )}
-                        {!achievement.earned && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Chưa đạt
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { ChangeEvent, FormEvent, useRef, useState } from "react"
 import Link from "next/link"
@@ -39,6 +39,7 @@ const emptyVocabulary: Omit<VocabularyItem, "id"> = {
   hiragana: "",
   romaji: "",
   vietnamese: "",
+  imageUrl: null,
   type: "Danh từ",
   topic: "Khác",
   example: {
@@ -508,6 +509,7 @@ export default function AdminPage() {
               <Field label="Tiếng Việt" value={vocabularyForm.vietnamese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, vietnamese: value })} />
               <Field label="Loại từ" value={vocabularyForm.type} onChange={(value) => setVocabularyForm({ ...vocabularyForm, type: value })} />
               <Field label="Chủ đề" value={vocabularyForm.topic} onChange={(value) => setVocabularyForm({ ...vocabularyForm, topic: value })} />
+              <Field label="URL ảnh minh họa" value={vocabularyForm.imageUrl ?? ""} onChange={(value) => setVocabularyForm({ ...vocabularyForm, imageUrl: value.trim() || null })} />
             </div>
             <Field label="Ví dụ tiếng Nhật" value={vocabularyForm.example.japanese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, japanese: value } })} />
             <Field label="Dịch ví dụ" value={vocabularyForm.example.vietnamese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, vietnamese: value } })} />
@@ -627,3 +629,5 @@ function RowActions({
     </div>
   )
 }
+
+

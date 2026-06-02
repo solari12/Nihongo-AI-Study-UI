@@ -45,7 +45,7 @@ export default function DashboardPage() {
 
   const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
   const totalGrammar = content.grammar.length || stats.totalGrammar
-  const completedGrammar = content.grammar.filter((item) => item.status === "Đã hoàn thành").length
+  const completedGrammar = stats.completedGrammar
   const safeVocabularyTotal = Math.max(totalVocabulary, 1)
   const safeGrammarTotal = Math.max(totalGrammar, 1)
   const n5Progress = Math.round(
@@ -55,7 +55,7 @@ export default function DashboardPage() {
       100
   )
   const hasActivity = activities.length > 0
-  const hasProgress = stats.learnedVocabulary > 0 || completedGrammar > 0 || stats.quizAttempts > 0 || hasActivity
+  const hasProgress = stats.learnedVocabulary > 0 || stats.completedGrammar > 0 || stats.quizAttempts > 0 || hasActivity
   const coldStartLabel = profile.completedOnboarding
     ? `${profile.coldStartScore}/100`
     : "Chưa có"
