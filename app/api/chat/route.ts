@@ -96,12 +96,11 @@ function createTextResponse({
         }
 
         if (!isUsefulModelText(finalText)) {
-          await iterator.return?.()
+          void iterator.return?.()
           finalText = fallbackText
         }
 
         controller.enqueue(encoder.encode(finalText))
-        await onComplete(finalText)
       } catch (error) {
         const errorText =
           error instanceof Error
@@ -109,9 +108,11 @@ function createTextResponse({
             : fallbackText
         finalText = errorText
         controller.enqueue(encoder.encode(errorText))
-        await onComplete(finalText)
       } finally {
         controller.close()
+        void onComplete(finalText).catch((error) => {
+          console.error("Failed to log chat response", error)
+        })
       }
     },
   })
