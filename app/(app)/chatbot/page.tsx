@@ -191,6 +191,7 @@ export default function ChatbotPage() {
 
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
+        let streamedText = ""
 
         while (true) {
           const { done, value } = await reader.read()
@@ -198,6 +199,7 @@ export default function ChatbotPage() {
 
           const chunk = decoder.decode(value, { stream: true })
           if (!chunk) continue
+          streamedText += chunk
 
           setMessages((previous) => {
             const nextMessages = [...previous]
@@ -207,6 +209,24 @@ export default function ChatbotPage() {
               nextMessages[nextMessages.length - 1] = {
                 ...lastMessage,
                 content: `${lastMessage.content}${chunk}`,
+              }
+            }
+
+            return nextMessages
+          })
+        }
+
+        if (streamedText.trim().length < 8) {
+          setMessages((previous) => {
+            const nextMessages = [...previous]
+            const lastMessage = nextMessages[nextMessages.length - 1]
+
+            if (lastMessage?.role === "assistant" && lastMessage.provider === "openrouter") {
+              nextMessages[nextMessages.length - 1] = {
+                ...lastMessage,
+                content:
+                  "Mình đã tìm được nguồn nhưng model chưa tạo câu trả lời hoàn chỉnh. Hãy gửi lại câu hỏi ngắn hơn hoặc thử tắt/bật lại dev server để tải phiên bản chatbot mới.",
+                provider: "fallback",
               }
             }
 

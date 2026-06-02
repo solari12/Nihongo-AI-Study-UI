@@ -49,6 +49,46 @@ function encodeHeaderJson(value: unknown) {
   return Buffer.from(JSON.stringify(value), "utf8").toString("base64url")
 }
 
+function normalizeIntent(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function shouldUseStudyAgentTools(message: string) {
+  const normalized = normalizeIntent(message)
+  const agentIntentKeywords = [
+    "yếu",
+    "yeu",
+    "ôn",
+    "on",
+    "lộ trình",
+    "lo trinh",
+    "kế hoạch",
+    "ke hoach",
+    "thi",
+    "jlpt",
+    "n4",
+    "n3",
+    "n2",
+    "n1",
+    "hôm nay",
+    "hom nay",
+    "nên học",
+    "nen hoc",
+    "tiến độ",
+    "tien do",
+    "mục tiêu",
+    "muc tieu",
+    "điểm yếu",
+    "diem yeu",
+  ]
+
+  return agentIntentKeywords.some((keyword) => normalized.includes(keyword))
+}
+
 async function logChat({
   userId,
   message,
@@ -130,8 +170,12 @@ export async function POST(request: NextRequest) {
     model: openrouter(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
     system: nihongoTutorSystemPrompt,
     prompt,
-    tools: createStudyAgentTools(user),
-    stopWhen: stepCountIs(5),
+    ...(shouldUseStudyAgentTools(message)
+      ? {
+          tools: createStudyAgentTools(user),
+          stopWhen: stepCountIs(5),
+        }
+      : {}),
     temperature: 0.25,
     onFinish: async ({ text }) => {
       await logChat({

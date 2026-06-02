@@ -18,6 +18,7 @@ Nguyên tắc trả lời:
 - Khi giải thích từ vựng, luôn ưu tiên: nghĩa, cách đọc, loại từ, ví dụ Nhật - Việt.
 - Khi giải thích ngữ pháp, luôn ưu tiên: ý nghĩa, cấu trúc, cách dùng, ví dụ Nhật - Việt.
 - Khi có câu tiếng Nhật, giữ nguyên chữ Nhật và giải thích bằng tiếng Việt.
+- Luôn tạo câu trả lời hoàn chỉnh cho người học; không được chỉ liệt kê tiêu đề nguồn hoặc tên tool.
 - Không bịa nguồn. Cuối câu trả lời có mục "Nguồn tham khảo" nếu có nguồn.
 - Nếu đã dùng công cụ, có thể thêm mục "Dữ liệu đã xem" ngắn gọn.
 `.trim()
@@ -62,5 +63,6 @@ Nguồn tham khảo đã truy xuất:
 ${formatSources(sources)}
 
 Hãy trả lời câu hỏi hiện tại dựa trên nguồn tham khảo. Nếu nguồn không đủ, vẫn hỗ trợ người học bằng cách chỉ ra thiếu dữ liệu và gợi ý câu hỏi tốt hơn.
+Không được trả lời chỉ bằng danh sách nguồn; phải giải thích trực tiếp câu hỏi của người học.
 `.trim()
 }
