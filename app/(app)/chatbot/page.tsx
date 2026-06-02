@@ -87,9 +87,17 @@ export default function ChatbotPage() {
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const latestAssistant = [...messages].reverse().find((message) => message.role === "assistant")
+  const latestAssistant = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant" && message.provider)
   const latestSources = latestAssistant?.sources ?? []
   const todayQuestions = messages.filter((message) => message.role === "user").length
+  const visibleProviderLabel =
+    latestAssistant?.provider === "openrouter"
+      ? "OpenRouter"
+      : latestAssistant?.provider === "fallback"
+        ? "Fallback nội bộ"
+        : "Chưa có"
   const providerLabel = latestAssistant?.provider === "openrouter" ? "OpenRouter" : "Fallback nội bộ"
   const sourceCounts = useMemo(() => {
     return latestSources.reduce<Record<string, number>>((counts, source) => {
@@ -97,6 +105,37 @@ export default function ChatbotPage() {
       return counts
     }, {})
   }, [latestSources])
+  const chatStats = useMemo(() => {
+    const assistantWithProvider = [...messages]
+      .reverse()
+      .find((message) => message.role === "assistant" && message.provider)
+    const sources = assistantWithProvider?.sources ?? []
+    const counts = sources.reduce<Record<ChatSource["type"], number>>(
+      (nextCounts, source) => {
+        nextCounts[source.type] = (nextCounts[source.type] ?? 0) + 1
+        return nextCounts
+      },
+      {
+        vocabulary: 0,
+        grammar: 0,
+        quiz: 0,
+        news: 0,
+      }
+    )
+
+    return {
+      assistant: assistantWithProvider,
+      providerLabel:
+        assistantWithProvider?.provider === "openrouter"
+          ? "OpenRouter"
+          : assistantWithProvider?.provider === "fallback"
+            ? "Fallback nội bộ"
+            : "Chưa có",
+      questionCount: messages.filter((message) => message.role === "user").length,
+      sources,
+      sourceCounts: counts,
+    }
+  }, [messages])
 
   async function handleSend(nextMessage = inputValue) {
     const message = nextMessage.trim()
@@ -276,18 +315,18 @@ export default function ChatbotPage() {
             <div className="rounded-lg border bg-muted/35 p-3 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Provider</span>
-                <Badge variant={latestAssistant?.provider === "openrouter" ? "default" : "secondary"}>
-                  {providerLabel}
+                <Badge variant={chatStats.assistant?.provider === "openrouter" ? "default" : "secondary"}>
+                  {chatStats.providerLabel}
                 </Badge>
               </div>
               <div className="mt-2 flex items-center justify-between">
                 <span className="text-muted-foreground">Câu hỏi hôm nay</span>
-                <span className="font-medium">{todayQuestions}</span>
+                <span className="font-medium">{chatStats.questionCount}</span>
               </div>
             </div>
 
-            {latestSources.length ? (
-              latestSources.map((source) => (
+            {chatStats.sources.length ? (
+              chatStats.sources.map((source) => (
                 <div key={source.id} className="rounded-lg border p-3 transition-colors hover:bg-muted/50">
                   <div className="flex items-start gap-3">
                     {sourceIcon(source.type)}
@@ -311,7 +350,7 @@ export default function ChatbotPage() {
               <div className="flex flex-wrap gap-2">
                 {(["vocabulary", "grammar", "quiz", "news"] as const).map((type) => (
                   <Badge key={type} variant="outline" className="rounded-full">
-                    {sourceLabel(type)} {sourceCounts[type] ?? 0}
+                    {sourceLabel(type)} {chatStats.sourceCounts[type] ?? 0}
                   </Badge>
                 ))}
               </div>

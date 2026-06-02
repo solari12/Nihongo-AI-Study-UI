@@ -23,6 +23,18 @@ const sourceTypeLabels: Record<RagSource["type"], string> = {
   news: "Bài đọc",
 }
 
+type DbVocabularyMatch = {
+  id: number
+  japanese: string
+  hiragana: string
+  romaji: string
+  vietnamese: string
+  type: string
+  topic: string
+  exampleJapanese: string
+  exampleVietnamese: string
+}
+
 function normalize(value: string) {
   return value
     .toLowerCase()
@@ -32,7 +44,7 @@ function normalize(value: string) {
     .trim()
 }
 
-function splitJapaneseCharacters(value: string) {
+function splitJapaneseTerms(value: string) {
   return Array.from(value.matchAll(/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+/gu)).map(
     (match) => match[0]
   )
@@ -41,9 +53,40 @@ function splitJapaneseCharacters(value: string) {
 function tokenize(value: string) {
   const normalized = normalize(value)
   const wordTokens = normalized.split(" ").filter((token) => token.length >= 2)
-  const japaneseTokens = splitJapaneseCharacters(value).filter((token) => token.length >= 1)
+  const japaneseTokens = splitJapaneseTerms(value).filter((token) => token.length >= 1)
 
   return Array.from(new Set([normalized, ...wordTokens, ...japaneseTokens].filter(Boolean)))
+}
+
+function isVocabularyMeaningQuery(query: string) {
+  const normalized = normalize(query)
+  return (
+    /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query) &&
+    (normalized.includes("nghĩa") ||
+      normalized.includes("nghia") ||
+      normalized.includes("la gi") ||
+      normalized.includes("là gì") ||
+      normalized.includes("mean") ||
+      normalized.includes("means"))
+  )
+}
+
+function isQuizIntent(query: string) {
+  const normalized = normalize(query)
+  return normalized.includes("quiz") || normalized.includes("kiểm tra") || normalized.includes("dap an")
+}
+
+function typeBoost(type: RagSource["type"], query: string) {
+  if (isVocabularyMeaningQuery(query)) {
+    if (type === "vocabulary") return 40
+    if (type === "quiz") return -10
+  }
+
+  if (isQuizIntent(query)) {
+    if (type === "quiz") return 20
+  }
+
+  return 0
 }
 
 function scoreSource(queryTokens: string[], searchableText: string) {
@@ -65,6 +108,13 @@ function scoreSource(queryTokens: string[], searchableText: string) {
   }, 0)
 }
 
+function sortSources(sources: RagSource[], query: string, limit: number) {
+  return sources
+    .filter((source) => source.score > 0)
+    .sort((a, b) => b.score + typeBoost(b.type, query) - (a.score + typeBoost(a.type, query)))
+    .slice(0, limit)
+}
+
 function mapChunkType(sourceType: string): RagSource["type"] {
   if (sourceType === "grammar" || sourceType === "n5-grammar") return "grammar"
   if (sourceType === "quiz") return "quiz"
@@ -72,7 +122,14 @@ function mapChunkType(sourceType: string): RagSource["type"] {
   return "vocabulary"
 }
 
-function vocabularyContent(item: VocabularyItem) {
+function vocabularyContent(item: VocabularyItem | DbVocabularyMatch) {
+  const exampleJapanese =
+    "example" in item ? item.example.japanese : item.exampleJapanese
+  const exampleVietnamese =
+    "example" in item ? item.example.vietnamese : item.exampleVietnamese
+  const exampleReading =
+    "example" in item && item.example.hiragana ? item.example.hiragana : null
+
   return [
     `Từ vựng: ${item.japanese}`,
     `Cách đọc: ${item.hiragana}`,
@@ -80,9 +137,9 @@ function vocabularyContent(item: VocabularyItem) {
     `Nghĩa: ${item.vietnamese}`,
     `Loại từ: ${item.type}`,
     `Chủ đề: ${item.topic}`,
-    `Ví dụ: ${item.example.japanese}`,
-    item.example.hiragana ? `Đọc ví dụ: ${item.example.hiragana}` : null,
-    `Dịch ví dụ: ${item.example.vietnamese}`,
+    `Ví dụ: ${exampleJapanese}`,
+    exampleReading ? `Đọc ví dụ: ${exampleReading}` : null,
+    `Dịch ví dụ: ${exampleVietnamese}`,
   ]
     .filter(Boolean)
     .join("\n")
@@ -110,6 +167,45 @@ function quizContent(item: QuizQuestionItem) {
     `Đáp án đúng: ${item.answers.find((answer) => answer.id === item.correctAnswer)?.text ?? item.correctAnswer}`,
     `Giải thích: ${item.explanation}`,
   ].join("\n")
+}
+
+function sourceFromDbVocabulary(item: DbVocabularyMatch, queryTokens: string[]): RagSource {
+  const content = vocabularyContent(item)
+  const exactJapaneseMatch = queryTokens.includes(item.japanese)
+  const exactReadingMatch = queryTokens.includes(item.hiragana) || queryTokens.includes(item.romaji.toLowerCase())
+
+  return {
+    id: `vocabulary-${item.id}`,
+    type: "vocabulary",
+    title: `${item.japanese} (${item.hiragana})`,
+    content,
+    score:
+      scoreSource(queryTokens, `${item.japanese}\n${item.hiragana}\n${item.romaji}\n${item.vietnamese}\n${content}`) +
+      (exactJapaneseMatch ? 30 : 0) +
+      (exactReadingMatch ? 16 : 0),
+  }
+}
+
+async function retrieveVocabularyMatchesFromDatabase(query: string, queryTokens: string[]) {
+  const japaneseTerms = splitJapaneseTerms(query)
+  const normalizedTokens = queryTokens.map(normalize).filter(Boolean)
+  const lookupTerms = Array.from(new Set([...japaneseTerms, ...normalizedTokens])).filter((term) => term.length >= 1)
+
+  if (!lookupTerms.length) return []
+
+  const vocabulary = await prisma.vocabulary.findMany({
+    where: {
+      OR: lookupTerms.flatMap((term) => [
+        { japanese: { contains: term } },
+        { hiragana: { contains: term } },
+        { romaji: { contains: term } },
+        { vietnamese: { contains: term } },
+      ]),
+    },
+    take: 30,
+  })
+
+  return vocabulary.map((item) => sourceFromDbVocabulary(item, queryTokens))
 }
 
 export function retrieveSources(
@@ -164,34 +260,109 @@ export function retrieveSources(
     }),
   ]
 
-  return sources
-    .filter((source) => source.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
+  return sortSources(sources, query, limit)
 }
 
 export async function retrieveSourcesFromDatabase(query: string, limit = 6): Promise<RagSource[]> {
   const queryTokens = tokenize(query)
   if (!queryTokens.length) return []
 
-  const chunks = await prisma.knowledgeChunk.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 1000,
-  })
+  const [vocabularySources, chunks] = await Promise.all([
+    retrieveVocabularyMatchesFromDatabase(query, queryTokens),
+    prisma.knowledgeChunk.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 1000,
+    }),
+  ])
 
-  return chunks
-    .map((chunk) => ({
-      id: chunk.id,
-      type: mapChunkType(chunk.sourceType),
-      title: chunk.title,
-      content: chunk.content,
-      score: scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`),
-    }))
-    .filter((source) => source.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
+  const chunkSources = chunks.map((chunk) => ({
+    id: chunk.id,
+    type: mapChunkType(chunk.sourceType),
+    title: chunk.title,
+    content: chunk.content,
+    score: scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`),
+  }))
+
+  const deduped = new Map<string, RagSource>()
+
+  for (const source of [...vocabularySources, ...chunkSources]) {
+    const existing = deduped.get(source.id)
+    if (!existing || existing.score < source.score) {
+      deduped.set(source.id, source)
+    }
+  }
+
+  return sortSources(Array.from(deduped.values()), query, limit)
+}
+
+function lineValue(content: string, label: string) {
+  const line = content
+    .split("\n")
+    .find((item) => normalize(item).startsWith(normalize(label)))
+
+  return line?.slice(line.indexOf(":") + 1).trim() ?? ""
+}
+
+function renderVocabularyFallback(source: RagSource) {
+  const japanese = lineValue(source.content, "Từ vựng")
+  const reading = lineValue(source.content, "Cách đọc")
+  const romaji = lineValue(source.content, "Romaji")
+  const meaning = lineValue(source.content, "Nghĩa")
+  const wordType = lineValue(source.content, "Loại từ")
+  const example = lineValue(source.content, "Ví dụ")
+  const translatedExample = lineValue(source.content, "Dịch ví dụ")
+
+  return [
+    `${japanese || source.title} nghĩa là ${meaning || "mình chưa có nghĩa tiếng Việt rõ trong dữ liệu"}.`,
+    "",
+    reading || romaji ? `Cách đọc: ${reading}${romaji ? ` (${romaji})` : ""}` : null,
+    wordType ? `Loại từ: ${wordType}` : null,
+    example ? `Ví dụ: ${example}` : null,
+    translatedExample ? `Dịch: ${translatedExample}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n")
+}
+
+function renderGrammarFallback(source: RagSource) {
+  const meaning = lineValue(source.content, "Ý nghĩa")
+  const structure = lineValue(source.content, "Cấu trúc")
+  const note = lineValue(source.content, "Ghi chú")
+  const example = lineValue(source.content, "Ví dụ")
+  const translatedExample = lineValue(source.content, "Dịch ví dụ")
+
+  return [
+    `${source.title}${meaning ? `: ${meaning}` : ""}`,
+    "",
+    structure ? `Cấu trúc: ${structure}` : null,
+    note ? `Cách dùng: ${note}` : null,
+    example ? `Ví dụ: ${example}` : null,
+    translatedExample ? `Dịch: ${translatedExample}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n")
+}
+
+function renderQuizFallback(source: RagSource) {
+  const answer = lineValue(source.content, "Đáp án đúng") || lineValue(source.content, "Correct answer")
+  const explanation = lineValue(source.content, "Giải thích") || lineValue(source.content, "Explanation")
+
+  return [
+    `Mình tìm thấy một câu quiz liên quan: ${source.title}`,
+    answer ? `Đáp án đúng: ${answer}` : null,
+    explanation ? `Giải thích: ${explanation}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n")
+}
+
+function renderTopSource(source: RagSource) {
+  if (source.type === "vocabulary") return renderVocabularyFallback(source)
+  if (source.type === "grammar") return renderGrammarFallback(source)
+  if (source.type === "quiz") return renderQuizFallback(source)
+  return source.content
 }
 
 export function buildFallbackAnswer(message: string, sources: RagSource[]) {
@@ -210,9 +381,7 @@ export function buildFallbackAnswer(message: string, sources: RagSource[]) {
   const otherSources = sources.slice(1, 4)
 
   return [
-    `Mình tìm thấy nguồn phù hợp nhất: ${topSource.title}.`,
-    "",
-    topSource.content,
+    renderTopSource(topSource),
     "",
     "Cách học tiếp:",
     "- Đọc lại ví dụ tiếng Nhật.",
