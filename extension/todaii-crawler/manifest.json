@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Todaii Crawler",
+  "version": "1.0.0",
+  "description": "Crawl a TODAII reading page into the local Nihongo AI Study database.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "https://japanese.todaiinews.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
+  "action": {
+    "default_title": "Crawl TODAII"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
