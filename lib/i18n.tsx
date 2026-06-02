@@ -1,10 +1,10 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import i18next from "i18next"
 import { I18nextProvider, initReactI18next, useTranslation } from "react-i18next"
 
-export type Locale = "vi" | "en" | "ja"
+export type Locale = "vi" | "ja"
 
 const storageKey = "nihongo_locale"
 const originalTextNodes = new WeakMap<Text, string>()
@@ -63,6 +63,8 @@ const dictionaries = {
     "auth.privateOnboarding": "Onboarding riêng",
     "nav.dashboard": "Dashboard",
     "nav.onboarding": "Hồ sơ học",
+    "nav.kana": "Bảng Kana",
+    "nav.reading": "B\u00e0i \u0111\u1ecdc song ng\u1eef",
     "nav.vocabulary": "Từ vựng",
     "nav.grammar": "Ngữ pháp",
     "nav.quiz": "Quiz",
@@ -151,6 +153,8 @@ const dictionaries = {
     "auth.privateOnboarding": "Private onboarding",
     "nav.dashboard": "Dashboard",
     "nav.onboarding": "Study profile",
+    "nav.kana": "Kana chart",
+    "nav.reading": "Bilingual reading",
     "nav.vocabulary": "Vocabulary",
     "nav.grammar": "Grammar",
     "nav.quiz": "Quiz",
@@ -239,6 +243,8 @@ const dictionaries = {
     "auth.privateOnboarding": "個別オンボーディング",
     "nav.dashboard": "ダッシュボード",
     "nav.onboarding": "学習プロフィール",
+    "nav.kana": "かな表",
+    "nav.reading": "\u30d0\u30a4\u30ea\u30f3\u30ac\u30eb\u8aad\u89e3",
     "nav.vocabulary": "語彙",
     "nav.grammar": "文法",
     "nav.quiz": "クイズ",
@@ -444,7 +450,7 @@ const globalTextTranslations: Record<string, Partial<Record<Locale, string>>> = 
 }
 
 function isLocale(value: string | null): value is Locale {
-  return value === "vi" || value === "en" || value === "ja"
+  return value === "vi" || value === "ja"
 }
 
 const resources = {
@@ -482,6 +488,7 @@ function translateTextNode(node: Text, locale: Locale) {
   const raw = node.nodeValue ?? ""
   const trimmed = raw.trim()
   if (!trimmed) return
+  if (node.parentElement?.closest("[data-i18n-managed]")) return
 
   const original = originalTextNodes.get(node) ?? trimmed
   originalTextNodes.set(node, original)
@@ -491,6 +498,8 @@ function translateTextNode(node: Text, locale: Locale) {
 }
 
 function translateElementAttributes(element: Element, locale: Locale) {
+  if (element.closest("[data-i18n-managed]")) return
+
   const attributes = ["placeholder", "title", "aria-label"]
   const originals = originalElementAttributes.get(element) ?? {}
 
@@ -519,6 +528,9 @@ function translateStaticDom(locale: Locale) {
         if (["SCRIPT", "STYLE", "TEXTAREA", "INPUT"].includes(parent.tagName)) {
           return NodeFilter.FILTER_REJECT
         }
+        if (parent.closest("[data-i18n-managed]")) {
+          return NodeFilter.FILTER_REJECT
+        }
         return NodeFilter.FILTER_ACCEPT
       },
     }
@@ -530,9 +542,9 @@ function translateStaticDom(locale: Locale) {
     node = walker.nextNode()
   }
 
-  document.querySelectorAll("[placeholder], [title], [aria-label]").forEach((element) => {
-    translateElementAttributes(element, locale)
-  })
+  document
+    .querySelectorAll("[placeholder], [title], [aria-label]")
+    .forEach((element) => translateElementAttributes(element, locale))
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
@@ -544,6 +556,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       setLocaleState(stored)
       void i18next.changeLanguage(stored)
       document.documentElement.lang = stored
+    } else if (stored === "en") {
+      window.localStorage.setItem(storageKey, "vi")
+      void i18next.changeLanguage("vi")
+      document.documentElement.lang = "vi"
     }
   }, [])
 
@@ -600,3 +616,6 @@ export function useI18n() {
     t: (key: TranslationKey) => translate(key),
   }
 }
+
+
+

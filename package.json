@@ -2,6 +2,10 @@
   "name": "my-project",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +16,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "data:fetch:jisho-n5-vocab": "tsx scripts/fetch-jisho-n5-vocabulary.ts",
     "data:import:jisho-n5-vocab": "tsx scripts/import-jisho-n5-vocabulary.ts",
+    "data:apply:vi-vocab": "tsx scripts/apply-vietnamese-vocabulary-meanings.ts",
+    "data:import:n5-grammar": "tsx scripts/import-n5-grammar.ts",
     "data:categorize:vocab": "tsx scripts/categorize-vocabulary-topics.ts"
   },
   "dependencies": {
