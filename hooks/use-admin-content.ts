@@ -58,22 +58,31 @@ function readContent(): AdminContent {
 }
 
 async function fetchJson<T>(url: string, signal: AbortSignal) {
-  const response = await fetch(url, { signal })
+  const response = await fetch(url, { signal, cache: "no-store" })
 
   return readJsonResponse<T>(response)
 }
 
 async function fetchContent(signal: AbortSignal): Promise<AdminContent> {
-  const [vocabulary, grammar, quiz] = await Promise.all([
+  const storedContent = readContent()
+  const [vocabulary, grammar, quiz] = await Promise.allSettled([
     fetchJson<VocabularyApiResponse>("/api/vocabulary", signal),
     fetchJson<GrammarApiResponse>("/api/grammar", signal),
     fetchJson<QuizApiResponse>("/api/quiz", signal),
   ])
 
+  const errors = [vocabulary, grammar, quiz]
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .map((result) => (result.reason instanceof Error ? result.reason.message : "Failed to load content"))
+
+  if (errors.length === 3) {
+    throw new Error(errors[0] ?? "Failed to load content")
+  }
+
   return {
-    vocabulary: vocabulary.items,
-    grammar: grammar.items,
-    quiz: quiz.items,
+    vocabulary: vocabulary.status === "fulfilled" ? vocabulary.value.items : storedContent.vocabulary,
+    grammar: grammar.status === "fulfilled" ? grammar.value.items : storedContent.grammar,
+    quiz: quiz.status === "fulfilled" ? quiz.value.items : storedContent.quiz,
   }
 }
 

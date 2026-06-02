@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma"
 
 export type RagSource = {
   id: string
-  type: "vocabulary" | "grammar" | "quiz"
+  type: "vocabulary" | "grammar" | "quiz" | "news"
   title: string
   content: string
   score: number
@@ -134,7 +134,14 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 5): Pro
   return chunks
     .map((chunk) => ({
       id: chunk.id,
-      type: chunk.sourceType === "grammar" ? "grammar" as const : chunk.sourceType === "quiz" ? "quiz" as const : "vocabulary" as const,
+      type:
+        chunk.sourceType === "grammar" || chunk.sourceType === "n5-grammar"
+          ? ("grammar" as const)
+          : chunk.sourceType === "quiz"
+            ? ("quiz" as const)
+            : chunk.sourceType === "todaii-news"
+              ? ("news" as const)
+              : ("vocabulary" as const),
       title: chunk.title,
       content: chunk.content,
       score: scoreSource(queryTokens, `${chunk.title}\n${chunk.content}`),

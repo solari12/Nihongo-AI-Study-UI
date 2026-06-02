@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MessageSquare, PlayCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
+import { localizeGrammarContent } from "@/lib/localized-study-content"
 
 interface GrammarCardProps {
   pattern: string
@@ -46,13 +48,29 @@ export function GrammarCard({
   onAskAI,
   className,
 }: GrammarCardProps) {
+  const { locale } = useI18n()
+  const localized = localizeGrammarContent({
+    pattern,
+    meaning,
+    structure,
+    usageNote,
+    locale,
+  })
+
   return (
     <Card className={cn("overflow-hidden border-[#dfb6aa] bg-[#fffdf8]/95 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <h3 className="text-2xl font-bold text-[#702f2a]">{pattern}</h3>
-            <p className="font-medium text-[#6f5952]">{meaning}</p>
+            <h3 className="text-2xl font-bold text-[#702f2a]">{localized.pattern}</h3>
+            <p className="font-medium text-[#6f5952]">{localized.meaning}</p>
+            {localized.secondary.length > 0 && (
+              <div className="space-y-0.5 text-xs font-medium text-[#8f4742]">
+                {localized.secondary.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-end gap-2">
             <Badge className={cn("rounded-full border-0", difficultyColors[difficulty])}>
@@ -68,7 +86,7 @@ export function GrammarCard({
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-[#ead0c6] bg-[#fff8f1]/80 p-3">
           <p className="text-sm font-semibold text-[#8f4742]">Cấu trúc</p>
-          <p className="mt-1 font-mono text-sm text-[#2a211f]">{structure}</p>
+          <p className="mt-1 font-mono text-sm text-[#2a211f]">{localized.structure}</p>
         </div>
 
         <div className="space-y-1 border-l-2 border-[#e58776] pl-3">
@@ -76,11 +94,11 @@ export function GrammarCard({
           <p className="text-sm text-[#6f5952]">{example.vietnamese}</p>
         </div>
 
-        {usageNote && (
+        {localized.usageNote && (
           <div className="rounded-lg bg-[#f4d8d1]/55 p-3">
             <p className="text-sm text-[#4f403b]">
               <span className="font-semibold text-[#702f2a]">Lưu ý: </span>
-              {usageNote}
+              {localized.usageNote}
             </p>
           </div>
         )}

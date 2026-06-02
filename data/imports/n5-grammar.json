@@ -1,0 +1,882 @@
+{
+  "source": {
+    "name": "Curated JLPT N5 grammar baseline",
+    "references": [
+      "https://jlptsensei.com/jlpt-n5-grammar-list/",
+      "https://jlpt.quest/en/n5/grammar/list",
+      "https://bunpro.jp/decks/nn10ai/bunpro-n5-grammar"
+    ],
+    "note": "Patterns are curated and examples/translations are written for this project."
+  },
+  "grammar": [
+    {
+      "pattern": "N は N です",
+      "meaning": "N la N",
+      "structure": "Noun 1 + は + Noun 2 + です",
+      "usageNote": "Dung de gioi thieu, dinh danh hoac noi mot dieu lich su ve chu de.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "私は学生です。",
+        "vietnamese": "Toi la hoc sinh."
+      }
+    },
+    {
+      "pattern": "N ではありません",
+      "meaning": "Khong phai la N",
+      "structure": "Noun + ではありません / じゃありません",
+      "usageNote": "Dang phu dinh lich su cua です. じゃありません than mat hon ではありません.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "田中さんは先生ではありません。",
+        "vietnamese": "Anh Tanaka khong phai la giao vien."
+      }
+    },
+    {
+      "pattern": "N でした",
+      "meaning": "Da tung la N",
+      "structure": "Noun + でした",
+      "usageNote": "Dang qua khu lich su cua です.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "昨日は休みでした。",
+        "vietnamese": "Hom qua la ngay nghi."
+      }
+    },
+    {
+      "pattern": "N ではありませんでした",
+      "meaning": "Da khong phai la N",
+      "structure": "Noun + ではありませんでした",
+      "usageNote": "Dang phu dinh qua khu lich su cua です.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "昨日は雨ではありませんでした。",
+        "vietnamese": "Hom qua da khong phai la mua."
+      }
+    },
+    {
+      "pattern": "これ / それ / あれ",
+      "meaning": "Cai nay / cai do / cai kia",
+      "structure": "これ/それ/あれ + は + Noun + です",
+      "usageNote": "これ gan nguoi noi, それ gan nguoi nghe, あれ xa ca hai.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "これは本です。",
+        "vietnamese": "Day la sach."
+      }
+    },
+    {
+      "pattern": "この / その / あの N",
+      "meaning": "N nay / N do / N kia",
+      "structure": "この/その/あの + Noun",
+      "usageNote": "Dung truoc danh tu de chi vi tri cua vat hoac nguoi.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "この本は新しいです。",
+        "vietnamese": "Quyen sach nay moi."
+      }
+    },
+    {
+      "pattern": "ここ / そこ / あそこ",
+      "meaning": "Cho nay / cho do / cho kia",
+      "structure": "ここ/そこ/あそこ + は + Place + です",
+      "usageNote": "Dung de chi dia diem gan nguoi noi, gan nguoi nghe, hoac xa ca hai.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "ここは教室です。",
+        "vietnamese": "Day la phong hoc."
+      }
+    },
+    {
+      "pattern": "だれ / 何 / どこ",
+      "meaning": "Ai / cai gi / o dau",
+      "structure": "Question word + ですか",
+      "usageNote": "Cac tu nghi van co ban trong cau hoi lich su.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "あの人はだれですか。",
+        "vietnamese": "Nguoi kia la ai?"
+      }
+    },
+    {
+      "pattern": "か",
+      "meaning": "Tro tu cau hoi",
+      "structure": "Sentence + か",
+      "usageNote": "Dat cuoi cau de bien cau tran thuat thanh cau hoi lich su.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "学生ですか。",
+        "vietnamese": "Ban la hoc sinh phai khong?"
+      }
+    },
+    {
+      "pattern": "も",
+      "meaning": "Cung, cung vay",
+      "structure": "Noun + も",
+      "usageNote": "Thay cho は/が/を de dien ta y 'cung'.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "私も学生です。",
+        "vietnamese": "Toi cung la hoc sinh."
+      }
+    },
+    {
+      "pattern": "の",
+      "meaning": "Cua, thuoc ve",
+      "structure": "Noun 1 + の + Noun 2",
+      "usageNote": "Noi hai danh tu de chi so huu, nguon goc, loai hoac moi quan he.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "これは私の本です。",
+        "vietnamese": "Day la sach cua toi."
+      }
+    },
+    {
+      "pattern": "と",
+      "meaning": "Va, cung voi",
+      "structure": "Noun + と + Noun",
+      "usageNote": "Noi cac danh tu hoac chi nguoi cung thuc hien hanh dong.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "友達と映画を見ます。",
+        "vietnamese": "Toi xem phim voi ban."
+      }
+    },
+    {
+      "pattern": "や",
+      "meaning": "Va nhung khong liet ke het",
+      "structure": "Noun + や + Noun",
+      "usageNote": "Dung khi neu mot vai vi du trong danh sach, khong phai tat ca.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "机の上に本やペンがあります。",
+        "vietnamese": "Tren ban co sach, but va nhung thu khac."
+      }
+    },
+    {
+      "pattern": "A と B",
+      "meaning": "A va B",
+      "structure": "Noun A + と + Noun B",
+      "usageNote": "Liet ke day du hai hoac nhieu danh tu.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "パンと水を買います。",
+        "vietnamese": "Toi mua banh mi va nuoc."
+      }
+    },
+    {
+      "pattern": "を",
+      "meaning": "Danh dau tan ngu truc tiep",
+      "structure": "Noun + を + Verb",
+      "usageNote": "Dung voi danh tu bi tac dong truc tiep boi dong tu.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "水を飲みます。",
+        "vietnamese": "Toi uong nuoc."
+      }
+    },
+    {
+      "pattern": "に",
+      "meaning": "Thoi diem, diem den, doi tuong",
+      "structure": "Time/Place/Person + に + Verb",
+      "usageNote": "Dung cho thoi diem cu the, noi den, noi ton tai, hoac nguoi nhan hanh dong.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "七時に起きます。",
+        "vietnamese": "Toi thuc day luc 7 gio."
+      }
+    },
+    {
+      "pattern": "で",
+      "meaning": "Tai noi xay ra hanh dong, bang phuong tien",
+      "structure": "Place/Tool + で + Verb",
+      "usageNote": "Dung cho dia diem hanh dong dien ra hoac cong cu/phuong tien duoc su dung.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "図書館で勉強します。",
+        "vietnamese": "Toi hoc o thu vien."
+      }
+    },
+    {
+      "pattern": "へ",
+      "meaning": "Huong den",
+      "structure": "Place + へ + Verb of movement",
+      "usageNote": "Chi huong di chuyen, thuong dung voi 行きます, 来ます, 帰ります.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "学校へ行きます。",
+        "vietnamese": "Toi di den truong."
+      }
+    },
+    {
+      "pattern": "から / まで",
+      "meaning": "Tu / den",
+      "structure": "Noun + から + Noun + まで",
+      "usageNote": "Dung de noi diem bat dau va diem ket thuc ve thoi gian hoac dia diem.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "九時から五時まで働きます。",
+        "vietnamese": "Toi lam viec tu 9 gio den 5 gio."
+      }
+    },
+    {
+      "pattern": "があります",
+      "meaning": "Co, ton tai (do vat/su viec)",
+      "structure": "Place + に + Noun + があります",
+      "usageNote": "Dung cho do vat, cay coi, su kien hoac nhung thu khong tu di chuyen.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "部屋に机があります。",
+        "vietnamese": "Trong phong co cai ban."
+      }
+    },
+    {
+      "pattern": "がいます",
+      "meaning": "Co, ton tai (nguoi/dong vat)",
+      "structure": "Place + に + Person/Animal + がいます",
+      "usageNote": "Dung cho nguoi va dong vat.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "公園に子どもがいます。",
+        "vietnamese": "O cong vien co tre em."
+      }
+    },
+    {
+      "pattern": "好きです",
+      "meaning": "Thich",
+      "structure": "Noun + が + 好きです",
+      "usageNote": "好き la tinh tu na, doi tuong duoc thich thuong di voi が.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "私は日本語が好きです。",
+        "vietnamese": "Toi thich tieng Nhat."
+      }
+    },
+    {
+      "pattern": "嫌いです",
+      "meaning": "Ghet, khong thich",
+      "structure": "Noun + が + 嫌いです",
+      "usageNote": "Dung de noi dieu minh khong thich mot cach lich su.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "私は雨が嫌いです。",
+        "vietnamese": "Toi khong thich mua."
+      }
+    },
+    {
+      "pattern": "上手です / 下手です",
+      "meaning": "Gioi / kem",
+      "structure": "Noun + が + 上手/下手です",
+      "usageNote": "Thuong dung de noi kha nang cua nguoi khac; voi ban than nen can than de tranh tu khen.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "山田さんは料理が上手です。",
+        "vietnamese": "Anh Yamada nau an gioi."
+      }
+    },
+    {
+      "pattern": "い-adjective です",
+      "meaning": "Tinh tu i o hien tai",
+      "structure": "い-adjective + です",
+      "usageNote": "Dung tinh tu i voi です de cau lich su hon.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "このかばんは大きいです。",
+        "vietnamese": "Cai cap nay to."
+      }
+    },
+    {
+      "pattern": "い-adjective くないです",
+      "meaning": "Khong ...",
+      "structure": "い-adjective bỏ い + くないです",
+      "usageNote": "Dang phu dinh cua tinh tu i.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "この本は高くないです。",
+        "vietnamese": "Quyen sach nay khong dat."
+      }
+    },
+    {
+      "pattern": "い-adjective かったです",
+      "meaning": "Da ...",
+      "structure": "い-adjective bỏ い + かったです",
+      "usageNote": "Dang qua khu khang dinh cua tinh tu i.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "昨日は暑かったです。",
+        "vietnamese": "Hom qua nong."
+      }
+    },
+    {
+      "pattern": "な-adjective です",
+      "meaning": "Tinh tu na o hien tai",
+      "structure": "な-adjective + です",
+      "usageNote": "Khi dung truoc danh tu thi them な, khi ket cau thi dung voi です.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "この町は静かです。",
+        "vietnamese": "Thi tran nay yen tinh."
+      }
+    },
+    {
+      "pattern": "な-adjective じゃありません",
+      "meaning": "Khong ...",
+      "structure": "な-adjective + じゃありません",
+      "usageNote": "Dang phu dinh lich su cua tinh tu na.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "この部屋はきれいじゃありません。",
+        "vietnamese": "Can phong nay khong sach dep."
+      }
+    },
+    {
+      "pattern": "Verb ます",
+      "meaning": "Lam gi do (lich su)",
+      "structure": "Verb ます-form",
+      "usageNote": "Dang lich su co ban cua dong tu, dung cho hien tai hoac tuong lai.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "毎日勉強します。",
+        "vietnamese": "Moi ngay toi hoc."
+      }
+    },
+    {
+      "pattern": "Verb ません",
+      "meaning": "Khong lam gi do",
+      "structure": "Verb stem + ません",
+      "usageNote": "Dang phu dinh lich su cua dong tu.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "今日は行きません。",
+        "vietnamese": "Hom nay toi khong di."
+      }
+    },
+    {
+      "pattern": "Verb ました",
+      "meaning": "Da lam gi do",
+      "structure": "Verb stem + ました",
+      "usageNote": "Dang qua khu lich su cua dong tu.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "昨日日本語を勉強しました。",
+        "vietnamese": "Hom qua toi da hoc tieng Nhat."
+      }
+    },
+    {
+      "pattern": "Verb ませんでした",
+      "meaning": "Da khong lam gi do",
+      "structure": "Verb stem + ませんでした",
+      "usageNote": "Dang phu dinh qua khu lich su cua dong tu.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "昨日テレビを見ませんでした。",
+        "vietnamese": "Hom qua toi da khong xem TV."
+      }
+    },
+    {
+      "pattern": "Verb ましょう",
+      "meaning": "Hay cung lam",
+      "structure": "Verb stem + ましょう",
+      "usageNote": "Dung de ru re hoac de xuat cung lam mot viec.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "一緒に昼ご飯を食べましょう。",
+        "vietnamese": "Cung an trua nao."
+      }
+    },
+    {
+      "pattern": "Verb ませんか",
+      "meaning": "Ban co muon ... khong?",
+      "structure": "Verb stem + ませんか",
+      "usageNote": "Loi moi lich su, mem hon ましょう trong nhieu tinh huong.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "一緒に映画を見ませんか。",
+        "vietnamese": "Ban co muon xem phim cung toi khong?"
+      }
+    },
+    {
+      "pattern": "Verb たいです",
+      "meaning": "Muon lam gi do",
+      "structure": "Verb stem + たいです",
+      "usageNote": "Dung de noi mong muon cua ban than hoac hoi mong muon cua nguoi nghe.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "日本へ行きたいです。",
+        "vietnamese": "Toi muon di Nhat Ban."
+      }
+    },
+    {
+      "pattern": "Verb てください",
+      "meaning": "Hay lam on...",
+      "structure": "Verb te-form + ください",
+      "usageNote": "Dung de yeu cau hoac nho ai lam gi mot cach lich su.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "ここに名前を書いてください。",
+        "vietnamese": "Hay viet ten vao day."
+      }
+    },
+    {
+      "pattern": "Verb てもいいです",
+      "meaning": "Duoc phep lam...",
+      "structure": "Verb te-form + もいいです",
+      "usageNote": "Dung de xin phep hoac noi rang mot hanh dong duoc chap nhan.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "ここで写真を撮ってもいいです。",
+        "vietnamese": "Chup anh o day cung duoc."
+      }
+    },
+    {
+      "pattern": "Verb てはいけません",
+      "meaning": "Khong duoc lam...",
+      "structure": "Verb te-form + はいけません",
+      "usageNote": "Dung de noi dieu bi cam hoac khong nen lam.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "ここでタバコを吸ってはいけません。",
+        "vietnamese": "Khong duoc hut thuoc o day."
+      }
+    },
+    {
+      "pattern": "Verb ています",
+      "meaning": "Dang lam, dang trong trang thai",
+      "structure": "Verb te-form + います",
+      "usageNote": "Dien ta hanh dong dang dien ra hoac trang thai keo dai sau mot hanh dong.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "今、日本語を勉強しています。",
+        "vietnamese": "Bay gio toi dang hoc tieng Nhat."
+      }
+    },
+    {
+      "pattern": "Verb たことがあります",
+      "meaning": "Da tung lam gi",
+      "structure": "Verb ta-form + ことがあります",
+      "usageNote": "Dung de noi ve kinh nghiem da tung trai qua.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "日本へ行ったことがあります。",
+        "vietnamese": "Toi da tung di Nhat Ban."
+      }
+    },
+    {
+      "pattern": "Verb たり Verb たりします",
+      "meaning": "Lam nhung viec nhu...",
+      "structure": "Verb ta-form + り + Verb ta-form + りします",
+      "usageNote": "Liet ke mot vai hanh dong tieu bieu, khong can day du.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "日曜日に本を読んだり音楽を聞いたりします。",
+        "vietnamese": "Chu nhat toi doc sach, nghe nhac va nhung viec tuong tu."
+      }
+    },
+    {
+      "pattern": "Verb 前に",
+      "meaning": "Truoc khi lam...",
+      "structure": "Verb dictionary-form + 前に",
+      "usageNote": "Dien ta hanh dong xay ra truoc mot hanh dong khac.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "寝る前に歯を磨きます。",
+        "vietnamese": "Truoc khi ngu toi danh rang."
+      }
+    },
+    {
+      "pattern": "Verb 後で",
+      "meaning": "Sau khi lam...",
+      "structure": "Verb ta-form + 後で",
+      "usageNote": "Dien ta hanh dong xay ra sau mot hanh dong khac.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "ご飯を食べた後で、勉強します。",
+        "vietnamese": "Sau khi an com, toi hoc."
+      }
+    },
+    {
+      "pattern": "から",
+      "meaning": "Vi, boi vi",
+      "structure": "Sentence + から",
+      "usageNote": "Noi ly do hoac nguyen nhan o cuoi menh de.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "寒いですから、コートを着ます。",
+        "vietnamese": "Vi troi lanh nen toi mac ao khoac."
+      }
+    },
+    {
+      "pattern": "けど / が",
+      "meaning": "Nhung, tuy nhien",
+      "structure": "Sentence + けど/が + Sentence",
+      "usageNote": "Noi hai menh de co y tuong trai nguoc; が trang trong hon けど.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "この店は高いですが、おいしいです。",
+        "vietnamese": "Cua hang nay dat nhung ngon."
+      }
+    },
+    {
+      "pattern": "より",
+      "meaning": "Hon",
+      "structure": "A + は + B + より + adjective",
+      "usageNote": "Dung trong cau so sanh de noi A hon B ve mot tinh chat.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "東京は大阪より大きいです。",
+        "vietnamese": "Tokyo lon hon Osaka."
+      }
+    },
+    {
+      "pattern": "ほど...ない",
+      "meaning": "Khong ... bang",
+      "structure": "A + は + B + ほど + adjective negative",
+      "usageNote": "Dung de noi A khong bang B ve mot tinh chat.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "今日は昨日ほど寒くないです。",
+        "vietnamese": "Hom nay khong lanh bang hom qua."
+      }
+    },
+    {
+      "pattern": "一番",
+      "meaning": "Nhat",
+      "structure": "Group + で + Noun + が + 一番 + adjective",
+      "usageNote": "Dung de noi muc do cao nhat trong mot nhom.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "季節の中で春が一番好きです。",
+        "vietnamese": "Trong cac mua toi thich mua xuan nhat."
+      }
+    },
+    {
+      "pattern": "だけ",
+      "meaning": "Chi, chi co",
+      "structure": "Noun/Verb plain-form + だけ",
+      "usageNote": "Dung de gioi han pham vi hoac so luong vao mot muc duy nhat.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "水だけ飲みます。",
+        "vietnamese": "Toi chi uong nuoc."
+      }
+    },
+    {
+      "pattern": "しか〜ない",
+      "meaning": "Chi co, khong hon",
+      "structure": "Noun + しか + negative verb",
+      "usageNote": "Nhan manh so luong it hoac lua chon bi gioi han; luon di voi dang phu dinh.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "百円しかありません。",
+        "vietnamese": "Toi chi co 100 yen."
+      }
+    },
+    {
+      "pattern": "くらい / ぐらい",
+      "meaning": "Khoang, tam",
+      "structure": "Number/quantity + くらい/ぐらい",
+      "usageNote": "Dung de noi so luong, thoi gian hoac muc do uoc chung.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "毎日一時間ぐらい勉強します。",
+        "vietnamese": "Moi ngay toi hoc khoang mot tieng."
+      }
+    },
+    {
+      "pattern": "ごろ",
+      "meaning": "Khoang luc",
+      "structure": "Time + ごろ",
+      "usageNote": "Dung voi thoi diem cu the de noi khoang luc nao do.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "七時ごろ家へ帰ります。",
+        "vietnamese": "Khoang 7 gio toi ve nha."
+      }
+    },
+    {
+      "pattern": "たくさん",
+      "meaning": "Nhieu",
+      "structure": "たくさん + Verb / Noun",
+      "usageNote": "Dung de noi so luong nhieu mot cach don gian.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "本をたくさん読みます。",
+        "vietnamese": "Toi doc nhieu sach."
+      }
+    },
+    {
+      "pattern": "あまり〜ない",
+      "meaning": "Khong ... lam",
+      "structure": "あまり + negative predicate",
+      "usageNote": "Dung de phu dinh nhe, noi rang muc do khong cao.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "肉はあまり食べません。",
+        "vietnamese": "Toi khong an thit nhieu lam."
+      }
+    },
+    {
+      "pattern": "全然〜ない",
+      "meaning": "Hoan toan khong",
+      "structure": "全然 + negative predicate",
+      "usageNote": "Dung de phu dinh manh, dien ta hoan toan khong co hoac khong lam.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "漢字が全然わかりません。",
+        "vietnamese": "Toi hoan toan khong hieu kanji."
+      }
+    },
+    {
+      "pattern": "もう",
+      "meaning": "Da, roi",
+      "structure": "もう + positive predicate",
+      "usageNote": "Dung de noi mot viec da xay ra hoac trang thai da dat duoc.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "もう昼ご飯を食べました。",
+        "vietnamese": "Toi da an trua roi."
+      }
+    },
+    {
+      "pattern": "まだ",
+      "meaning": "Van, chua",
+      "structure": "まだ + predicate",
+      "usageNote": "Dung de noi trang thai tiep tuc hoac viec chua xay ra.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "宿題はまだ終わっていません。",
+        "vietnamese": "Bai tap van chua xong."
+      }
+    },
+    {
+      "pattern": "〜中",
+      "meaning": "Dang trong luc, trong khoang",
+      "structure": "Noun + 中",
+      "usageNote": "Dung de noi dang trong mot hoat dong hoac trong mot khoang thoi gian.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "今、勉強中です。",
+        "vietnamese": "Bay gio toi dang hoc."
+      }
+    },
+    {
+      "pattern": "〜方",
+      "meaning": "Cach lam",
+      "structure": "Verb stem + 方",
+      "usageNote": "Dung de tao danh tu chi cach thuc thuc hien hanh dong.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "この漢字の読み方を教えてください。",
+        "vietnamese": "Hay chi toi cach doc kanji nay."
+      }
+    },
+    {
+      "pattern": "〜ながら",
+      "meaning": "Vua ... vua ...",
+      "structure": "Verb stem + ながら",
+      "usageNote": "Dien ta hai hanh dong xay ra dong thoi boi cung mot chu the.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "音楽を聞きながら勉強します。",
+        "vietnamese": "Toi vua nghe nhac vua hoc."
+      }
+    },
+    {
+      "pattern": "〜に行く",
+      "meaning": "Di de lam gi",
+      "structure": "Verb stem/Noun + に行きます",
+      "usageNote": "Dung de noi muc dich cua viec di den dau do.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "図書館へ勉強しに行きます。",
+        "vietnamese": "Toi di den thu vien de hoc."
+      }
+    },
+    {
+      "pattern": "〜と思います",
+      "meaning": "Toi nghi la",
+      "structure": "Plain-form sentence + と思います",
+      "usageNote": "Dung de trinh bay suy nghi, y kien hoac du doan mot cach lich su.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "明日は雨だと思います。",
+        "vietnamese": "Toi nghi ngay mai se mua."
+      }
+    },
+    {
+      "pattern": "〜でしょう",
+      "meaning": "Co le, chac la",
+      "structure": "Plain-form sentence + でしょう",
+      "usageNote": "Dung de du doan hoac noi mot dieu co ve dung mot cach mem hon.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "明日は寒いでしょう。",
+        "vietnamese": "Ngay mai co le se lanh."
+      }
+    },
+    {
+      "pattern": "〜ましょうか",
+      "meaning": "De toi lam nhe?, chung ta ... nhe?",
+      "structure": "Verb stem + ましょうか",
+      "usageNote": "Dung de de nghi giup ai hoac ru cung lam voi sac thai lich su.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "窓を開けましょうか。",
+        "vietnamese": "De toi mo cua so nhe?"
+      }
+    },
+    {
+      "pattern": "〜ないでください",
+      "meaning": "Xin dung lam",
+      "structure": "Verb nai-form + でください",
+      "usageNote": "Dung de yeu cau ai khong lam mot viec nao do.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "ここで写真を撮らないでください。",
+        "vietnamese": "Xin dung chup anh o day."
+      }
+    },
+    {
+      "pattern": "〜なくてもいいです",
+      "meaning": "Khong can lam cung duoc",
+      "structure": "Verb nai-form bỏ い + くてもいいです",
+      "usageNote": "Dung de noi mot viec khong bat buoc phai lam.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "明日来なくてもいいです。",
+        "vietnamese": "Ngay mai khong can den cung duoc."
+      }
+    },
+    {
+      "pattern": "〜なければなりません",
+      "meaning": "Phai lam",
+      "structure": "Verb nai-form bỏ い + ければなりません",
+      "usageNote": "Dung de noi nghia vu hoac viec can phai lam.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "毎日勉強しなければなりません。",
+        "vietnamese": "Moi ngay toi phai hoc."
+      }
+    },
+    {
+      "pattern": "〜ほうがいいです",
+      "meaning": "Nen lam, nen ... hon",
+      "structure": "Verb ta-form / nai-form + ほうがいいです",
+      "usageNote": "Dung de dua ra loi khuyen.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "早く寝たほうがいいです。",
+        "vietnamese": "Ban nen ngu som."
+      }
+    },
+    {
+      "pattern": "〜ことができます",
+      "meaning": "Co the lam",
+      "structure": "Verb dictionary-form + ことができます",
+      "usageNote": "Dien ta kha nang hoac viec duoc phep lam.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "日本語を読むことができます。",
+        "vietnamese": "Toi co the doc tieng Nhat."
+      }
+    },
+    {
+      "pattern": "〜てから",
+      "meaning": "Sau khi lam roi thi",
+      "structure": "Verb te-form + から",
+      "usageNote": "Nhan manh thu tu hanh dong: lam viec A xong roi moi lam viec B.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "手を洗ってからご飯を食べます。",
+        "vietnamese": "Sau khi rua tay, toi an com."
+      }
+    },
+    {
+      "pattern": "〜ても",
+      "meaning": "Du co ... cung",
+      "structure": "Verb/い-adjective te-form + も",
+      "usageNote": "Dung de noi ket qua van khong doi bat chap dieu kien.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "雨が降っても行きます。",
+        "vietnamese": "Du mua toi van di."
+      }
+    },
+    {
+      "pattern": "〜なくて",
+      "meaning": "Vi khong..., khong... va",
+      "structure": "Negative te-form + なくて",
+      "usageNote": "Dung de noi ly do hoac noi hai y trong dang phu dinh.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "時間がなくて、朝ご飯を食べませんでした。",
+        "vietnamese": "Vi khong co thoi gian nen toi da khong an sang."
+      }
+    },
+    {
+      "pattern": "〜ので",
+      "meaning": "Vi, boi vi",
+      "structure": "Plain-form sentence + ので",
+      "usageNote": "Dung de dua ly do mem va lich su hon から trong nhieu tinh huong.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "雨なので、家にいます。",
+        "vietnamese": "Vi troi mua nen toi o nha."
+      }
+    },
+    {
+      "pattern": "〜のが好きです",
+      "meaning": "Thich viec lam gi",
+      "structure": "Verb dictionary-form + のが好きです",
+      "usageNote": "Bien dong tu thanh cum danh tu de noi so thich.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "本を読むのが好きです。",
+        "vietnamese": "Toi thich doc sach."
+      }
+    },
+    {
+      "pattern": "〜のは",
+      "meaning": "Viec ... thi",
+      "structure": "Verb dictionary-form + のは + adjective/noun",
+      "usageNote": "Dung の de danh tu hoa hanh dong roi dua len lam chu de.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "漢字を書くのは難しいです。",
+        "vietnamese": "Viec viet kanji thi kho."
+      }
+    },
+    {
+      "pattern": "〜んです",
+      "meaning": "Giai thich, nhan manh boi canh",
+      "structure": "Plain-form sentence + んです",
+      "usageNote": "Dung khi giai thich ly do, dua boi canh, hoac hoi voi cam giac muon biet nguyen nhan.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "頭が痛いんです。",
+        "vietnamese": "La vi toi dau dau."
+      }
+    },
+    {
+      "pattern": "〜でしょうか",
+      "meaning": "Khong biet co phai... khong",
+      "structure": "Plain-form sentence + でしょうか",
+      "usageNote": "Dang hoi lich su va mem hon ですか khi ban muon hoi du doan hoac xac nhan.",
+      "difficulty": "medium",
+      "example": {
+        "japanese": "明日は雨でしょうか。",
+        "vietnamese": "Khong biet ngay mai co mua khong?"
+      }
+    },
+    {
+      "pattern": "〜ませんか",
+      "meaning": "Ru, moi ai lam gi",
+      "structure": "Verb stem + ませんか",
+      "usageNote": "Dung de moi ai lam gi mot cach lich su va tu nhien.",
+      "difficulty": "easy",
+      "example": {
+        "japanese": "一緒に昼ご飯を食べませんか。",
+        "vietnamese": "Ban co muon an trua cung toi khong?"
+      }
+    }
+  ]
+}
