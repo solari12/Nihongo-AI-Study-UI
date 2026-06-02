@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createOpenAI } from "@ai-sdk/openai"
-import { stepCountIs, streamText } from "ai"
+import { streamText } from "ai"
 import { getCurrentUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import {
@@ -9,7 +9,6 @@ import {
   type ChatHistoryMessage,
 } from "@/lib/rag/chat-prompt"
 import { buildFallbackAnswer, retrieveSources, retrieveSourcesFromDatabase } from "@/lib/rag/retriever"
-import { createStudyAgentTools } from "@/lib/rag/study-agent-tools"
 
 type ChatRequest = {
   message?: string
@@ -125,46 +124,6 @@ function createTextResponse({
   })
 }
 
-function normalizeIntent(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFKC")
-    .replace(/\s+/g, " ")
-    .trim()
-}
-
-function shouldUseStudyAgentTools(message: string) {
-  const normalized = normalizeIntent(message)
-  const agentIntentKeywords = [
-    "yếu",
-    "yeu",
-    "ôn",
-    "on",
-    "lộ trình",
-    "lo trinh",
-    "kế hoạch",
-    "ke hoach",
-    "thi",
-    "jlpt",
-    "n4",
-    "n3",
-    "n2",
-    "n1",
-    "hôm nay",
-    "hom nay",
-    "nên học",
-    "nen hoc",
-    "tiến độ",
-    "tien do",
-    "mục tiêu",
-    "muc tieu",
-    "điểm yếu",
-    "diem yeu",
-  ]
-
-  return agentIntentKeywords.some((keyword) => normalized.includes(keyword))
-}
-
 async function logChat({
   userId,
   message,
@@ -246,12 +205,6 @@ export async function POST(request: NextRequest) {
     model: openrouter(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
     system: nihongoTutorSystemPrompt,
     prompt,
-    ...(shouldUseStudyAgentTools(message)
-      ? {
-          tools: createStudyAgentTools(user),
-          stopWhen: stepCountIs(5),
-        }
-      : {}),
     temperature: 0.25,
   })
 

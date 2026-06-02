@@ -1,6 +1,6 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { BookmarkPlus, CheckCircle2, FileText, HelpCircle, Newspaper, Volume2 } from "lucide-react"
@@ -55,10 +55,7 @@ export function ChatMessage({
     <div className={cn("flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
       <Avatar className="h-8 w-8 shrink-0">
         {isUser ? (
-          <>
-            <AvatarImage src="/avatar.png" alt="" />
-            <AvatarFallback className="bg-primary text-xs text-primary-foreground">U</AvatarFallback>
-          </>
+          <AvatarFallback className="bg-primary text-xs text-primary-foreground">U</AvatarFallback>
         ) : (
           <AvatarFallback className="bg-accent text-xs font-bold text-accent-foreground">AI</AvatarFallback>
         )}
