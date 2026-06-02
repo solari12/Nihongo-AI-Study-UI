@@ -29,6 +29,11 @@ enum QuizType {
   grammar
 }
 
+enum SavedStudyItemType {
+  vocabulary
+  grammar
+}
+
 enum VocabularyProgressStatus {
   learned
   review
@@ -69,6 +74,7 @@ model User {
   quizAttempts       QuizAttempt[]
   activityLogs       ActivityLog[]
   chatLogs           ChatLog[]
+  savedStudyItems    SavedStudyItem[]
   learnerProfile     LearnerProfile?
   placementResult    PlacementResult?
   createdAt          DateTime                 @default(now()) @map("created_at")
@@ -133,6 +139,7 @@ model Vocabulary {
   vietnamese         String
   type               String
   topic              String
+  imageUrl           String?                  @map("image_url")
   exampleJapanese    String                   @map("example_japanese")
   exampleVietnamese  String                   @map("example_vietnamese")
   userProgress       UserVocabularyProgress[]
@@ -241,6 +248,51 @@ model ChatLog {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("chat_logs")
+}
+
+model SavedStudyItem {
+  id          String             @id @default(uuid())
+  userId      String             @map("user_id")
+  type        SavedStudyItemType
+  sourceType  String             @map("source_type")
+  sourceId    String             @map("source_id")
+  itemKey     String             @map("item_key")
+  title       String
+  reading     String?
+  level       String?
+  meaning     String?
+  note        String?
+  example     String?
+  rawPayload  Json               @map("raw_payload")
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  @@unique([userId, type, itemKey])
+  @@index([userId, type])
+  @@map("saved_study_items")
+}
+
+model NewsArticle {
+  id          String    @id @default(uuid())
+  sourceUrl   String    @unique @map("source_url")
+  provider    String
+  title       String
+  level       String
+  category    String?
+  articleText String    @map("article_text")
+  imageUrl    String?   @map("image_url")
+  audioUrl    String?   @map("audio_url")
+  publishedAt DateTime? @map("published_at")
+  questions   Json
+  levelStats  Json      @default("[]") @map("level_stats")
+  vocabulary  Json
+  grammar     Json
+  rawPayload   Json      @map("raw_payload")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("news_articles")
 }
 
 model KnowledgeChunk {
