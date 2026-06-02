@@ -1,6 +1,6 @@
 "use client"
 
-import { KeyboardEvent, useMemo, useState } from "react"
+import { KeyboardEvent, useMemo, useRef, useState } from "react"
 import { ChatMessage } from "@/components/app/chat-message"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { readJsonResponse } from "@/lib/http"
-import { BookOpen, FileText, HelpCircle, Newspaper, RotateCcw, Send, Sparkles } from "lucide-react"
+import { BookOpen, FileText, HelpCircle, Newspaper, RotateCcw, Send, Sparkles, Square } from "lucide-react"
 
 type ChatSource = {
   id: string
@@ -45,7 +45,7 @@ const initialMessages: ChatMessageItem[] = [
     content: [
       "Xin chào, mình là trợ lý học tiếng Nhật của Nihongo AI Study.",
       "",
-      "Mình có thể tra cứu kho từ vựng, ngữ pháp, quiz và bài đọc đã import để trả lời kèm nguồn. Bạn có thể hỏi về nghĩa từ, cấu trúc câu, ví dụ, hoặc nhờ gợi ý ôn tập.",
+      "Mình có thể tra cứu kho từ vựng, ngữ pháp, quiz, bài đọc và tiến độ học để trả lời kèm nguồn. Với câu hỏi về mục tiêu học, mình sẽ xem dữ liệu hiện có trước khi đề xuất kế hoạch.",
     ].join("\n"),
     timestamp: "Bây giờ",
   },
@@ -103,6 +103,8 @@ export default function ChatbotPage() {
   const [messages, setMessages] = useState<ChatMessageItem[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [actionMessage, setActionMessage] = useState("")
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const chatStats = useMemo(() => {
     const assistantWithProvider = [...messages]
@@ -154,8 +156,11 @@ export default function ChatbotPage() {
         content: item.content,
       }))
 
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
     setMessages((previous) => [...previous, userMessage])
     setInputValue("")
+    setActionMessage("")
     setIsLoading(true)
 
     try {
@@ -165,6 +170,7 @@ export default function ChatbotPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ message, history }),
+        signal: abortController.signal,
       })
 
       const streamProvider = response.headers.get("x-chat-provider")
@@ -224,19 +230,98 @@ export default function ChatbotPage() {
       }
 
       setMessages((previous) => [...previous, botResponse])
-    } catch {
+    } catch (error) {
+      if (abortController.signal.aborted) {
+        setMessages((previous) => [
+          ...previous,
+          {
+            role: "assistant",
+            content: "Đã dừng câu trả lời theo yêu cầu của bạn.",
+            timestamp: formatTime(),
+            provider: "fallback",
+          },
+        ])
+        return
+      }
+
       setMessages((previous) => [
         ...previous,
         {
           role: "assistant",
-          content: "Mình chưa thể xử lý câu hỏi lúc này. Hãy thử lại sau hoặc hỏi ngắn hơn.",
+          content:
+            error instanceof Error
+              ? `Mình chưa thể xử lý câu hỏi lúc này. Lỗi: ${error.message}`
+              : "Mình chưa thể xử lý câu hỏi lúc này. Hãy thử lại sau hoặc hỏi ngắn hơn.",
           timestamp: formatTime(),
           provider: "fallback",
         },
       ])
     } finally {
+      abortControllerRef.current = null
       setIsLoading(false)
     }
+  }
+
+  function stopStreaming() {
+    abortControllerRef.current?.abort()
+  }
+
+  async function saveFirstSource(message: ChatMessageItem) {
+    const source = message.sources?.find((item) => item.type === "vocabulary" || item.type === "grammar")
+    if (!source) {
+      setActionMessage("Chưa có nguồn từ vựng/ngữ pháp phù hợp để lưu.")
+      return
+    }
+
+    if (!window.confirm(`Lưu "${source.title}" vào ôn tập?`)) return
+
+    const response = await fetch("/api/saved-study-items", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: source.type,
+        sourceType: "chatbot-agent",
+        sourceId: source.id,
+        itemKey: source.id,
+        title: source.title,
+        note: "Được lưu từ Chatbot AI.",
+        rawPayload: {
+          source,
+          assistantContent: message.content,
+        },
+      }),
+    })
+    await readJsonResponse(response)
+    setActionMessage(`Đã lưu "${source.title}" vào ôn tập.`)
+  }
+
+  function createMiniQuiz(message: ChatMessageItem) {
+    if (!window.confirm("Tạo mini quiz 5 câu dựa trên câu trả lời này?")) return
+
+    const sourceTitles = message.sources?.map((source) => source.title).join(", ") || "nội dung vừa trao đổi"
+    void handleSend(`Hãy tạo mini quiz 5 câu trắc nghiệm dựa trên: ${sourceTitles}. Có đáp án và giải thích ngắn.`)
+  }
+
+  async function logChatActivity(message: ChatMessageItem) {
+    if (!window.confirm("Ghi cuộc trao đổi này vào lịch sử hoạt động học?")) return
+
+    const response = await fetch("/api/activity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "chatbot",
+        content: `Chatbot AI: ${message.content.slice(0, 180)}`,
+        topic: "AI tutor",
+        result: "Đã học",
+        durationMinutes: 5,
+      }),
+    })
+    await readJsonResponse(response)
+    setActionMessage("Đã ghi hoạt động học vào lịch sử.")
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -255,23 +340,38 @@ export default function ChatbotPage() {
               Chatbot AI
             </h1>
             <p className="text-muted-foreground">
-              Hỏi đáp tiếng Nhật với RAG từ từ vựng, ngữ pháp, quiz và bài đọc đã import.
+              Study Agent dùng RAG, tiến độ học và công cụ đọc dữ liệu để tư vấn tiếng Nhật.
             </p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-fit"
-            onClick={() => {
-              setMessages(initialMessages)
-              setInputValue("")
-            }}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Xóa hội thoại
-          </Button>
+          <div className="flex gap-2">
+            {isLoading && (
+              <Button type="button" variant="outline" size="sm" className="w-fit" onClick={stopStreaming}>
+                <Square className="mr-2 h-4 w-4" />
+                Dừng
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-fit"
+              onClick={() => {
+                setMessages(initialMessages)
+                setInputValue("")
+                setActionMessage("")
+              }}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Xóa hội thoại
+            </Button>
+          </div>
         </div>
+
+        {actionMessage && (
+          <div className="mb-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+            {actionMessage}
+          </div>
+        )}
 
         <Card className="flex min-h-0 flex-1 flex-col">
           <ScrollArea className="min-h-0 flex-1 p-4">
@@ -284,6 +384,9 @@ export default function ChatbotPage() {
                   timestamp={message.timestamp}
                   sources={message.sources}
                   onListen={() => speak(message.content)}
+                  onSave={() => void saveFirstSource(message)}
+                  onCreateQuiz={() => createMiniQuiz(message)}
+                  onLogActivity={() => void logChatActivity(message)}
                 />
               ))}
               {isLoading && !messages[messages.length - 1]?.provider && (
@@ -292,10 +395,8 @@ export default function ChatbotPage() {
                     <span className="text-xs font-bold text-accent-foreground">AI</span>
                   </div>
                   <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-3">
-                    <div className="flex gap-1 text-muted-foreground">
-                      <span className="animate-bounce">•</span>
-                      <span className="animate-bounce [animation-delay:0.2s]">•</span>
-                      <span className="animate-bounce [animation-delay:0.4s]">•</span>
+                    <div className="text-sm text-muted-foreground">
+                      Đang xem nguồn RAG, tiến độ học và công cụ phù hợp...
                     </div>
                   </div>
                 </div>
@@ -366,6 +467,11 @@ export default function ChatbotPage() {
                 <span className="text-muted-foreground">Câu hỏi hôm nay</span>
                 <span className="font-medium">{chatStats.questionCount}</span>
               </div>
+              {isLoading && (
+                <div className="mt-2 rounded-md bg-background px-2 py-1 text-xs text-muted-foreground">
+                  Agent có thể đang gọi công cụ đọc hồ sơ, tiến độ, ngữ pháp hoặc bài đọc.
+                </div>
+              )}
             </div>
 
             {chatStats.sources.length ? (

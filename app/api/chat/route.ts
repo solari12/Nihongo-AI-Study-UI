@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamText } from "ai"
+import { stepCountIs, streamText } from "ai"
 import { getCurrentUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import {
@@ -9,6 +9,7 @@ import {
   type ChatHistoryMessage,
 } from "@/lib/rag/chat-prompt"
 import { buildFallbackAnswer, retrieveSources, retrieveSourcesFromDatabase } from "@/lib/rag/retriever"
+import { createStudyAgentTools } from "@/lib/rag/study-agent-tools"
 
 type ChatRequest = {
   message?: string
@@ -129,6 +130,8 @@ export async function POST(request: NextRequest) {
     model: openrouter(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
     system: nihongoTutorSystemPrompt,
     prompt,
+    tools: createStudyAgentTools(user),
+    stopWhen: stepCountIs(5),
     temperature: 0.25,
     onFinish: async ({ text }) => {
       await logChat({

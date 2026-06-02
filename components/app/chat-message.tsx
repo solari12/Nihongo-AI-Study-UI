@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { BookmarkPlus, FileText, HelpCircle, Newspaper, Volume2 } from "lucide-react"
+import { BookmarkPlus, CheckCircle2, FileText, HelpCircle, Newspaper, Volume2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type ChatSource = {
@@ -20,6 +20,7 @@ interface ChatMessageProps {
   showActions?: boolean
   onSave?: () => void
   onCreateQuiz?: () => void
+  onLogActivity?: () => void
   onListen?: () => void
 }
 
@@ -45,6 +46,7 @@ export function ChatMessage({
   showActions = true,
   onSave,
   onCreateQuiz,
+  onLogActivity,
   onListen,
 }: ChatMessageProps) {
   const isUser = role === "user"
@@ -84,7 +86,7 @@ export function ChatMessage({
         )}
 
         {!isUser && showActions && (
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
@@ -101,7 +103,7 @@ export function ChatMessage({
               className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
             >
               <BookmarkPlus className="mr-1 h-3 w-3" />
-              Lưu
+              Lưu nguồn
             </Button>
             <Button
               variant="ghost"
@@ -111,6 +113,15 @@ export function ChatMessage({
             >
               <HelpCircle className="mr-1 h-3 w-3" />
               Tạo quiz
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onLogActivity}
+              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <CheckCircle2 className="mr-1 h-3 w-3" />
+              Ghi hoạt động
             </Button>
           </div>
         )}
