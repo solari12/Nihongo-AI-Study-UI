@@ -49,6 +49,57 @@ function encodeHeaderJson(value: unknown) {
   return Buffer.from(JSON.stringify(value), "utf8").toString("base64url")
 }
 
+function createTextResponse({
+  textStream,
+  fallbackText,
+  onComplete,
+  headers,
+}: {
+  textStream: AsyncIterable<string>
+  fallbackText: string
+  onComplete: (text: string) => Promise<void>
+  headers: HeadersInit
+}) {
+  const encoder = new TextEncoder()
+
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let finalText = ""
+
+      try {
+        for await (const chunk of textStream) {
+          finalText += chunk
+          controller.enqueue(encoder.encode(chunk))
+        }
+
+        if (finalText.trim().length < 8) {
+          finalText = fallbackText
+          controller.enqueue(encoder.encode(fallbackText))
+        }
+
+        await onComplete(finalText)
+      } catch (error) {
+        const errorText =
+          error instanceof Error
+            ? `Mình chưa thể tạo câu trả lời từ model lúc này. Lỗi: ${error.message}\n\n${fallbackText}`
+            : fallbackText
+        finalText = errorText
+        controller.enqueue(encoder.encode(errorText))
+        await onComplete(finalText)
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      ...headers,
+    },
+  })
+}
+
 function normalizeIntent(value: string) {
   return value
     .toLowerCase()
@@ -177,18 +228,20 @@ export async function POST(request: NextRequest) {
         }
       : {}),
     temperature: 0.25,
-    onFinish: async ({ text }) => {
+  })
+
+  return createTextResponse({
+    textStream: result.textStream,
+    fallbackText: buildFallbackAnswer(message, sources),
+    onComplete: async (answer) => {
       await logChat({
         userId: user.id,
         message,
-        answer: text,
+        answer,
         provider: "openrouter",
         sources: sourcePayload,
       })
     },
-  })
-
-  return result.toTextStreamResponse({
     headers: {
       "x-chat-provider": "openrouter",
       "x-chat-sources": encodeHeaderJson(sourcePayload),

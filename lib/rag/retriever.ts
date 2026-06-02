@@ -76,10 +76,36 @@ function isQuizIntent(query: string) {
   return normalized.includes("quiz") || normalized.includes("kiểm tra") || normalized.includes("dap an")
 }
 
+function isGrammarIntent(query: string) {
+  const normalized = normalize(query)
+  return (
+    normalized.includes("giải thích") ||
+    normalized.includes("giai thich") ||
+    normalized.includes("mẫu câu") ||
+    normalized.includes("mau cau") ||
+    normalized.includes("ngữ pháp") ||
+    normalized.includes("ngu phap") ||
+    normalized.includes("cấu trúc") ||
+    normalized.includes("cau truc") ||
+    /[~〜]/.test(query) ||
+    query.includes(" は ") ||
+    query.includes(" が ") ||
+    query.includes(" を ") ||
+    query.includes(" に ") ||
+    query.includes(" です")
+  )
+}
+
 function typeBoost(type: RagSource["type"], query: string) {
   if (isVocabularyMeaningQuery(query)) {
     if (type === "vocabulary") return 40
     if (type === "quiz") return -10
+  }
+
+  if (isGrammarIntent(query)) {
+    if (type === "grammar") return 45
+    if (type === "vocabulary") return -8
+    if (type === "news") return -8
   }
 
   if (isQuizIntent(query)) {
