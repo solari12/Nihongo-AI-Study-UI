@@ -5375,39 +5375,6 @@
       }
     },
     {
-      "japanese": "作文",
-      "hiragana": "さくぶん",
-      "romaji": "sakubun",
-      "vietnamese": "[Cần dịch] writing (an essay, prose, etc.); composition; formal writing with little real meaning",
-      "type": "Động từ",
-      "topic": "JLPT N5",
-      "source": {
-        "provider": "jisho",
-        "slug": "作文",
-        "url": "https://jisho.org/search/%E4%BD%9C%E6%96%87",
-        "englishDefinitions": [
-          "writing (an essay, prose, etc.)",
-          "composition",
-          "formal writing with little real meaning",
-          "Composition (language)"
-        ],
-        "partsOfSpeech": [
-          "Noun",
-          "Suru verb",
-          "Intransitive verb",
-          "Noun",
-          "Suru verb",
-          "Intransitive verb",
-          "Wikipedia definition"
-        ],
-        "isCommon": true
-      },
-      "example": {
-        "japanese": "例文を追加してください。",
-        "vietnamese": "Cần bổ sung ví dụ."
-      }
-    },
-    {
       "japanese": "散歩",
       "hiragana": "さんぽ",
       "romaji": "sanpo",

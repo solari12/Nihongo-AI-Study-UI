@@ -8,6 +8,7 @@ type DbVocabulary = {
   vietnamese: string
   type: string
   topic: string
+  imageUrl?: string | null
   exampleJapanese: string
   exampleVietnamese: string
 }
@@ -47,6 +48,7 @@ export function toVocabularyItem(item: DbVocabulary): VocabularyItem {
     vietnamese: item.vietnamese,
     type: item.type,
     topic: item.topic,
+    imageUrl: item.imageUrl ?? null,
     example: {
       japanese: item.exampleJapanese,
       vietnamese: item.exampleVietnamese,
@@ -101,8 +103,8 @@ export function toQuizQuestionItem(item: DbQuizQuestion): QuizQuestionItem {
 }
 
 export function toDbGrammarStatus(status: string) {
-  if (status === "completed" || status.includes("hoÃ n") || status.includes("hoàn")) return "completed" as const
-  if (status === "in_progress" || status.includes("Äang") || status.includes("Đang")) return "in_progress" as const
+  if (status === "completed" || status.includes("hoàn")) return "completed" as const
+  if (status === "in_progress" || status.includes("Đang")) return "in_progress" as const
   return "not_started" as const
 }
 

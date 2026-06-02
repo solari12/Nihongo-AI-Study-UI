@@ -139,15 +139,14 @@ export function useStudyProgress() {
       learnedVocabulary: progress.learnedVocabularyIds.length,
       totalVocabulary: vocabularyData.length,
       reviewVocabulary: progress.reviewVocabularyIds.length,
-      completedGrammar: grammarData.filter((item) => item.status === "Đã hoàn thành").length,
+      completedGrammar: 0,
       totalGrammar: grammarData.length,
       quizAttempts: progress.quizAttempts.length,
       averageQuizScore,
       latestQuizScore: latestAttempt?.percentage ?? 0,
       n5Progress: Math.round(
         ((progress.learnedVocabularyIds.length / vocabularyData.length) * 0.45 +
-          (grammarData.filter((item) => item.status === "Đã hoàn thành").length / grammarData.length) *
-            0.35 +
+          0 +
           ((latestAttempt?.percentage ?? 0) / 100) * 0.2) *
           100
       ),

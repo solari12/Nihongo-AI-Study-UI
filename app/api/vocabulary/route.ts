@@ -12,6 +12,7 @@ const vocabularySchema = z.object({
   vietnamese: z.string().trim().min(1),
   type: z.string().trim().min(1),
   topic: z.string().trim().min(1),
+  imageUrl: z.string().trim().url().optional().nullable().or(z.literal("")),
   example: z.object({
     japanese: z.string().trim().min(1),
     vietnamese: z.string().trim().min(1),
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
         vietnamese: item.vietnamese,
         type: item.type,
         topic: item.topic,
+        imageUrl: item.imageUrl || null,
         exampleJapanese: item.example.japanese,
         exampleVietnamese: item.example.vietnamese,
       },
@@ -93,6 +95,7 @@ export async function PUT(request: NextRequest) {
         vietnamese: item.vietnamese,
         type: item.type,
         topic: item.topic,
+        imageUrl: item.imageUrl || null,
         exampleJapanese: item.example.japanese,
         exampleVietnamese: item.example.vietnamese,
       },

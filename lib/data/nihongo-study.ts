@@ -6,8 +6,10 @@ export type VocabularyItem = {
   vietnamese: string
   type: string
   topic: string
+  imageUrl?: string | null
   example: {
     japanese: string
+    hiragana?: string
     vietnamese: string
   }
 }
