@@ -18,6 +18,7 @@ type ChatSource = {
 }
 
 type ChatMessageItem = {
+  id?: string
   role: "user" | "assistant"
   content: string
   timestamp: string
@@ -141,8 +142,10 @@ export default function ChatbotPage() {
   async function handleSend(nextMessage = inputValue) {
     const message = nextMessage.trim()
     if (!message || isLoading) return
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
     const userMessage: ChatMessageItem = {
+      id: `user-${requestId}`,
       role: "user",
       content: message,
       timestamp: formatTime(),
@@ -177,10 +180,12 @@ export default function ChatbotPage() {
 
       if (streamProvider === "openrouter" && response.body) {
         const streamedSources = decodeHeaderJson<ChatSource[]>(response.headers.get("x-chat-sources"), [])
+        const assistantMessageId = `assistant-${requestId}`
 
         setMessages((previous) => [
           ...previous,
           {
+            id: assistantMessageId,
             role: "assistant",
             content: "",
             timestamp: formatTime(),
@@ -193,35 +198,27 @@ export default function ChatbotPage() {
 
         if (streamedText.trim().length < 8) {
           setMessages((previous) => {
-            const nextMessages = [...previous]
-            const lastMessage = nextMessages[nextMessages.length - 1]
-
-            if (lastMessage?.role === "assistant" && lastMessage.provider === "openrouter") {
-              nextMessages[nextMessages.length - 1] = {
-                ...lastMessage,
+            return previous.map((item) => {
+              if (item.id !== assistantMessageId) return item
+              return {
+                ...item,
                 content:
                   "Mình đã tìm được nguồn nhưng model chưa tạo câu trả lời hoàn chỉnh. Hãy gửi lại câu hỏi ngắn hơn hoặc thử tắt/bật lại dev server để tải phiên bản chatbot mới.",
                 provider: "fallback",
               }
-            }
-
-            return nextMessages
+            })
           })
           return
         }
 
         setMessages((previous) => {
-          const nextMessages = [...previous]
-          const lastMessage = nextMessages[nextMessages.length - 1]
-
-          if (lastMessage?.role === "assistant" && lastMessage.provider === "openrouter") {
-            nextMessages[nextMessages.length - 1] = {
-              ...lastMessage,
+          return previous.map((item) => {
+            if (item.id !== assistantMessageId) return item
+            return {
+              ...item,
               content: streamedText,
             }
-          }
-
-          return nextMessages
+          })
         })
 
         return
@@ -229,6 +226,7 @@ export default function ChatbotPage() {
 
       const data = await readJsonResponse<ChatResponse>(response)
       const botResponse: ChatMessageItem = {
+        id: `assistant-${requestId}`,
         role: "assistant",
         content:
           data.provider === "fallback"
@@ -388,7 +386,7 @@ export default function ChatbotPage() {
             <div className="space-y-6">
               {messages.map((message, index) => (
                 <ChatMessage
-                  key={`${message.role}-${index}`}
+                  key={message.id ?? `${message.role}-${index}`}
                   role={message.role}
                   content={message.content || (message.provider === "openrouter" ? "Đang trả lời..." : "")}
                   timestamp={message.timestamp}
