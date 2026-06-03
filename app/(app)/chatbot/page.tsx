@@ -1,18 +1,23 @@
 "use client"
 
-import { KeyboardEvent, useMemo, useRef, useState } from "react"
-import { ChatMessage } from "@/components/app/chat-message"
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from "react"
+import { ChatMessage, type ChatQuizState } from "@/components/app/chat-message"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
+import { CHAT_ACTIVE_SOURCE_STORAGE_KEY, type ActiveChatSource } from "@/lib/chat/active-source"
+import { type ChatQuizCard } from "@/lib/chat/quiz"
 import { readJsonResponse } from "@/lib/http"
-import { BookOpen, FileText, HelpCircle, Newspaper, RotateCcw, Send, Sparkles, Square } from "lucide-react"
+import { useI18n } from "@/lib/i18n"
+import { BookOpen, ChevronUp, FileText, HelpCircle, MessageSquare, Newspaper, Plus, Send, Sparkles, Square, Trash2, X } from "lucide-react"
 
 type ChatSource = {
   id: string
+  sourceId?: string
   title: string
+  href?: string
   type: "vocabulary" | "grammar" | "quiz" | "news"
   score: number
 }
@@ -24,33 +29,49 @@ type ChatMessageItem = {
   timestamp: string
   provider?: "openrouter" | "fallback"
   sources?: ChatSource[]
+  quizCards?: ChatQuizCard[]
+  quizState?: ChatQuizState
+  isStreaming?: boolean
 }
 
 type ChatResponse = {
   answer: string
   provider: "openrouter" | "fallback"
   sources: ChatSource[]
+  quizCards?: ChatQuizCard[]
+  activeSource?: ActiveChatSource | null
+  conversationId: string
+  userMessageId: string
+  assistantMessageId: string
 }
 
-const suggestedQuestions = [
-  "学生 nghĩa là gì? Cho ví dụ dễ nhớ.",
-  "Giải thích mẫu câu N は N です cho người mới học.",
-  "Phân biệt これ, それ và あれ.",
-  "Tôi hay sai trợ từ は và が, nên ôn gì trước?",
-  "Tôi muốn thi N4 vào tháng 7 nhưng mới xong N5, phải làm sao?",
-]
+type ChatConversationSummary = {
+  id: string
+  title: string
+  createdAt: string
+  updatedAt: string
+  messageCount: number
+  lastMessage: string | null
+}
 
-const initialMessages: ChatMessageItem[] = [
-  {
-    role: "assistant",
-    content: [
-      "Xin chào, mình là trợ lý học tiếng Nhật của Nihongo AI Study.",
-      "",
-      "Mình có thể tra cứu kho từ vựng, ngữ pháp, quiz, bài đọc và tiến độ học để trả lời kèm nguồn. Với câu hỏi về mục tiêu học, mình sẽ xem dữ liệu hiện có trước khi đề xuất kế hoạch.",
-    ].join("\n"),
-    timestamp: "Bây giờ",
-  },
-]
+type StoredChatMessage = {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  provider?: "openrouter" | "fallback" | null
+  sources?: ChatSource[] | null
+  quizCards?: ChatQuizCard[] | null
+  quizState?: ChatQuizState | null
+  createdAt: string
+}
+
+const suggestedQuestionKeys = [
+  "chatbot.suggestion.word",
+  "chatbot.suggestion.pattern",
+  "chatbot.suggestion.kosoado",
+  "chatbot.suggestion.particles",
+  "chatbot.suggestion.plan",
+] as const
 
 function formatTime() {
   return new Date().toLocaleTimeString("vi-VN", {
@@ -59,11 +80,18 @@ function formatTime() {
   })
 }
 
-function sourceLabel(type: ChatSource["type"]) {
-  if (type === "grammar") return "Ngữ pháp"
-  if (type === "quiz") return "Quiz"
-  if (type === "news") return "Bài đọc"
-  return "Từ vựng"
+function formatTimeFromIso(value: string) {
+  return new Date(value).toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+function sourceLabel(type: ChatSource["type"], t: ReturnType<typeof useI18n>["t"]) {
+  if (type === "grammar") return t("chatbot.source.grammar")
+  if (type === "quiz") return t("chatbot.source.quiz")
+  if (type === "news") return t("chatbot.source.news")
+  return t("chatbot.source.vocabulary")
 }
 
 function sourceIcon(type: ChatSource["type"]) {
@@ -101,16 +129,118 @@ function decodeHeaderJson<T>(value: string | null, fallback: T) {
 }
 
 export default function ChatbotPage() {
+  const { t } = useI18n()
+  const initialMessages = useMemo<ChatMessageItem[]>(
+    () => [
+      {
+        role: "assistant",
+        content: [t("chatbot.welcome.title"), "", t("chatbot.welcome.description")].join("\n"),
+        timestamp: t("chatbot.now"),
+      },
+    ],
+    [t]
+  )
+  const suggestedQuestions = useMemo(() => suggestedQuestionKeys.map((key) => t(key)), [t])
   const [messages, setMessages] = useState<ChatMessageItem[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState("")
+  const [showSuggestions, setShowSuggestions] = useState(true)
+  const [activeSource, setActiveSource] = useState<ActiveChatSource | null>(null)
+  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [conversations, setConversations] = useState<ChatConversationSummary[]>([])
+  const [loadingConversations, setLoadingConversations] = useState(true)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  async function refreshConversations() {
+    const response = await fetch("/api/chat/conversations", { cache: "no-store" })
+    const data = await readJsonResponse<{ items: ChatConversationSummary[] }>(response)
+    setConversations(data.items)
+    return data.items
+  }
+
+  async function openConversation(id: string) {
+    const response = await fetch(`/api/chat/conversations/${id}`, { cache: "no-store" })
+    const data = await readJsonResponse<{
+      conversation: ChatConversationSummary
+      messages: StoredChatMessage[]
+    }>(response)
+
+    setConversationId(data.conversation.id)
+    setMessages(
+      data.messages.map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        timestamp: formatTimeFromIso(message.createdAt),
+        provider: message.provider ?? undefined,
+        sources: message.sources ?? undefined,
+        quizCards: message.quizCards ?? undefined,
+        quizState: message.quizState ?? undefined,
+      }))
+    )
+    setActionMessage("")
+    setShowSuggestions(data.messages.length === 0)
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLatestConversation() {
+      try {
+        const items = await refreshConversations()
+        if (cancelled) return
+        if (items[0]) {
+          await openConversation(items[0].id)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setActionMessage(
+            error instanceof Error
+              ? `${t("chatbot.history.loadError")} ${error.message}`
+              : t("chatbot.history.loadError")
+          )
+        }
+      } finally {
+        if (!cancelled) setLoadingConversations(false)
+      }
+    }
+
+    void loadLatestConversation()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const stored = window.sessionStorage.getItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY)
+    if (!stored) return
+
+    try {
+      const parsed = JSON.parse(stored) as ActiveChatSource
+      if (parsed.type && parsed.id && parsed.title) {
+        setActiveSource(parsed)
+        setActionMessage(`${t("chatbot.activeArticle")}: ${parsed.title}`)
+      }
+    } catch {
+      window.sessionStorage.removeItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (activeSource) {
+      window.sessionStorage.setItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY, JSON.stringify(activeSource))
+      return
+    }
+
+    window.sessionStorage.removeItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY)
+  }, [activeSource])
 
   const chatStats = useMemo(() => {
     const assistantWithProvider = [...messages]
       .reverse()
-      .find((message) => message.role === "assistant" && message.provider)
+      .find((message) => message.role === "assistant" && message.provider && !message.isStreaming)
     const sources = assistantWithProvider?.sources ?? []
     const counts = sources.reduce<Record<ChatSource["type"], number>>(
       (nextCounts, source) => {
@@ -131,13 +261,13 @@ export default function ChatbotPage() {
         assistantWithProvider?.provider === "openrouter"
           ? "OpenRouter"
           : assistantWithProvider?.provider === "fallback"
-            ? "Fallback nội bộ"
-            : "Chưa có",
+            ? t("chatbot.provider.fallback")
+            : t("chatbot.provider.none"),
       questionCount: messages.filter((message) => message.role === "user").length,
       sources,
       sourceCounts: counts,
     }
-  }, [messages])
+  }, [messages, t])
 
   async function handleSend(nextMessage = inputValue) {
     const message = nextMessage.trim()
@@ -172,13 +302,13 @@ export default function ChatbotPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, history }),
+        body: JSON.stringify({ message, history, activeSource, conversationId }),
         signal: abortController.signal,
       })
 
       const streamProvider = response.headers.get("x-chat-provider")
 
-      if (streamProvider === "openrouter" && response.body) {
+      if (false && streamProvider === "openrouter" && response.body) {
         const streamedSources = decodeHeaderJson<ChatSource[]>(response.headers.get("x-chat-sources"), [])
         const assistantMessageId = `assistant-${requestId}`
 
@@ -191,10 +321,32 @@ export default function ChatbotPage() {
             timestamp: formatTime(),
             provider: "openrouter",
             sources: streamedSources,
+            isStreaming: true,
           },
         ])
 
-        const streamedText = await response.text()
+        const reader = response.body!.getReader()
+        const decoder = new TextDecoder()
+        let streamedText = ""
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          streamedText += decoder.decode(value, { stream: true })
+          setMessages((previous) => {
+            return previous.map((item) => {
+              if (item.id !== assistantMessageId) return item
+              return {
+                ...item,
+                content: streamedText,
+                isStreaming: true,
+              }
+            })
+          })
+        }
+
+        streamedText += decoder.decode()
 
         if (streamedText.trim().length < 8) {
           setMessages((previous) => {
@@ -202,9 +354,9 @@ export default function ChatbotPage() {
               if (item.id !== assistantMessageId) return item
               return {
                 ...item,
-                content:
-                  "Mình đã tìm được nguồn nhưng model chưa tạo câu trả lời hoàn chỉnh. Hãy gửi lại câu hỏi ngắn hơn hoặc thử tắt/bật lại dev server để tải phiên bản chatbot mới.",
+                content: t("chatbot.streamEmpty"),
                 provider: "fallback",
+                isStreaming: false,
               }
             })
           })
@@ -217,6 +369,7 @@ export default function ChatbotPage() {
             return {
               ...item,
               content: streamedText,
+              isStreaming: false,
             }
           })
         })
@@ -230,21 +383,36 @@ export default function ChatbotPage() {
         role: "assistant",
         content:
           data.provider === "fallback"
-            ? `${data.answer}\n\nGhi chú: câu trả lời này đang dùng fallback vì OpenRouter chưa có phản hồi hoặc chưa cấu hình key.`
+            ? `${data.answer}\n\n${t("chatbot.fallbackNote")}`
             : data.answer,
         timestamp: formatTime(),
         provider: data.provider,
         sources: data.sources,
+        quizCards: data.quizCards,
       }
 
-      setMessages((previous) => [...previous, botResponse])
+      if (data.activeSource !== undefined) {
+        setActiveSource(data.activeSource)
+      }
+      setConversationId(data.conversationId)
+
+      setMessages((previous) => [
+        ...previous.map((item) => (item.id === userMessage.id ? { ...item, id: data.userMessageId } : item)),
+        {
+          ...botResponse,
+          id: data.assistantMessageId,
+        },
+      ])
+      void refreshConversations().catch((error) => {
+        console.error("Failed to refresh chat conversations", error)
+      })
     } catch (error) {
       if (abortController.signal.aborted) {
         setMessages((previous) => [
           ...previous,
           {
             role: "assistant",
-            content: "Đã dừng câu trả lời theo yêu cầu của bạn.",
+            content: t("chatbot.stopped"),
             timestamp: formatTime(),
             provider: "fallback",
           },
@@ -258,8 +426,8 @@ export default function ChatbotPage() {
           role: "assistant",
           content:
             error instanceof Error
-              ? `Mình chưa thể xử lý câu hỏi lúc này. Lỗi: ${error.message}`
-              : "Mình chưa thể xử lý câu hỏi lúc này. Hãy thử lại sau hoặc hỏi ngắn hơn.",
+              ? `${t("chatbot.errorWithMessage")} ${error.message}`
+              : t("chatbot.errorFallback"),
           timestamp: formatTime(),
           provider: "fallback",
         },
@@ -277,7 +445,7 @@ export default function ChatbotPage() {
   async function saveFirstSource(message: ChatMessageItem) {
     const source = message.sources?.find((item) => item.type === "vocabulary" || item.type === "grammar")
     if (!source) {
-      setActionMessage("Chưa có nguồn từ vựng/ngữ pháp phù hợp để lưu.")
+      setActionMessage(t("chatbot.saveSourceMissing"))
       return
     }
 
@@ -294,7 +462,7 @@ export default function ChatbotPage() {
         sourceId: source.id,
         itemKey: source.id,
         title: source.title,
-        note: "Được lưu từ Chatbot AI.",
+        note: t("chatbot.saveSourceNote"),
         rawPayload: {
           source,
           assistantContent: message.content,
@@ -302,18 +470,18 @@ export default function ChatbotPage() {
       }),
     })
     await readJsonResponse(response)
-    setActionMessage(`Đã lưu "${source.title}" vào ôn tập.`)
+    setActionMessage(`${t("chatbot.saveSourcePrefix")} "${source.title}" ${t("chatbot.saveSourceSuffix")}`)
   }
 
   function createMiniQuiz(message: ChatMessageItem) {
-    if (!window.confirm("Tạo mini quiz 5 câu dựa trên câu trả lời này?")) return
+    if (!window.confirm(t("chatbot.createQuizConfirm"))) return
 
-    const sourceTitles = message.sources?.map((source) => source.title).join(", ") || "nội dung vừa trao đổi"
-    void handleSend(`Hãy tạo mini quiz 5 câu trắc nghiệm dựa trên: ${sourceTitles}. Có đáp án và giải thích ngắn.`)
+    const sourceTitles = message.sources?.map((source) => source.title).join(", ") || t("chatbot.quizSourceFallback")
+    void handleSend(`${t("chatbot.createQuizPromptPrefix")} ${sourceTitles}. ${t("chatbot.createQuizPromptSuffix")}`)
   }
 
   async function logChatActivity(message: ChatMessageItem) {
-    if (!window.confirm("Ghi cuộc trao đổi này vào lịch sử hoạt động học?")) return
+    if (!window.confirm(t("chatbot.logActivityConfirm"))) return
 
     const response = await fetch("/api/activity", {
       method: "POST",
@@ -324,12 +492,91 @@ export default function ChatbotPage() {
         type: "chatbot",
         content: `Chatbot AI: ${message.content.slice(0, 180)}`,
         topic: "AI tutor",
-        result: "Đã học",
+        result: t("chatbot.activityResultLearned"),
         durationMinutes: 5,
       }),
     })
     await readJsonResponse(response)
-    setActionMessage("Đã ghi hoạt động học vào lịch sử.")
+    setActionMessage(t("chatbot.activitySaved"))
+  }
+
+  async function logQuizActivity(message: ChatMessageItem, result: { correctCount: number; total: number; percentage: number }) {
+    const response = await fetch("/api/activity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "chatbot_quiz",
+        content: `Chatbot quiz: ${message.content.slice(0, 180)}`,
+        topic: "AI tutor",
+        result: `${result.correctCount}/${result.total} ${t("chatbot.correctUnit")}`,
+        score: result.percentage,
+        durationMinutes: 5,
+      }),
+    })
+
+    await readJsonResponse(response)
+    setActionMessage(
+      `${t("chatbot.quizSavePrefix")} ${result.correctCount}/${result.total} ${t("chatbot.correctUnit")} (${result.percentage}%).`
+    )
+  }
+
+  function startNewChat() {
+    setConversationId(null)
+    setMessages(initialMessages)
+    setInputValue("")
+    setActionMessage(t("chatbot.newStarted"))
+    setActiveSource(null)
+    setShowSuggestions(true)
+  }
+
+  async function deleteConversation(id: string) {
+    if (!window.confirm(t("chatbot.history.deleteOneConfirm"))) return
+
+    const response = await fetch(`/api/chat/conversations/${id}`, {
+      method: "DELETE",
+    })
+    await readJsonResponse(response)
+    const items = await refreshConversations()
+
+    if (conversationId === id) {
+      if (items[0]) {
+        await openConversation(items[0].id)
+      } else {
+        startNewChat()
+      }
+    }
+  }
+
+  async function deleteAllConversations() {
+    if (!window.confirm(t("chatbot.history.deleteAllConfirm"))) return
+
+    const response = await fetch("/api/chat/conversations", {
+      method: "DELETE",
+    })
+    await readJsonResponse(response)
+    setConversations([])
+    startNewChat()
+  }
+
+  async function updateQuizState(message: ChatMessageItem, quizState: ChatQuizState) {
+    if (!message.id) return
+
+    setMessages((previous) =>
+      previous.map((item) => (item.id === message.id ? { ...item, quizState } : item))
+    )
+
+    if (!conversationId) return
+
+    const response = await fetch(`/api/chat/conversations/${conversationId}/messages/${message.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ quizState }),
+    })
+    await readJsonResponse(response)
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -339,23 +586,97 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-6">
+    <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 md:flex-row md:gap-6">
+      <aside className="w-full shrink-0 md:w-72">
+        <Card className="flex max-h-72 flex-col md:h-full md:max-h-none">
+          <CardHeader className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageSquare className="h-4 w-4" />
+                {t("chatbot.history.title")}
+              </CardTitle>
+              <Button type="button" variant="outline" size="icon" className="h-8 w-8" onClick={startNewChat}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="flex min-h-0 flex-1 flex-col gap-3">
+            <ScrollArea className="min-h-0 flex-1 pr-2">
+              <div className="space-y-2">
+                {loadingConversations ? (
+                  <div className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                    {t("chatbot.history.loading")}
+                  </div>
+                ) : conversations.length ? (
+                  conversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      className={`group rounded-lg border p-2 transition ${
+                        conversation.id === conversationId ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="w-full text-left"
+                        onClick={() => void openConversation(conversation.id)}
+                        disabled={isLoading}
+                      >
+                        <div className="line-clamp-1 text-sm font-medium">{conversation.title}</div>
+                        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                          {conversation.lastMessage ?? `${conversation.messageCount} ${t("chatbot.messageUnit")}`}
+                        </div>
+                      </button>
+                      <div className="mt-2 flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={() => void deleteConversation(conversation.id)}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                    {t("chatbot.history.empty")}
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+              onClick={() => void deleteAllConversations()}
+              disabled={!conversations.length || isLoading}
+            >
+              <Trash2 className="h-4 w-4" />
+              {t("chatbot.history.deleteAll")}
+            </Button>
+          </CardContent>
+        </Card>
+      </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-bold">
               <Sparkles className="h-6 w-6 text-accent" />
-              Chatbot AI
+              {t("chatbot.title")}
             </h1>
             <p className="text-muted-foreground">
-              Study Agent dùng RAG, tiến độ học và công cụ đọc dữ liệu để tư vấn tiếng Nhật.
+              {t("chatbot.description")}
             </p>
           </div>
           <div className="flex gap-2">
             {isLoading && (
               <Button type="button" variant="outline" size="sm" className="w-fit" onClick={stopStreaming}>
                 <Square className="mr-2 h-4 w-4" />
-                Dừng
+                {t("chatbot.stop")}
               </Button>
             )}
             <Button
@@ -363,17 +684,35 @@ export default function ChatbotPage() {
               variant="outline"
               size="sm"
               className="w-fit"
-              onClick={() => {
-                setMessages(initialMessages)
-                setInputValue("")
-                setActionMessage("")
-              }}
+              onClick={startNewChat}
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Xóa hội thoại
+              <Plus className="mr-2 h-4 w-4" />
+              {t("chatbot.new")}
             </Button>
           </div>
         </div>
+
+        {activeSource && (
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border bg-muted/35 px-3 py-2 text-sm">
+            <Badge variant="secondary" className="gap-1 rounded-full">
+              {activeSource.type === "news" ? <Newspaper className="h-3.5 w-3.5" /> : <BookOpen className="h-3.5 w-3.5" />}
+              {t("chatbot.activeSource")}: {activeSource.title}
+            </Badge>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+              onClick={() => {
+                setActiveSource(null)
+                setActionMessage(t("chatbot.sourceCleared"))
+              }}
+            >
+              <X className="h-3.5 w-3.5" />
+              {t("chatbot.clearSource")}
+            </Button>
+          </div>
+        )}
 
         {actionMessage && (
           <div className="mb-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
@@ -381,20 +720,25 @@ export default function ChatbotPage() {
           </div>
         )}
 
-        <Card className="flex min-h-0 flex-1 flex-col">
+        <Card className="relative flex min-h-0 flex-1 flex-col">
           <ScrollArea className="min-h-0 flex-1 p-4">
             <div className="space-y-6">
               {messages.map((message, index) => (
                 <ChatMessage
                   key={message.id ?? `${message.role}-${index}`}
                   role={message.role}
-                  content={message.content || (message.provider === "openrouter" ? "Đang trả lời..." : "")}
+                  content={message.content || (message.provider === "openrouter" ? t("chatbot.answering") : "")}
                   timestamp={message.timestamp}
-                  sources={message.sources}
+                  sources={message.isStreaming ? undefined : message.sources}
+                  quizCards={message.isStreaming ? undefined : message.quizCards}
+                  quizState={message.quizState}
+                  showActions={!message.isStreaming}
                   onListen={() => speak(message.content)}
                   onSave={() => void saveFirstSource(message)}
                   onCreateQuiz={() => createMiniQuiz(message)}
                   onLogActivity={() => void logChatActivity(message)}
+                  onQuizSubmit={(result) => logQuizActivity(message, result)}
+                  onQuizStateChange={(state) => void updateQuizState(message, state)}
                 />
               ))}
               {isLoading && !messages[messages.length - 1]?.provider && (
@@ -404,7 +748,7 @@ export default function ChatbotPage() {
                   </div>
                   <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-3">
                     <div className="text-sm text-muted-foreground">
-                      Đang xem nguồn RAG, tiến độ học và công cụ phù hợp...
+                      {t("chatbot.agent.loading")}
                     </div>
                   </div>
                 </div>
@@ -412,8 +756,20 @@ export default function ChatbotPage() {
             </div>
           </ScrollArea>
 
-          <div className="border-t p-4">
-            <p className="mb-3 text-sm font-medium text-muted-foreground">Câu hỏi gợi ý</p>
+          {showSuggestions && (
+          <div className="border-t p-3">
+            <div className="mb-2 flex items-center justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 shrink-0 text-muted-foreground"
+                onClick={() => setShowSuggestions((value) => !value)}
+                aria-label="Toggle suggested questions"
+              >
+                <ChevronUp className="h-3.5 w-3.5 rotate-180" />
+              </Button>
+            </div>
             <div className="flex flex-wrap gap-2">
               {suggestedQuestions.map((question) => (
                 <Button
@@ -430,8 +786,21 @@ export default function ChatbotPage() {
               ))}
             </div>
           </div>
+          )}
 
-          <div className="border-t p-4">
+          <div className="relative border-t p-4">
+            {!showSuggestions && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="absolute right-4 top-0 h-6 w-6 -translate-y-1/2 rounded-full bg-background shadow-sm"
+                onClick={() => setShowSuggestions(true)}
+                aria-label="Show suggested questions"
+              >
+                <ChevronUp className="h-3.5 w-3.5" />
+              </Button>
+            )}
             <form
               onSubmit={(event) => {
                 event.preventDefault()
@@ -443,7 +812,7 @@ export default function ChatbotPage() {
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Nhập câu hỏi của bạn... Enter để gửi, Shift+Enter để xuống dòng."
+                placeholder={t("chatbot.input.placeholder")}
                 className="min-h-12 flex-1 resize-none"
                 maxLength={1500}
               />
@@ -460,24 +829,24 @@ export default function ChatbotPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <BookOpen className="h-4 w-4" />
-              Nguồn tham khảo
+              {t("chatbot.sources.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border bg-muted/35 p-3 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Provider</span>
+                <span className="text-muted-foreground">{t("chatbot.provider.label")}</span>
                 <Badge variant={chatStats.assistant?.provider === "openrouter" ? "default" : "secondary"}>
                   {chatStats.providerLabel}
                 </Badge>
               </div>
               <div className="mt-2 flex items-center justify-between">
-                <span className="text-muted-foreground">Câu hỏi hôm nay</span>
+                <span className="text-muted-foreground">{t("chatbot.questionCount")}</span>
                 <span className="font-medium">{chatStats.questionCount}</span>
               </div>
               {isLoading && (
                 <div className="mt-2 rounded-md bg-background px-2 py-1 text-xs text-muted-foreground">
-                  Agent có thể đang gọi công cụ đọc hồ sơ, tiến độ, ngữ pháp hoặc bài đọc.
+                  {t("chatbot.agent.toolsLoading")}
                 </div>
               )}
             </div>
@@ -490,7 +859,7 @@ export default function ChatbotPage() {
                     <div className="min-w-0">
                       <p className="text-sm font-medium leading-5">{source.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {sourceLabel(source.type)} · score {source.score}
+                        {sourceLabel(source.type, t)} · score {source.score}
                       </p>
                     </div>
                   </div>
@@ -498,16 +867,16 @@ export default function ChatbotPage() {
               ))
             ) : (
               <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                Chưa có nguồn nào. Hãy gửi một câu hỏi để hệ thống truy xuất dữ liệu.
+                {t("chatbot.sources.empty")}
               </div>
             )}
 
             <div className="border-t pt-4">
-              <h4 className="mb-2 text-sm font-medium">Nguồn gần nhất</h4>
+              <h4 className="mb-2 text-sm font-medium">{t("chatbot.sources.recent")}</h4>
               <div className="flex flex-wrap gap-2">
                 {(["vocabulary", "grammar", "quiz", "news"] as const).map((type) => (
                   <Badge key={type} variant="outline" className="rounded-full">
-                    {sourceLabel(type)} {chatStats.sourceCounts[type] ?? 0}
+                    {sourceLabel(type, t)} {chatStats.sourceCounts[type] ?? 0}
                   </Badge>
                 ))}
               </div>
