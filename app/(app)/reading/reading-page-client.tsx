@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState, useEffect } from "react"
 import {
   BookOpen,
@@ -12,6 +13,7 @@ import {
   FileQuestion,
   Languages,
   ListChecks,
+  MessageSquare,
   Plus,
   Search,
   Trash2,
@@ -21,6 +23,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
+import { CHAT_ACTIVE_SOURCE_STORAGE_KEY, type ActiveChatSource } from "@/lib/chat/active-source"
 import { cn } from "@/lib/utils"
 
 type ReadingArticle = {
@@ -300,6 +303,9 @@ function renderArticleToken(token: ArticleToken, terms: HighlightTerm[], showFur
 }
 
 export function ReadingPageClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const articleIdFromUrl = searchParams.get("article")
   const [articles, setArticles] = useState<ReadingArticle[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [query, setQuery] = useState("")
@@ -332,7 +338,11 @@ export function ReadingPageClient() {
         const data = (await response.json()) as { items: ReadingArticle[] }
         if (cancelled) return
         setArticles(data.items)
-        setSelectedId((current) => current ?? data.items[0]?.id ?? null)
+        setSelectedId((current) => {
+          if (current) return current
+          if (articleIdFromUrl && data.items.some((article) => article.id === articleIdFromUrl)) return articleIdFromUrl
+          return data.items[0]?.id ?? null
+        })
       } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : "Không tải được bài đọc")
@@ -347,7 +357,7 @@ export function ReadingPageClient() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [articleIdFromUrl])
 
   useEffect(() => {
     let cancelled = false
@@ -398,10 +408,11 @@ export function ReadingPageClient() {
       return
     }
 
-    setSelectedId((current) =>
-      current && filteredArticles.some((article) => article.id === current) ? current : filteredArticles[0].id
-    )
-  }, [filteredArticles])
+    setSelectedId((current) => {
+      if (articleIdFromUrl && filteredArticles.some((article) => article.id === articleIdFromUrl)) return articleIdFromUrl
+      return current && filteredArticles.some((article) => article.id === current) ? current : filteredArticles[0].id
+    })
+  }, [articleIdFromUrl, filteredArticles])
 
   // Lấy dữ liệu bài đọc hiện tại
   const selectedArticle = filteredArticles.find((article) => article.id === selectedId) ?? filteredArticles[0] ?? null
@@ -458,6 +469,17 @@ export function ReadingPageClient() {
   // Handlers
   const chooseArticle = (id: string) => {
     setSelectedId(id)
+  }
+
+  const askAiAboutArticle = (article: ReadingArticle) => {
+    const activeSource: ActiveChatSource = {
+      type: "news",
+      id: article.id,
+      title: article.title,
+    }
+
+    window.sessionStorage.setItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY, JSON.stringify(activeSource))
+    router.push("/chatbot")
   }
 
   const goToPreviousQuestion = () => {
@@ -708,7 +730,17 @@ export function ReadingPageClient() {
                   {selectedArticle.category && <Badge variant="outline" className="rounded px-2 py-0.5">{selectedArticle.category}</Badge>}
                   <span className="text-sm text-muted-foreground">{formatDate(selectedArticle.publishedAt)}</span>
                   <span className="text-sm text-muted-foreground">Nguồn: {selectedArticle.provider}</span>
-                  <Button variant="ghost" size="sm" className="ml-auto h-8 gap-1" asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto h-8 gap-1"
+                    onClick={() => askAiAboutArticle(selectedArticle)}
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Hoi AI ve bai nay
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 gap-1" asChild>
                     <a href={selectedArticle.sourceUrl} target="_blank" rel="noreferrer">
                       <ExternalLink className="h-4 w-4" />
                       TODAII

@@ -10,8 +10,10 @@ import { prisma } from "@/lib/prisma"
 
 export type RagSource = {
   id: string
+  sourceId?: string
   type: "vocabulary" | "grammar" | "quiz" | "news"
   title: string
+  href?: string
   content: string
   score: number
 }
@@ -306,6 +308,7 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 6): Pro
 
   const chunkSources = chunks.map((chunk) => ({
     id: chunk.id,
+    sourceId: chunk.sourceId,
     type: mapChunkType(chunk.sourceType),
     title: chunk.title,
     content: chunk.content,
