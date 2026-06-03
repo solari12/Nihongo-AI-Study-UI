@@ -74,6 +74,8 @@ model User {
   quizAttempts       QuizAttempt[]
   activityLogs       ActivityLog[]
   chatLogs           ChatLog[]
+  chatConversations  ChatConversation[]
+  chatMessages       ChatConversationMessage[]
   savedStudyItems    SavedStudyItem[]
   learnerProfile     LearnerProfile?
   placementResult    PlacementResult?
@@ -248,6 +250,38 @@ model ChatLog {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("chat_logs")
+}
+
+model ChatConversation {
+  id        String                    @id @default(uuid())
+  userId    String                    @map("user_id")
+  title     String
+  user      User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatConversationMessage[]
+  createdAt DateTime                  @default(now()) @map("created_at")
+  updatedAt DateTime                  @updatedAt @map("updated_at")
+
+  @@index([userId, updatedAt])
+  @@map("chat_conversations")
+}
+
+model ChatConversationMessage {
+  id             String           @id @default(uuid())
+  conversationId String           @map("conversation_id")
+  userId         String           @map("user_id")
+  role           String
+  content        String
+  provider       String?
+  sourcesJson    Json?            @map("sources_json")
+  quizCardsJson  Json?            @map("quiz_cards_json")
+  quizStateJson  Json?            @map("quiz_state_json")
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  @@index([conversationId, createdAt])
+  @@index([userId, createdAt])
+  @@map("chat_conversation_messages")
 }
 
 model SavedStudyItem {
