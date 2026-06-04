@@ -1,140 +1,112 @@
-# Kế hoạch kiểm thử
+# Kế Hoạch Và Kết Quả Kiểm Thử
 
-## 1. Mục tiêu kiểm thử
+## Mục tiêu
 
-Đảm bảo các chức năng chính của Nihongo AI Study hoạt động ổn định:
+Chứng minh các chức năng chính trong PRD hoạt động đủ ổn định cho bảo vệ:
 
-- Học từ vựng.
-- Học ngữ pháp.
-- Làm quiz.
-- Ghi lịch sử học tập.
-- Sinh gợi ý học tập.
-- Quản trị nội dung.
-- Chatbot RAG.
+- Đăng nhập/đăng ký và session.
+- Học từ vựng, ngữ pháp.
+- Làm quiz và lưu kết quả.
+- Chatbot RAG/fallback.
+- Recommendation trên Dashboard/Learning Path.
+- Reading/TODAII render được dữ liệu nếu database đã import.
 
-## 2. Kiểm thử chức năng
-
-### 2.1. Landing page
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Mở `/` | Hiển thị landing page giới thiệu hệ thống |
-| Click Đăng nhập | Điều hướng đến `/login` |
-| Click Đăng ký | Điều hướng đến `/register` |
-| Click Vào học ngay | Điều hướng đến `/dashboard` |
-
-### 2.2. Vocabulary
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Mở `/vocabulary` | Hiển thị danh sách từ vựng |
-| Tìm từ bằng romaji | Lọc đúng từ |
-| Đánh dấu đã học | Tiến độ tăng, activity log được ghi |
-| Thêm ôn tập | Số từ cần ôn tăng, activity log được ghi |
-
-### 2.3. Grammar
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Mở `/grammar` | Hiển thị danh sách ngữ pháp |
-| Lọc theo trạng thái | Danh sách thay đổi đúng |
-| Xem ví dụ | Hiển thị ví dụ tiếng Nhật và tiếng Việt |
-
-### 2.4. Quiz
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Chọn loại quiz | Câu hỏi được lọc theo loại |
-| Trả lời đủ câu | Cho phép hoàn thành |
-| Nộp quiz | Hiển thị điểm, đáp án đúng và giải thích |
-| Hoàn thành quiz | Lưu quiz attempt và activity log |
-
-### 2.5. History
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Chưa có hoạt động | Hiển thị empty state |
-| Có hoạt động học từ | Table hiển thị activity |
-| Có quiz attempt | Chart điểm quiz cập nhật |
-| Lọc theo loại | Chỉ hiển thị activity tương ứng |
-| Lọc theo thời gian | Chỉ hiển thị activity trong khoảng chọn |
-
-### 2.6. Recommendation
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Có từ cần ôn | Gợi ý ôn tập xuất hiện |
-| Quiz điểm thấp | Gợi ý làm quiz củng cố xuất hiện |
-| Còn từ chưa học | Gợi ý học từ mới xuất hiện |
-| Chưa học nhiều ngày | Gợi ý phiên học ngắn xuất hiện |
-
-### 2.7. Admin
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Thêm từ vựng | Từ mới xuất hiện trong admin và vocabulary |
-| Sửa ngữ pháp | Nội dung cập nhật trong grammar |
-| Xóa quiz | Quiz không còn xuất hiện |
-| Export JSON | Tải file JSON chứa vocabulary, grammar, quiz |
-| Import JSON hợp lệ | Dữ liệu được thay thế |
-| Import JSON sai format | Hiển thị thông báo lỗi |
-
-### 2.8. Chatbot
-
-| Test case | Kết quả mong đợi |
-|---|---|
-| Hỏi từ có trong dữ liệu | Trả lời đúng và có source |
-| Hỏi ngữ pháp có trong dữ liệu | Trả lời theo nguồn grammar |
-| Hỏi nội dung không có dữ liệu | Trả lời rằng chưa đủ nguồn |
-| OpenRouter lỗi/mất key | Fallback answer vẫn hoạt động |
-
-## 3. Kiểm thử tích hợp
-
-### Luồng 1: Admin nhập dữ liệu đến chatbot
-
-```text
-Admin thêm từ mới
-  -> mở Vocabulary thấy từ mới
-  -> hỏi chatbot về từ đó
-  -> chatbot trả lời có source từ mới
-```
-
-### Luồng 2: Quiz đến recommendation
-
-```text
-User làm quiz điểm thấp
-  -> lưu quiz attempt
-  -> History hiển thị quiz
-  -> Dashboard/Learning Path gợi ý làm quiz củng cố
-```
-
-### Luồng 3: Review đến recommendation
-
-```text
-User thêm từ vào ôn tập
-  -> History ghi activity
-  -> Recommendation ưu tiên ôn tập
-```
-
-## 4. Kiểm thử phi chức năng
-
-| Tiêu chí | Cách kiểm thử |
-|---|---|
-| Responsive | Mở trên mobile/desktop |
-| Hiệu năng | Kiểm tra build và thao tác UI không lag |
-| Bảo mật cơ bản | Không commit `.env.local` |
-| Khả năng phục hồi | Import/export JSON để backup dữ liệu |
-| Khả năng mở rộng | Kiến trúc tách data/API/AI module |
-
-## 5. Lệnh kiểm thử
+## Lệnh kiểm thử
 
 ```bash
-corepack pnpm run build
+pnpm build
+npx tsc --noEmit
+pnpm test:e2e
+pnpm data:generate:embeddings
 ```
 
-Kỳ vọng:
+Điều kiện trước khi chạy E2E:
+
+- Đã cấu hình `DATABASE_URL` trong `.env.local`.
+- Đã chạy migration và seed:
+
+```bash
+pnpm db:migrate
+pnpm db:seed
+pnpm data:generate:embeddings
+```
+
+Tài khoản seed dùng cho E2E:
 
 ```text
-Compiled successfully
-Generating static pages completed
+Email: learner@example.com
+Password: password123
+```
+
+Có thể override bằng:
+
+```bash
+E2E_LEARNER_EMAIL=... E2E_LEARNER_PASSWORD=... pnpm test:e2e
+```
+
+## E2E Smoke Test
+
+File test: `tests/e2e/prd-defense.spec.ts`.
+
+| Flow | Kỳ vọng |
+|---|---|
+| Landing + login | Mở landing, vào login, đăng nhập thành công |
+| Vocabulary | Trang từ vựng render, search cơ bản hoạt động nếu có input |
+| Grammar | Trang ngữ pháp render được nội dung |
+| Dashboard/Learning Path | Hiển thị recommendation hoặc vùng lộ trình học |
+| Quiz | Bắt đầu quiz, chọn đáp án, nộp bài, thấy kết quả |
+| Chatbot | Gửi câu hỏi N5, nhận câu trả lời có source hoặc fallback rõ ràng |
+| Reading | Trang reading render, không crash kể cả khi chưa import bài |
+
+## Test RAG thủ công
+
+| Câu hỏi | Kỳ vọng |
+|---|---|
+| Kiểm tra DB sau `pnpm data:generate:embeddings` | Các dòng `knowledge_chunks` có `embedding` là mảng số |
+| `学生 nghĩa là gì?` | Trả nghĩa, cách đọc, ví dụ, nguồn từ vựng |
+| `Giải thích N は N です` | Trả ý nghĩa, cấu trúc, ví dụ |
+| `Tạo 5 câu quiz từ vựng N5` | Render quiz card A/B/C/D có đáp án ẩn đến khi nộp |
+| Câu hỏi ngoài dữ liệu | Nói rõ chưa đủ dữ liệu và gợi ý hỏi cụ thể hơn |
+
+## Test Recommendation thủ công
+
+| Scenario | Kỳ vọng |
+|---|---|
+| User mới chưa onboarding | Gợi ý tạo hồ sơ học tập |
+| Có từ cần review | Gợi ý ôn tập từ vựng |
+| Quiz điểm thấp | Gợi ý làm quiz củng cố |
+| Lâu không có activity | Gợi ý phiên học ngắn |
+
+## Kết quả chạy gần nhất
+
+```text
+Ngày: 2026-06-04
+Lệnh: npx tsc --noEmit
+Kết quả: Pass
+Lỗi còn lại: Không có
+Ghi chú: Đã sửa lỗi type ở locale, saved-study-items và script import grammar.
+```
+
+```text
+Ngày: 2026-06-04
+Lệnh: pnpm data:generate:embeddings
+Kết quả: Chưa chạy trong lần kiểm thử này
+Lỗi còn lại: Cần OPENAI_API_KEY để gọi embedding API
+Ghi chú: Có thể dùng OPENROUTER_API_KEY thay cho OPENAI_API_KEY. Đây là bước bắt buộc trước demo nếu muốn chứng minh pipeline vector theo PRD bằng dữ liệu thật.
+```
+
+```text
+Ngày: 2026-06-04
+Lệnh: pnpm build
+Kết quả: Pass
+Lỗi còn lại: Không có
+Ghi chú: Next build vẫn đang cấu hình skip validation of types theo next.config.mjs, nhưng typecheck riêng đã pass.
+```
+
+```text
+Ngày: 2026-06-04
+Lệnh: pnpm test:e2e
+Kết quả: Pass, 5/5 tests
+Lỗi còn lại: Không có lỗi fail test
+Ghi chú: Playwright cần cài Chromium bằng `pnpm exec playwright install chromium` trước lần chạy đầu. Dev server có warning LCP cho `/assets/sidebar.png`, không làm fail E2E.
 ```

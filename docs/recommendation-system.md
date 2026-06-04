@@ -1,168 +1,53 @@
-# Hệ khuyến nghị lộ trình học
+# Hệ Khuyến Nghị Lộ Trình Học
 
-## 1. Mục tiêu
+## Mục tiêu
 
-Hệ khuyến nghị trong Nihongo AI Study có nhiệm vụ đề xuất nội dung học tiếp theo dựa trên hành vi và kết quả học tập của người dùng.
+Recommendation trong Nihongo AI Study đề xuất nội dung học tiếp theo dựa trên hồ sơ người học, kết quả placement test, tiến độ từ vựng, lịch sử quiz và activity log.
 
-Mục tiêu chính:
+Mỗi đề xuất có:
 
-- Cá nhân hóa lộ trình học.
-- Ưu tiên nội dung người học cần ôn.
-- Gợi ý quiz khi điểm thấp.
-- Giải thích được lý do mỗi gợi ý.
+- `type`: vocabulary, grammar, quiz hoặc review.
+- `priority`: điểm ưu tiên 0-100.
+- `reason`: lý do hiển thị cho người học.
+- `explanation`: các yếu tố đóng góp theo mô hình BKT+SM2.
 
-## 2. Dữ liệu đầu vào
+## Thuật toán hiện tại
 
-Hệ khuyến nghị sử dụng các dữ liệu sau:
+Hệ thống dùng rule-based recommendation có giải thích:
 
-- Danh sách từ đã học.
-- Danh sách từ cần ôn.
-- Lịch sử quiz.
-- Điểm quiz gần nhất.
-- Điểm quiz trung bình.
-- Activity log: học từ, ôn tập, làm quiz.
-- Số ngày từ lần học gần nhất.
+- BKT ước lượng mức nắm kiến thức từ điểm quiz.
+- SM-2 ở mức MVP ưu tiên các từ nằm trong danh sách review và các phiên học ngắn khi người học lâu không hoạt động.
+- Cold-start dùng onboarding và placement test để đề xuất bước đầu.
+- Nội dung tiếp theo lấy từ từ vựng/ngữ pháp chưa học hoặc chưa hoàn thành.
 
-Các dữ liệu này được quản lý trong:
+## Scenario đánh giá
 
-```text
-hooks/use-study-progress.ts
-hooks/use-activity-log.ts
-hooks/use-admin-content.ts
-```
+| Scenario | Dữ liệu đầu vào | Gợi ý mong đợi |
+|---|---|---|
+| User chưa onboarding | Không có `LearnerProfile.completedOnboarding` | Ưu tiên tạo hồ sơ học tập |
+| Đã onboarding nhưng chưa placement | Có profile, chưa có placement | Ưu tiên làm kiểm tra đầu vào |
+| Placement yếu kana | `recommendedStart = kana-basics` | Gợi ý kana/từ vựng nền tảng |
+| Có từ cần ôn | `reviewVocabularyIds.length > 0` | Gợi ý ôn tập từ vựng |
+| Quiz điểm thấp | `quizMastery < 0.65` | Gợi ý làm quiz củng cố |
+| Còn từ chưa học | Có vocabulary chưa nằm trong `learnedVocabularyIds` | Gợi ý học từ mới |
+| Lâu không học | Không có activity hoặc activity cách >= 2 ngày | Gợi ý phiên học ngắn |
 
-## 3. Thuật toán sử dụng
+## Tiêu chí đạt khi bảo vệ
 
-### 3.1. Bayesian Knowledge Tracing
+- Dashboard hoặc Learning Path hiển thị được danh sách đề xuất.
+- Mỗi đề xuất có lý do dễ hiểu.
+- Có thể giải thích được các yếu tố BKT+SM2 trong báo cáo.
+- Có test hoặc checklist chứng minh các scenario chính hoạt động.
 
-Bayesian Knowledge Tracing (BKT) được dùng để ước lượng khả năng người học đã nắm một kiến thức dựa trên kết quả quiz.
+## Giới hạn MVP
 
-Các tham số MVP:
+- Mastery đang tính ở mức tổng quát, chưa theo từng topic nhỏ.
+- SM-2 chưa lưu easiness/repetition interval chi tiết.
+- Chưa có collaborative filtering vì dữ liệu người dùng ít.
 
-```text
-priorMastery = 0.35
-learnRate = 0.18
-slip = 0.10
-guess = 0.25
-```
+## Hướng nâng cấp
 
-Ý nghĩa:
-
-- priorMastery: xác suất ban đầu người học đã nắm kiến thức.
-- learnRate: xác suất học được sau một lần tương tác.
-- slip: xác suất trả lời sai dù đã biết.
-- guess: xác suất trả lời đúng nhờ đoán.
-
-Nếu mức mastery ước lượng thấp hơn ngưỡng, hệ thống ưu tiên gợi ý quiz hoặc ôn tập.
-
-### 3.2. SM-2 / Spaced Repetition
-
-SM-2 là thuật toán lặp lại ngắt quãng được dùng trong các hệ thống học ghi nhớ.
-
-Trong MVP, ý tưởng SM-2 được áp dụng bằng cách:
-
-- Nếu từ được đưa vào danh sách review, hệ thống tăng độ ưu tiên ôn tập.
-- Nếu đã lâu không học, hệ thống tăng priority cho phiên học ngắn.
-- Nội dung cần ôn được xếp trước nội dung mới khi review load cao.
-
-### 3.3. Explanation
-
-Mỗi recommendation có trường explanation:
-
-```ts
-{
-  method: "BKT+SM2",
-  factors: [
-    { label: "Số từ cần ôn", contribution: 30 },
-    { label: "Khoảng cách từ lần học gần nhất", contribution: 16 }
-  ]
-}
-```
-
-Cách này giúp hệ thống giải thích được vì sao một bài học được đề xuất.
-
-## 4. Output
-
-Mỗi gợi ý có cấu trúc:
-
-```ts
-{
-  id: string
-  type: "vocabulary" | "grammar" | "quiz" | "review"
-  title: string
-  reason: string
-  priority: number
-  estimatedTime: string
-  targetUrl: string
-  explanation: {
-    method: "BKT+SM2"
-    factors: { label: string; contribution: number }[]
-  }
-}
-```
-
-## 5. Các rule chính
-
-### Rule 1: Ưu tiên ôn tập
-
-Nếu có từ trong danh sách review:
-
-```text
-priority = 45 + recencyBoost + reviewBoost
-```
-
-### Rule 2: Ưu tiên quiz khi mastery thấp
-
-Nếu BKT mastery thấp hơn 0.65:
-
-```text
-priority = 55 + masteryGap
-```
-
-### Rule 3: Gợi ý từ mới
-
-Nếu còn từ chưa học:
-
-```text
-priority = 35 + vocabularyGap
-```
-
-### Rule 4: Gợi ý ngữ pháp tiếp theo
-
-Nếu còn mẫu ngữ pháp chưa hoàn thành:
-
-```text
-priority = 30 + grammarGap
-```
-
-### Rule 5: Duy trì thói quen học
-
-Nếu chưa có hoạt động gần đây:
-
-```text
-priority = 40 + inactivityBoost
-```
-
-## 6. Hiển thị trên UI
-
-Recommendation được dùng ở:
-
-- Dashboard: bài học đề xuất hôm nay.
-- Learning Path: timeline học tập cá nhân hóa.
-
-## 7. Đánh giá
-
-Có thể đánh giá hệ khuyến nghị theo:
-
-- Tính phù hợp của gợi ý.
-- Khả năng phản ứng với điểm quiz thấp.
-- Khả năng ưu tiên từ cần ôn.
-- Khả năng giải thích lý do gợi ý.
-
-## 8. Hướng nâng cấp
-
-- Lưu dữ liệu học tập vào database.
-- Tính mastery theo từng topic thay vì toàn bộ quiz.
-- Dùng collaborative filtering nếu có nhiều người dùng.
-- Kết hợp kết quả chatbot để phát hiện chủ đề người học quan tâm.
-- Tối ưu tham số BKT bằng dữ liệu thực tế.
+- Tính mastery theo topic/từ vựng/ngữ pháp.
+- Lưu lịch ôn chi tiết theo SM-2.
+- Dùng dữ liệu chat để phát hiện chủ đề người học quan tâm.
+- Tối ưu tham số BKT khi có nhiều dữ liệu quiz thực tế.
