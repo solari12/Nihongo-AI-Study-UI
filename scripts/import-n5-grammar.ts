@@ -35,7 +35,11 @@ const prisma = new PrismaClient({
 
 const inputPath = path.join(process.cwd(), "data", "imports", "n5-grammar.json")
 
-const polishedVietnameseByPattern: Record<string, Partial<ImportedGrammar> & { example?: Partial<ImportedGrammar["example"]> }> = {
+type GrammarOverride = Omit<Partial<ImportedGrammar>, "example"> & {
+  example?: Partial<ImportedGrammar["example"]>
+}
+
+const polishedVietnameseByPattern: Record<string, GrammarOverride> = {
   "N は N です": {
     meaning: "N là N",
     usageNote: "Dùng để giới thiệu, định danh hoặc nói một cách lịch sự về chủ đề.",
