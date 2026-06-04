@@ -37,7 +37,7 @@ const navItems = [
   { href: "/vocabulary", labelKey: "nav.vocabulary", viLabel: "T\u1eeb v\u1ef1ng", jaLabel: "\u8a9e\u5f59", icon: BookOpen },
   { href: "/grammar", labelKey: "nav.grammar", viLabel: "Ng\u1eef ph\u00e1p", jaLabel: "\u6587\u6cd5", icon: FileText },
   { href: "/quiz", labelKey: "nav.quiz", viLabel: "Quiz", jaLabel: "\u30af\u30a4\u30ba", icon: HelpCircle },
-  { href: "/chatbot", labelKey: "nav.chatbot", viLabel: "Chatbot AI", jaLabel: "AI\u30c1\u30e3\u30c3\u30c8", icon: MessageSquare },
+  { href: "/chatbot", labelKey: "nav.chatbot", viLabel: "Kami", jaLabel: "Kami", icon: MessageSquare },
   { href: "/learning-path", labelKey: "nav.learningPath", viLabel: "L\u1ed9 tr\u00ecnh h\u1ecdc", jaLabel: "\u5b66\u7fd2\u30eb\u30fc\u30c8", icon: Route },
   { href: "/history", labelKey: "nav.history", viLabel: "L\u1ecbch s\u1eed h\u1ecdc t\u1eadp", jaLabel: "\u5b66\u7fd2\u5c65\u6b74", icon: History },
   { href: "/profile", labelKey: "nav.profile", viLabel: "H\u1ed3 s\u01a1", jaLabel: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb", icon: User },

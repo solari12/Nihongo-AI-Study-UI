@@ -53,7 +53,7 @@ const features = [
   },
   {
     icon: Bot,
-    title: "Chatbot AI RAG",
+    title: "Kami RAG",
     description: "Truy xuất nguồn từ dữ liệu N5 trước khi trả lời qua OpenRouter hoặc fallback.",
   },
 ]
@@ -109,7 +109,7 @@ export default function LandingPage() {
               Quản trị
             </a>
             <a href="#chatbot" className="text-sm text-muted-foreground hover:text-foreground">
-              Chatbot
+              Kami
             </a>
           </nav>
           <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold">Bạn tự xây bộ dữ liệu N5 cho hệ thống</h2>
             <p className="text-sm leading-7 text-muted-foreground">
               Admin có thể thêm, sửa, xóa từ vựng, ngữ pháp, câu hỏi quiz và import/export JSON.
-              Dữ liệu vừa nhập sẽ được dùng ngay trong học tập, quiz, chatbot và hệ khuyến nghị.
+              Dữ liệu vừa nhập sẽ được dùng ngay trong học tập, quiz, Kami và hệ khuyến nghị.
             </p>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {["CRUD từ vựng/ngữ pháp/quiz", "Import/export JSON để backup", "Dữ liệu dùng chung cho toàn app"].map((item) => (
@@ -317,9 +317,9 @@ export default function LandingPage() {
             <Badge className="border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-50">
               Retrieval-Augmented Generation
             </Badge>
-            <h2 className="text-3xl font-bold">Chatbot trả lời có nguồn tham khảo</h2>
+            <h2 className="text-3xl font-bold">Kami trả lời có nguồn tham khảo</h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              Chatbot truy xuất dữ liệu từ vocabulary, grammar và quiz trước khi gọi OpenRouter.
+              Kami truy xuất dữ liệu từ vocabulary, grammar và quiz trước khi gọi OpenRouter.
               Nếu thiếu API key hoặc lỗi mạng, hệ thống dùng fallback template để demo vẫn chạy.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -338,7 +338,7 @@ export default function LandingPage() {
           <div className="rounded-lg border bg-background shadow-sm">
             <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-3">
               <MessageSquare className="h-4 w-4 text-indigo-600" />
-              <span className="text-sm font-medium">Nihongo AI Assistant</span>
+              <span className="text-sm font-medium">Kami</span>
             </div>
             <div className="space-y-4 p-4">
               <div className="ml-auto max-w-[80%] rounded-lg bg-indigo-600 px-4 py-3 text-sm text-white">

@@ -1,14 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { X } from "lucide-react"
-import { type ClientAuthUser } from "@/hooks/use-auth"
-import { useLearnerProfile } from "@/hooks/use-learner-profile"
-import { Spinner } from "@/components/ui/spinner"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Spinner } from "@/components/ui/spinner"
+import { type ClientAuthUser } from "@/hooks/use-auth"
+import { useLearnerProfile } from "@/hooks/use-learner-profile"
 
 interface OnboardingGateProps {
   children: React.ReactNode
