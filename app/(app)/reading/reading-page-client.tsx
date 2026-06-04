@@ -312,6 +312,7 @@ export function ReadingPageClient() {
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [showFurigana, setShowFurigana] = useState(true)
+  const [questionIndexByArticle, setQuestionIndexByArticle] = useState<Record<string, number>>({})
   
   // Trạng thái Quiz quản lý theo ID bài đọc để không bị mất/xung đột khi đổi bài
   const [quiz, setQuiz] = useState<QuizState>({
@@ -455,7 +456,7 @@ export function ReadingPageClient() {
   const articleBlocks = selectedArticle?.articleBlocks?.length ? selectedArticle.articleBlocks : null
 
   // Logic Index & Trạng thái làm bài
-  const rawIndex = quiz.currentIndex[articleId] ?? 0
+  const rawIndex = questionIndexByArticle[articleId] ?? 0
   const currentQuestionIndex = totalQuestions > 0 ? Math.min(Math.max(rawIndex, 0), totalQuestions - 1) : 0
 
   const getAnswerKey = (questionNumber: number) => `${articleId}:${questionNumber}`
@@ -465,10 +466,14 @@ export function ReadingPageClient() {
     const selected = quiz.answers[getAnswerKey(index)]
     return selected && selected === question.correctAnswer ? total + 1 : total
   }, 0)
+  const scoreableQuestionCount = questions.filter(
+    (question) => typeof question.correctAnswer === "string" && question.correctAnswer.trim()
+  ).length
 
   // Handlers
   const chooseArticle = (id: string) => {
     setSelectedId(id)
+    router.replace(`/reading?article=${encodeURIComponent(id)}`, { scroll: false })
   }
 
   const askAiAboutArticle = (article: ReadingArticle) => {
@@ -484,24 +489,26 @@ export function ReadingPageClient() {
 
   const goToPreviousQuestion = () => {
     if (!articleId) return
-    setQuiz((prev) => ({
-      ...prev,
-      currentIndex: {
-        ...prev.currentIndex,
-        [articleId]: Math.max(0, currentQuestionIndex - 1),
-      },
-    }))
+    setQuestionIndexByArticle((current) => {
+      const index = current[articleId] ?? 0
+
+      return {
+        ...current,
+        [articleId]: Math.max(0, index - 1),
+      }
+    })
   }
 
   const goToNextQuestion = () => {
     if (!articleId) return
-    setQuiz((prev) => ({
-      ...prev,
-      currentIndex: {
-        ...prev.currentIndex,
-        [articleId]: Math.min(totalQuestions - 1, currentQuestionIndex + 1),
-      },
-    }))
+    setQuestionIndexByArticle((current) => {
+      const index = current[articleId] ?? 0
+
+      return {
+        ...current,
+        [articleId]: Math.min(totalQuestions - 1, index + 1),
+      }
+    })
   }
 
   const chooseAnswer = (questionNumber: number, answerKey: string) => {
@@ -716,7 +723,7 @@ export function ReadingPageClient() {
         </aside>
 
         {selectedArticle && (
-          <main className="min-w-0 space-y-5">
+          <main key={selectedArticle.id} className="min-w-0 space-y-5">
             <section className="overflow-hidden rounded-lg border border-[#deded8] bg-white shadow-sm">
               {selectedArticle.imageUrl && (
                 <div className="relative aspect-video w-full bg-[#e7e7e2]">
@@ -725,6 +732,14 @@ export function ReadingPageClient() {
               )}
 
               <div className="p-4 md:p-6">
+                {selectedArticle.audioUrl && (
+                  <div className="mb-5 rounded-lg border border-[#e5e5df] bg-[#fbfbf8] p-3">
+                    <audio controls preload="metadata" className="h-10 w-full" src={selectedArticle.audioUrl}>
+                      TrÃ¬nh duyá»‡t cá»§a báº¡n chÆ°a há»— trá»£ phÃ¡t audio.
+                    </audio>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={cn("rounded px-2 py-0.5", levelBadgeClass(selectedArticle.level))}>{selectedArticle.level}</Badge>
                   {selectedArticle.category && <Badge variant="outline" className="rounded px-2 py-0.5">{selectedArticle.category}</Badge>}
@@ -763,32 +778,6 @@ export function ReadingPageClient() {
 
                 <h1 className="mt-4 text-2xl font-bold leading-tight tracking-tight md:text-3xl">{selectedArticle.title}</h1>
 
-                {levelStats.length > 0 && (
-                  <div
-                    key={`${selectedArticle.id}:level-stats`}
-                    className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-[#e5e5df] bg-[#fbfbf8] p-3 sm:grid-cols-5"
-                  >
-                    {levelStats.map((stat) => (
-                      <div key={stat.level} className="flex items-center justify-between gap-2 sm:justify-center">
-                        <Badge className={cn("rounded px-2 py-0.5 text-xs", levelBadgeClass(stat.level))}>
-                          {stat.level}
-                        </Badge>
-                        <span className="text-sm font-semibold text-[#2a211f] sm:text-base">
-                          {stat.percentage}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {selectedArticle.audioUrl && (
-                  <div className="mt-4 rounded-lg border border-[#e5e5df] bg-[#fbfbf8] p-3">
-                    <audio controls preload="metadata" className="h-10 w-full" src={selectedArticle.audioUrl}>
-                      Trình duyệt của bạn chưa hỗ trợ phát audio.
-                    </audio>
-                  </div>
-                )}
-
                 <div className="mt-5 rounded-lg border border-[#e5e5df] bg-[#fbfbf8] p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm font-semibold">
@@ -823,6 +812,24 @@ export function ReadingPageClient() {
                         ))}
                   </article>
                 </div>
+
+                {levelStats.length > 0 && (
+                  <div
+                    key={`${selectedArticle.id}:level-stats`}
+                    className="mt-5 grid grid-cols-2 gap-2 rounded-lg border border-[#e5e5df] bg-[#fbfbf8] p-3 sm:grid-cols-5"
+                  >
+                    {levelStats.map((stat) => (
+                      <div key={stat.level} className="flex items-center justify-between gap-2 sm:justify-center">
+                        <Badge className={cn("rounded px-2 py-0.5 text-xs", levelBadgeClass(stat.level))}>
+                          {stat.level}
+                        </Badge>
+                        <span className="text-sm font-semibold text-[#2a211f] sm:text-base">
+                          {stat.percentage}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </section>
 
@@ -832,47 +839,40 @@ export function ReadingPageClient() {
                   <FileQuestion className="h-5 w-5 text-[#24b26b]" />
                   Câu hỏi
                 </h2>
-                <div className="flex items-center gap-3">
-                  {/* Sửa lại text hiển thị Đã chọn x/y để không bị dính chữ */}
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={isSubmitted || totalQuestions === 0}
-                    className="bg-[#24b26b] text-white hover:bg-[#1d9659] disabled:bg-muted disabled:text-muted-foreground"
-                    onClick={submitQuiz}
-                  >
-                    {isSubmitted ? "Đã nộp" : "Nộp bài"}
-                  </Button>
-                </div>
               </div>
 
               {isSubmitted && (
                 <div className="mb-4 rounded-lg border border-[#24b26b]/30 bg-[#ecf9f1] px-4 py-3 text-sm font-medium text-[#17683e]">
-                  Kết quả: {score}/{totalQuestions}
+                  {scoreableQuestionCount > 0
+                    ? `Kết quả: ${score}/${scoreableQuestionCount}`
+                    : "Đã nộp bài. Crawler chưa có dữ liệu đáp án đúng."}
                 </div>
               )}
 
               {questions.length > 0 ? (
                 <div className="space-y-4">
-                  {questions.map((question, questionIndex) => {
-                    const selectedAnswer = quiz.answers[getAnswerKey(questionIndex)]
+                  {(() => {
+                    const question = questions[currentQuestionIndex]
+                    const selectedAnswer = quiz.answers[getAnswerKey(currentQuestionIndex)]
 
                     return (
-                      <Card key={`${question.question ?? question.rawText ?? questionIndex}-${questionIndex}`} className="border-[#e5e5df]">
-                        <CardContent className="p-4">
+                      <Card key={`${articleId}:${currentQuestionIndex}:${question.question ?? question.rawText ?? ""}`} className="border-[#e5e5df]">
+                          <CardContent className="p-4">
                           <div className="mb-4 flex items-start justify-between gap-4">
                             <p className="font-['Noto_Sans_JP',sans-serif] text-lg font-semibold leading-8">
-                              {question.question || question.rawText || `Câu hỏi ${questionIndex + 1}`}
+                              {question.question || question.rawText || `Câu hỏi ${currentQuestionIndex + 1}`}
                             </p>
                             <Badge variant="outline" className="shrink-0 rounded-full">
-                              {questionIndex + 1}/{totalQuestions}
+                              {currentQuestionIndex + 1}/{totalQuestions}
                             </Badge>
                           </div>
                           <div className="grid gap-3 md:grid-cols-2">
                             {(question.options?.length ? question.options : []).map((option) => {
                               const selected = selectedAnswer === option.key
-                              const isCorrect = isSubmitted && option.key === question.correctAnswer
-                              const isWrong = isSubmitted && selected && option.key !== question.correctAnswer
+                              const hasCorrectAnswer =
+                                typeof question.correctAnswer === "string" && question.correctAnswer.trim().length > 0
+                              const isCorrect = isSubmitted && hasCorrectAnswer && option.key === question.correctAnswer
+                              const isWrong = isSubmitted && hasCorrectAnswer && selected && option.key !== question.correctAnswer
 
                               return (
                                 <button
@@ -881,7 +881,7 @@ export function ReadingPageClient() {
                                   disabled={isSubmitted}
                                   onClick={() => {
                                     if (!option.key) return
-                                    chooseAnswer(questionIndex, option.key)
+                                    chooseAnswer(currentQuestionIndex, option.key)
                                   }}
                                   className={cn(
                                     "flex items-center gap-3 rounded-lg border p-3 text-left transition",
@@ -912,10 +912,47 @@ export function ReadingPageClient() {
                               </p>
                             )}
                           </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
                     )
-                  })}
+                  })()}
+
+                  <div className="flex flex-col items-center gap-4 pt-1">
+                    <Button
+                      type="button"
+                      size="lg"
+                      disabled={isSubmitted || totalQuestions === 0}
+                      className="bg-[#171923] px-5 text-white shadow-sm hover:bg-[#111318] disabled:bg-muted disabled:text-muted-foreground"
+                      onClick={submitQuiz}
+                    >
+                      {isSubmitted ? "\u0110\u00e3 n\u1ed9p" : "N\u1ed9p b\u00e0i"}
+                    </Button>
+
+                    <div className="flex items-center justify-center gap-5">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="h-11 w-11 rounded-full bg-[#f2f2f0] text-[#2a211f] hover:bg-[#e8e8e4]"
+                        disabled={currentQuestionIndex === 0}
+                        onClick={goToPreviousQuestion}
+                        aria-label="Cau hoi truoc"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="h-11 w-11 rounded-full bg-[#f2f2f0] text-[#2a211f] hover:bg-[#e8e8e4]"
+                        disabled={currentQuestionIndex === totalQuestions - 1}
+                        onClick={goToNextQuestion}
+                        aria-label="Cau hoi tiep theo"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <p className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">Bài này chưa có dữ liệu câu hỏi.</p>

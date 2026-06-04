@@ -14,7 +14,7 @@ const savedStudyItemSchema = z.object({
   meaning: z.string().trim().optional(),
   note: z.string().trim().optional(),
   example: z.string().trim().optional(),
-  rawPayload: z.unknown(),
+  rawPayload: z.any(),
 })
 
 export async function GET() {

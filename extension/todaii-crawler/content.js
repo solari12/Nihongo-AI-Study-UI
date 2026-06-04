@@ -24,6 +24,42 @@ function sendImportPayload(payload) {
   })
 }
 
+function safeDebugFileName(title) {
+  const normalized = String(title || "todaii-article")
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80)
+
+  return `${normalized || "todaii-article"}-crawl-debug.txt`
+}
+
+function downloadCrawlDebugText(payload, importResult) {
+  const lines = [
+    "TODAII crawl debug",
+    `Generated at: ${new Date().toISOString()}`,
+    `Page URL: ${location.href}`,
+    "",
+    "Import result:",
+    JSON.stringify(importResult ?? null, null, 2),
+    "",
+    "Payload:",
+    JSON.stringify(payload, null, 2),
+  ]
+  const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+
+  link.href = url
+  link.download = safeDebugFileName(payload?.title)
+  link.style.display = "none"
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
 function parseStructuredArticle() {
   return Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
     .map((script) => {
@@ -532,24 +568,61 @@ function textWithoutReadingsFromNode(element) {
   return textWithoutRubyReading(element).replace(/\s+/g, " ").trim()
 }
 
-function parseVisibleQuestionCard() {
+function visibleElements(root, selector) {
+  return Array.from(root.querySelectorAll(selector)).filter(isVisibleElement)
+}
+
+function visibleQuestionCardRoot(root, counterElement) {
+  let current = counterElement
+
+  for (let depth = 0; current && depth < 10; depth += 1) {
+    const text = visibleText(current)
+    const hasCounter = /\b\d+\s*\/\s*\d+\b/.test(text)
+    const hasOptions = ["A", "B", "C", "D"].every((key) => new RegExp(`\\b${key}\\b`).test(text))
+
+    if (hasCounter && hasOptions && hasJapanese(text) && isVisibleElement(current)) {
+      return current
+    }
+
+    current = current.parentElement
+  }
+
+  return root
+}
+
+function currentQuestionCardParts() {
   const root = questionSectionRoot()
-  const counterElement = Array.from(root.querySelectorAll("span, div"))
+  const counterElement = visibleElements(root, "span, div")
     .find((element) => /^\d+\s*\/\s*\d+$/.test(cleanQuestionLine(element.textContent ?? "")))
   const counter = cleanQuestionLine(counterElement?.textContent ?? "")
   const counterMatch = counter.match(/^(\d+)\s*\/\s*(\d+)$/)
-  if (!counterMatch) return null
+  if (!counterElement || !counterMatch) return null
+
+  const cardRoot = visibleQuestionCardRoot(root, counterElement)
+
+  return {
+    root,
+    counter,
+    counterMatch,
+    cardRoot,
+  }
+}
+
+function parseVisibleQuestionCard() {
+  const parts = currentQuestionCardParts()
+  if (!parts) return null
+  const { counter, counterMatch, cardRoot } = parts
 
   const questionElement =
-    root.querySelector("p.one-click-trans") ||
-    root.querySelector("p.japanese-body-l-regular") ||
-    Array.from(root.querySelectorAll("p")).find((element) => hasJapanese(element.textContent ?? ""))
+    visibleElements(cardRoot, "p.one-click-trans")[0] ||
+    visibleElements(cardRoot, "p.japanese-body-l-regular")[0] ||
+    visibleElements(cardRoot, "p").find((element) => hasJapanese(element.textContent ?? ""))
   const question = questionElement ? textWithoutReadingsFromNode(questionElement) : ""
   if (!question) return null
 
   const options = ["A", "B", "C", "D"]
     .map((key) => {
-      const optionRoot = Array.from(root.querySelectorAll("[tabindex='0'], button, .cursor-pointer"))
+      const optionRoot = visibleElements(cardRoot, "[tabindex='0'], button, .cursor-pointer")
         .find((element) => {
           const firstSpan = element.querySelector("span")
           return cleanQuestionLine(firstSpan?.textContent ?? "") === key
@@ -559,18 +632,127 @@ function parseVisibleQuestionCard() {
       const textElement = Array.from(optionRoot.querySelectorAll("span"))
         .find((element) => cleanQuestionLine(element.textContent ?? "") !== key)
       const text = textElement ? textWithoutReadingsFromNode(textElement) : ""
-      return text ? { key, text } : null
+      const optionClassName = String(optionRoot.getAttribute("class") ?? "")
+      const isCorrect = /bg-smt-green|text-smt-green|border-smt-green/i.test(optionClassName)
+
+      return text ? { key, text, isCorrect } : null
     })
     .filter((option) => option !== null)
 
   if (options.length !== 4) return null
+  const correctAnswer = options.find((option) => option.isCorrect)?.key ?? null
+  const cleanOptions = options.map(({ key, text }) => ({ key, text }))
 
   return {
     index: Number(counterMatch[1]),
     total: Number(counterMatch[2]),
     question,
-    options,
+    options: cleanOptions,
+    correctAnswer,
     rawText: [question, counter, ...options.flatMap((option) => [option.key, option.text])].join(" "),
+  }
+}
+
+function normalizedActionText(value) {
+  return cleanQuestionLine(value)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u0111/g, "d")
+}
+
+function findQuestionButtonByText(matchers) {
+  return visibleElements(questionSectionRoot(), "button")
+    .filter((button) => !button.disabled)
+    .find((button) => {
+      const text = normalizedActionText(button.textContent ?? "")
+      return matchers.some((matcher) => text.includes(matcher))
+    })
+}
+
+function clickVisibleQuestionOption(key) {
+  const parts = currentQuestionCardParts()
+  if (!parts) return false
+
+  const optionRoot = visibleElements(parts.cardRoot, "[tabindex='0'], button, .cursor-pointer")
+    .find((element) => {
+      const firstSpan = element.querySelector("span")
+      return cleanQuestionLine(firstSpan?.textContent ?? "") === key
+    })
+
+  if (!optionRoot) return false
+  optionRoot.click()
+  return true
+}
+
+async function revealQuestionAnswersForCrawl() {
+  const visibleQuestion = parseVisibleQuestionCard()
+  if (!visibleQuestion) {
+    return { attempted: false, revealed: false, reason: "question_not_found" }
+  }
+
+  if (visibleQuestion.correctAnswer) {
+    return { attempted: false, revealed: true, reason: "already_revealed" }
+  }
+
+  const existingDetailButton = findQuestionButtonByText(["dap an chi tiet", "answer"])
+  if (existingDetailButton) {
+    existingDetailButton.click()
+    await wait(1000)
+    return {
+      attempted: false,
+      revealed: Boolean(parseVisibleQuestionCard()?.correctAnswer),
+      reason: "opened_existing_detail",
+    }
+  }
+
+  const expectedTotal = visibleQuestion.total
+  const maxSteps = Math.min(Math.max(expectedTotal, 5), 10)
+
+  for (let step = 0; step < maxSteps; step += 1) {
+    const current = parseVisibleQuestionCard()
+    const { previous } = questionNavigationButtons()
+    if (!previous || current?.index === 1) break
+    previous.click()
+    await wait(500)
+  }
+
+  let answeredCount = 0
+  for (let step = 0; step < maxSteps; step += 1) {
+    const current = parseVisibleQuestionCard()
+    if (!current) break
+
+    if (clickVisibleQuestionOption("A")) answeredCount += 1
+    await wait(200)
+
+    if (current.index >= expectedTotal) break
+    const { next } = questionNavigationButtons()
+    if (!next) break
+    next.click()
+    await wait(500)
+  }
+
+  const submitButton = findQuestionButtonByText(["nop bai", "submit"])
+  if (!submitButton) {
+    return { attempted: true, revealed: false, reason: "submit_button_not_found", answeredCount }
+  }
+
+  submitButton.click()
+  await wait(1200)
+
+  const answerDetailButton = findQuestionButtonByText(["dap an chi tiet", "answer"])
+  if (!answerDetailButton) {
+    return { attempted: true, revealed: false, reason: "detail_button_not_found", answeredCount }
+  }
+
+  answerDetailButton.click()
+  await wait(1200)
+
+  return {
+    attempted: true,
+    revealed: Boolean(parseVisibleQuestionCard()?.correctAnswer),
+    reason: "auto_submitted",
+    answeredCount,
   }
 }
 
@@ -766,7 +948,7 @@ async function extractQuestions() {
       const { previous } = questionNavigationButtons()
       if (!previous || current?.index === 1) break
       previous.click()
-      await wait(250)
+      await wait(500)
       saveVisibleQuestion()
     }
 
@@ -775,7 +957,7 @@ async function extractQuestions() {
       const { next } = questionNavigationButtons()
       if (!next || current?.index === expectedTotal) break
       next.click()
-      await wait(250)
+      await wait(500)
       saveVisibleQuestion()
     }
 
@@ -797,7 +979,7 @@ async function extractQuestions() {
 
     const beforeCount = questions.length
     nextButton.click()
-    await wait(300)
+    await wait(500)
 
     questions = mergeQuestions([questions, extractQuestionsFromCurrentDom()])
     staleClicks = questions.length === beforeCount ? staleClicks + 1 : 0
@@ -829,6 +1011,7 @@ async function crawlTodaii() {
   const publishedAt =
     structuredArticle?.datePublished || getMeta('meta[property="article:published_time"]') || null
 
+  const answerRevealResult = await revealQuestionAnswersForCrawl()
   const root = detailRoot()
   const bodyText = root?.innerText || document.body.innerText || document.body.textContent || ""
 
@@ -844,6 +1027,7 @@ async function crawlTodaii() {
     audioUrl: extractAudioUrl(),
     publishedAt,
     questions: await extractQuestions(),
+    answerRevealResult,
     levelStats: extractLevelStats(),
     highlights: extractArticleHighlights(),
     vocabulary: extractVocabulary(),
@@ -853,13 +1037,14 @@ async function crawlTodaii() {
   }
 
   const result = await sendImportPayload(payload)
+  downloadCrawlDebugText(payload, result)
 
   if (!result?.ok) {
-    alert(`Import failed: ${JSON.stringify(result)}`)
+    alert(`Import failed. Crawl debug txt downloaded. ${JSON.stringify(result)}`)
     return
   }
 
-  alert(`Imported TODAII article: ${result.body.articleId}`)
+  alert(`Imported TODAII article: ${result.body.articleId}. Crawl debug txt downloaded.`)
 }
 
 crawlTodaii().catch((error) => {
