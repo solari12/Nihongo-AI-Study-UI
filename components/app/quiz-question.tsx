@@ -1,10 +1,10 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
 
 interface QuizQuestionProps {
   questionNumber: number
@@ -73,21 +73,13 @@ export function QuizQuestion({
           {timeLeft !== undefined && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span className={cn(timeLeft <= 10 && "text-destructive font-medium")}>
-                {timeLeft}s
-              </span>
+              <span className={cn(timeLeft <= 10 && "text-destructive font-medium")}>{timeLeft}s</span>
             </div>
           )}
         </div>
         <Progress value={progress} className="h-2" />
         {timeLeft !== undefined && (
-          <Progress
-            value={timeProgress}
-            className={cn(
-              "h-1",
-              timeLeft <= 10 && "[&>div]:bg-destructive"
-            )}
-          />
+          <Progress value={timeProgress} className={cn("h-1", timeLeft <= 10 && "[&>div]:bg-destructive")} />
         )}
       </div>
 

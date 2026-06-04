@@ -6,6 +6,7 @@ import {
   type QuizQuestionItem,
   type VocabularyItem,
 } from "@/lib/data/nihongo-study"
+import { createEmbedding, cosineSimilarity, hasEmbeddingProvider, isEmbeddingVector } from "@/lib/rag/embeddings"
 import { prisma } from "@/lib/prisma"
 
 export type RagSource = {
@@ -16,6 +17,12 @@ export type RagSource = {
   href?: string
   content: string
   score: number
+}
+
+type RetrieveSourcesOptions = {
+  preferredTypes?: RagSource["type"][]
+  requireTypes?: RagSource["type"][]
+  requireJapaneseTermMatch?: boolean
 }
 
 const sourceTypeLabels: Record<RagSource["type"], string> = {
@@ -41,7 +48,7 @@ function normalize(value: string) {
   return value
     .toLowerCase()
     .normalize("NFKC")
-    .replace(/[^\p{L}\p{N}\sぁ-んァ-ン一-龯]/gu, " ")
+    .replace(/[^\p{L}\p{N}\s\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/gu, " ")
     .replace(/\s+/g, " ")
     .trim()
 }
@@ -102,7 +109,9 @@ function isGrammarIntent(query: string) {
   )
 }
 
-function typeBoost(type: RagSource["type"], query: string) {
+function typeBoost(type: RagSource["type"], query: string, options: RetrieveSourcesOptions = {}) {
+  if (options.preferredTypes?.includes(type)) return 80
+
   if (isVocabularyMeaningQuery(query)) {
     if (type === "vocabulary") return 40
     if (type === "quiz") return -10
@@ -138,10 +147,27 @@ function scoreSource(queryTokens: string[], searchableText: string) {
   }, 0)
 }
 
-function sortSources(sources: RagSource[], query: string, limit: number) {
+function sourceMatchesJapaneseTerms(query: string, source: RagSource) {
+  const terms = splitJapaneseTerms(query)
+  if (!terms.length) return true
+
+  const searchableText = `${source.title}\n${source.content}`
+  const variants = terms.flatMap((term) => {
+    if (term.endsWith("る") && term.length > 1) return [term, term.slice(0, -1)]
+    return [term]
+  })
+
+  return variants.some((term) => searchableText.includes(term))
+}
+
+function sortSources(sources: RagSource[], query: string, limit: number, options: RetrieveSourcesOptions = {}) {
+  const requiredTypes = new Set(options.requireTypes ?? [])
+
   return sources
     .filter((source) => source.score > 0)
-    .sort((a, b) => b.score + typeBoost(b.type, query) - (a.score + typeBoost(a.type, query)))
+    .filter((source) => !requiredTypes.size || requiredTypes.has(source.type))
+    .filter((source) => !options.requireJapaneseTermMatch || sourceMatchesJapaneseTerms(query, source))
+    .sort((a, b) => b.score + typeBoost(b.type, query, options) - (a.score + typeBoost(a.type, query, options)))
     .slice(0, limit)
 }
 
@@ -292,11 +318,26 @@ export function retrieveSources(
   return sortSources(sources, query, limit)
 }
 
-export async function retrieveSourcesFromDatabase(query: string, limit = 6): Promise<RagSource[]> {
+async function queryEmbedding(query: string) {
+  if (!hasEmbeddingProvider()) return null
+
+  try {
+    return await createEmbedding(query)
+  } catch (error) {
+    console.warn("Vector retrieval disabled for this request", error)
+    return null
+  }
+}
+
+export async function retrieveSourcesFromDatabase(
+  query: string,
+  limit = 6,
+  options: RetrieveSourcesOptions = {}
+): Promise<RagSource[]> {
   const queryTokens = tokenize(query)
   if (!queryTokens.length) return []
 
-  const [vocabularySources, chunks] = await Promise.all([
+  const [vocabularySources, chunks, embedding] = await Promise.all([
     retrieveVocabularyMatchesFromDatabase(query, queryTokens),
     prisma.knowledgeChunk.findMany({
       orderBy: {
@@ -304,18 +345,28 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 6): Pro
       },
       take: 1000,
     }),
+    queryEmbedding(query),
   ])
 
-  const chunkSources = chunks.map((chunk) => ({
-    id: chunk.id,
-    sourceId: chunk.sourceId,
-    type: mapChunkType(chunk.sourceType),
-    title: chunk.title,
-    content: chunk.content,
-    score: scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`),
-  }))
+  const chunkSources = chunks.map((chunk) => {
+    const keywordScore = scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`)
+    const vectorScore = embedding && isEmbeddingVector(chunk.embedding)
+      ? Math.max(0, cosineSimilarity(embedding, chunk.embedding)) * 100
+      : 0
+    const type = mapChunkType(chunk.sourceType)
 
-  const localSources = retrieveSources(query, limit)
+    return {
+      id: chunk.id,
+      sourceId: chunk.sourceId,
+      type,
+      title: chunk.title,
+      href: type === "news" ? `/reading?article=${encodeURIComponent(chunk.sourceId)}` : undefined,
+      content: chunk.content,
+      score: vectorScore > 0 ? vectorScore + keywordScore * 0.15 : keywordScore,
+    }
+  })
+
+  const localSources = options.requireTypes?.length ? [] : retrieveSources(query, limit)
   const deduped = new Map<string, RagSource>()
 
   for (const source of [...vocabularySources, ...chunkSources, ...localSources]) {
@@ -325,7 +376,7 @@ export async function retrieveSourcesFromDatabase(query: string, limit = 6): Pro
     }
   }
 
-  return sortSources(Array.from(deduped.values()), query, limit)
+  return sortSources(Array.from(deduped.values()), query, limit, options)
 }
 
 function lineValue(content: string, label: string) {

@@ -74,7 +74,6 @@ function isNewsIntent(message: string) {
     normalized.includes("article") ||
     normalized.includes("news") ||
     normalized.includes("todaii") ||
-    /\bn[1-5]\b/.test(normalized) ||
     /\bbai\b.*\b(khac|nao|moi|n[1-5])\b/.test(normalized) ||
     /\b(co|con|cho toi|cho minh|tim|liet ke)\b.*\bbai\b/.test(normalized)
   )

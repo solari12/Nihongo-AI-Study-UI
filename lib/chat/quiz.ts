@@ -77,9 +77,12 @@ function matchOptionLine(line: string) {
 function matchAnswerLine(line: string) {
   const cleaned = cleanQuizLine(line)
   const normalized = normalizedLabel(cleaned)
-  if (!/^(dap an|answer)\b/.test(normalized)) return null
+  if (!/^(dap an|dap an dung|answer|correct answer|correct)\b/.test(normalized)) return null
 
-  const match = cleaned.match(/[:\uFF1A]\s*([A-D])\b/i) ?? cleaned.match(/\b([A-D])\b/i)
+  const match =
+    cleaned.match(/[:\uFF1A]\s*([A-D])\b/i) ??
+    cleaned.match(/\b(?:la|is)\s+([A-D])\b/i) ??
+    cleaned.match(/\b([A-D])\b/i)
   const label = match?.[1]?.toUpperCase() as QuizOptionLabel | undefined
 
   return label && optionLabels.has(label) ? label : null

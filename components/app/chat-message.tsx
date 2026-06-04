@@ -106,7 +106,8 @@ function QuizCards({
 
   const answeredCount = cards.filter((card) => selected[card.id]).length
   const correctCount = cards.filter((card) => card.answer && selected[card.id] === card.answer).length
-  const canSubmit = answeredCount === cards.length
+  const hasAnswerKey = cards.every((card) => Boolean(card.answer))
+  const canSubmit = hasAnswerKey && answeredCount === cards.length
 
   async function submitQuiz() {
     if (!canSubmit) return
@@ -214,7 +215,9 @@ function QuizCards({
 
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-background p-3">
         <span className="text-xs text-muted-foreground">
-          {submitted
+          {!hasAnswerKey
+            ? t("chatbot.quiz.missingAnswerKey")
+            : submitted
             ? `${t("chatbot.quiz.resultPrefix")} ${correctCount}/${cards.length} ${t("chatbot.correctUnit")}.`
             : `${t("chatbot.quiz.selectedCountPrefix")} ${answeredCount}/${cards.length}.`}
           {saveStatus === "saving" ? ` ${t("chatbot.quiz.saving")}` : null}
@@ -282,7 +285,7 @@ export function ChatMessage({
         {isUser ? (
           <AvatarFallback className="bg-primary text-xs text-primary-foreground">U</AvatarFallback>
         ) : (
-          <AvatarFallback className="bg-accent text-xs font-bold text-accent-foreground">AI</AvatarFallback>
+          <AvatarFallback className="bg-accent text-[10px] font-bold text-accent-foreground">Kami</AvatarFallback>
         )}
       </Avatar>
 

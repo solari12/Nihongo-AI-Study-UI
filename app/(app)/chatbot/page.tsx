@@ -40,9 +40,23 @@ type ChatResponse = {
   sources: ChatSource[]
   quizCards?: ChatQuizCard[]
   activeSource?: ActiveChatSource | null
+  isDeterministic?: boolean
   conversationId: string
   userMessageId: string
   assistantMessageId: string
+}
+
+type ChatAppState = {
+  page: "chatbot"
+  activeSource?: ActiveChatSource | null
+  latestSources?: ChatSource[]
+  latestAssistantQuiz?: {
+    messageId?: string
+    cards: ChatQuizCard[]
+    sources?: ChatSource[]
+  } | null
+  quizState?: ChatQuizState | null
+  lastActionMessage?: string | null
 }
 
 type ChatConversationSummary = {
@@ -99,6 +113,23 @@ function sourceIcon(type: ChatSource["type"]) {
   if (type === "quiz") return <HelpCircle className="h-4 w-4 text-accent" />
   if (type === "news") return <Newspaper className="h-4 w-4 text-primary" />
   return <BookOpen className="h-4 w-4 text-primary" />
+}
+
+function latestAssistantQuizState(messages: ChatMessageItem[]) {
+  const latestQuiz = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant" && message.quizCards?.length)
+
+  if (!latestQuiz?.quizCards?.length) return null
+
+  return {
+    latestAssistantQuiz: {
+      messageId: latestQuiz.id,
+      cards: latestQuiz.quizCards,
+      sources: latestQuiz.sources,
+    },
+    quizState: latestQuiz.quizState ?? null,
+  }
 }
 
 function speak(text: string) {
@@ -288,6 +319,16 @@ export default function ChatbotPage() {
         role: item.role,
         content: item.content,
       }))
+    const latestQuiz = latestAssistantQuizState(messages)
+    const latestAssistant = [...messages].reverse().find((item) => item.role === "assistant")
+    const appState: ChatAppState = {
+      page: "chatbot",
+      activeSource,
+      latestSources: latestAssistant?.sources ?? [],
+      latestAssistantQuiz: latestQuiz?.latestAssistantQuiz ?? null,
+      quizState: latestQuiz?.quizState ?? null,
+      lastActionMessage: actionMessage || null,
+    }
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController
@@ -302,7 +343,7 @@ export default function ChatbotPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, history, activeSource, conversationId }),
+        body: JSON.stringify({ message, history, activeSource, conversationId, appState }),
         signal: abortController.signal,
       })
 
@@ -382,7 +423,7 @@ export default function ChatbotPage() {
         id: `assistant-${requestId}`,
         role: "assistant",
         content:
-          data.provider === "fallback"
+          data.provider === "fallback" && !data.isDeterministic
             ? `${data.answer}\n\n${t("chatbot.fallbackNote")}`
             : data.answer,
         timestamp: formatTime(),
@@ -490,8 +531,8 @@ export default function ChatbotPage() {
       },
       body: JSON.stringify({
         type: "chatbot",
-        content: `Chatbot AI: ${message.content.slice(0, 180)}`,
-        topic: "AI tutor",
+        content: `Kami: ${message.content.slice(0, 180)}`,
+        topic: "Kami",
         result: t("chatbot.activityResultLearned"),
         durationMinutes: 5,
       }),
@@ -501,22 +542,38 @@ export default function ChatbotPage() {
   }
 
   async function logQuizActivity(message: ChatMessageItem, result: { correctCount: number; total: number; percentage: number }) {
-    const response = await fetch("/api/activity", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "chatbot_quiz",
-        content: `Chatbot quiz: ${message.content.slice(0, 180)}`,
-        topic: "AI tutor",
-        result: `${result.correctCount}/${result.total} ${t("chatbot.correctUnit")}`,
-        score: result.percentage,
-        durationMinutes: 5,
+    const [activityResponse, progressResponse] = await Promise.all([
+      fetch("/api/activity", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "chatbot_quiz",
+          content: `Kami quiz: ${message.content.slice(0, 180)}`,
+          topic: "Kami",
+          result: `${result.correctCount}/${result.total} ${t("chatbot.correctUnit")}`,
+          score: result.percentage,
+          durationMinutes: 5,
+        }),
       }),
-    })
+      fetch("/api/progress", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "quiz_attempt",
+          quizType: "vocabulary",
+          score: result.correctCount,
+          total: result.total,
+          percentage: result.percentage,
+        }),
+      }),
+    ])
 
-    await readJsonResponse(response)
+    await readJsonResponse(activityResponse)
+    await readJsonResponse(progressResponse)
     setActionMessage(
       `${t("chatbot.quizSavePrefix")} ${result.correctCount}/${result.total} ${t("chatbot.correctUnit")} (${result.percentage}%).`
     )
@@ -744,7 +801,7 @@ export default function ChatbotPage() {
               {isLoading && !messages[messages.length - 1]?.provider && (
                 <div className="flex gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
-                    <span className="text-xs font-bold text-accent-foreground">AI</span>
+                    <span className="text-[10px] font-bold text-accent-foreground">Kami</span>
                   </div>
                   <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-3">
                     <div className="text-sm text-muted-foreground">
