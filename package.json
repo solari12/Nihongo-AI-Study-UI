@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "test:e2e": "playwright test",
+    "test:unit": "tsx --test tests/unit/*.test.ts",
     "test:e2e:ui": "playwright test --ui",
     "lint": "eslint .",
     "db:migrate": "prisma migrate dev",
@@ -21,7 +22,9 @@
     "data:apply:vi-vocab": "tsx scripts/apply-vietnamese-vocabulary-meanings.ts",
     "data:import:n5-grammar": "tsx scripts/import-n5-grammar.ts",
     "data:generate:embeddings": "tsx scripts/generate-knowledge-embeddings.ts",
-    "data:categorize:vocab": "tsx scripts/categorize-vocabulary-topics.ts"
+    "data:categorize:vocab": "tsx scripts/categorize-vocabulary-topics.ts",
+    "data:clean:vocab": "tsx scripts/clean-vocabulary-data.ts",
+    "data:audit:vocab": "tsx scripts/audit-vocabulary-data.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.67",

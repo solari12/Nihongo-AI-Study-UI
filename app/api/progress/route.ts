@@ -26,7 +26,8 @@ export async function GET() {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
 
-  const [vocabularyProgress, quizAttempts] = await Promise.all([
+  const now = new Date()
+  const [vocabularyProgress, quizAttempts, vocabularyTotal] = await Promise.all([
     prisma.userVocabularyProgress.findMany({
       where: {
         userId: user.id,
@@ -43,15 +44,23 @@ export async function GET() {
         createdAt: "asc",
       },
     }),
+    prisma.vocabulary.count(),
   ])
 
+  const dueVocabulary = vocabularyProgress.filter((item) => item.dueAt <= now)
+  const masteredVocabulary = vocabularyProgress.filter((item) => item.stage === "mastered")
+  const learningVocabulary = vocabularyProgress.filter((item) => item.stage === "learning")
+
   return NextResponse.json({
-    learnedVocabularyIds: vocabularyProgress
-      .filter((item) => item.status === "learned")
-      .map((item) => item.vocabularyId),
-    reviewVocabularyIds: vocabularyProgress
-      .filter((item) => item.status === "review")
-      .map((item) => item.vocabularyId),
+    learnedVocabularyIds: vocabularyProgress.map((item) => item.vocabularyId),
+    reviewVocabularyIds: dueVocabulary.map((item) => item.vocabularyId),
+    vocabulary: {
+      total: vocabularyTotal,
+      studied: vocabularyProgress.length,
+      mastered: masteredVocabulary.length,
+      dueReview: dueVocabulary.length,
+      learning: learningVocabulary.length,
+    },
     quizAttempts: quizAttempts.map((attempt) => ({
       id: attempt.id,
       date: attempt.createdAt.toISOString(),
@@ -72,6 +81,7 @@ export async function POST(request: NextRequest) {
 
   if (parsed.data.type === "vocabulary") {
     const now = new Date()
+    const isLearned = parsed.data.status === "learned"
     const progress = await prisma.userVocabularyProgress.upsert({
       where: {
         userId_vocabularyId: {
@@ -80,16 +90,24 @@ export async function POST(request: NextRequest) {
         },
       },
       update: {
-        status: parsed.data.status,
+        stage: isLearned ? "review" : "learning",
+        repetitions: isLearned ? 1 : 0,
+        intervalDays: 1,
+        lastQuality: isLearned ? 5 : 1,
+        lapses: isLearned ? undefined : { increment: 1 },
         lastReviewedAt: now,
-        nextReviewAt: parsed.data.status === "review" ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
+        dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
       create: {
         userId: user.id,
         vocabularyId: parsed.data.vocabularyId,
-        status: parsed.data.status,
+        stage: isLearned ? "review" : "learning",
+        repetitions: isLearned ? 1 : 0,
+        intervalDays: 1,
+        lastQuality: isLearned ? 5 : 1,
+        lapses: isLearned ? 0 : 1,
         lastReviewedAt: now,
-        nextReviewAt: parsed.data.status === "review" ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
+        dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
     })
 

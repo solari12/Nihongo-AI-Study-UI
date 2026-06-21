@@ -40,7 +40,7 @@ const placementStorageKey = "nihongo-ai-placement-result"
 export const defaultLearnerProfile: LearnerProfile = {
   goal: "FROM_ZERO",
   kanaLevel: "none",
-  dailyMinutes: 20,
+  dailyMinutes: 30,
   experience: "new",
   preferredTopics: ["Chào hỏi", "Trường học"],
   coldStartScore: 0,

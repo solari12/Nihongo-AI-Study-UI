@@ -6,6 +6,8 @@ export type VocabularyItem = {
   vietnamese: string
   type: string
   topic: string
+  topicKey?: string
+  partOfSpeech?: string
   imageUrl?: string | null
   example: {
     japanese: string

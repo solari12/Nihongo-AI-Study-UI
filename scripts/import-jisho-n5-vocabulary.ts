@@ -119,6 +119,8 @@ async function main() {
           vietnamese: meaning,
           type: item.type,
           topic: item.topic,
+          topicKey: "other",
+          partOfSpeech: item.type.includes("Động") ? "verb" : item.type.includes("Danh") ? "noun" : "expression",
           exampleJapanese,
           exampleVietnamese:
             item.example?.vietnamese && !item.example.vietnamese.includes("bổ sung")
@@ -133,6 +135,8 @@ async function main() {
           vietnamese: meaning,
           type: item.type,
           topic: item.topic,
+          topicKey: "other",
+          partOfSpeech: item.type.includes("Động") ? "verb" : item.type.includes("Danh") ? "noun" : "expression",
           exampleJapanese,
           exampleVietnamese: `Study ${meaning}.`,
         },

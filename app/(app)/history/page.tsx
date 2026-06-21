@@ -36,21 +36,27 @@ import { useActivityLog, type ActivityType, type LearningActivity } from "@/hook
 
 const typeIcons: Record<ActivityType, React.ReactNode> = {
   vocabulary: <BookOpen className="h-4 w-4 text-primary" />,
+  vocabulary_session: <BookOpen className="h-4 w-4 text-primary" />,
   grammar: <FileText className="h-4 w-4 text-success" />,
+  grammar_session: <FileText className="h-4 w-4 text-success" />,
   quiz: <HelpCircle className="h-4 w-4 text-accent" />,
   review: <RefreshCw className="h-4 w-4 text-purple-500" />,
 }
 
 const typeLabels: Record<ActivityType, string> = {
   vocabulary: "Từ vựng",
+  vocabulary_session: "Phiên từ vựng",
   grammar: "Ngữ pháp",
+  grammar_session: "Phiên ngữ pháp",
   quiz: "Quiz",
   review: "Ôn tập",
 }
 
 const typeBadgeColors: Record<ActivityType, string> = {
   vocabulary: "bg-blue-100 text-blue-700",
+  vocabulary_session: "bg-blue-100 text-blue-700",
   grammar: "bg-green-100 text-green-700",
+  grammar_session: "bg-green-100 text-green-700",
   quiz: "bg-orange-100 text-orange-700",
   review: "bg-purple-100 text-purple-700",
 }
@@ -116,7 +122,7 @@ export default function HistoryPage() {
       if (!day) return
 
       day.minutes += activity.durationMinutes ?? 0
-      if (activity.type === "vocabulary") {
+      if (activity.type === "vocabulary" || activity.type === "vocabulary_session") {
         day.vocabulary += 1
       }
     })
@@ -281,7 +287,9 @@ export default function HistoryPage() {
                 <SelectContent>
                   <SelectItem value="all">Tất cả</SelectItem>
                   <SelectItem value="vocabulary">Từ vựng</SelectItem>
+                  <SelectItem value="vocabulary_session">Phiên từ vựng</SelectItem>
                   <SelectItem value="grammar">Ngữ pháp</SelectItem>
+                  <SelectItem value="grammar_session">Phiên ngữ pháp</SelectItem>
                   <SelectItem value="quiz">Quiz</SelectItem>
                   <SelectItem value="review">Ôn tập</SelectItem>
                 </SelectContent>

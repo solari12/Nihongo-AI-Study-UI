@@ -1,0 +1,32 @@
+@startuml ChatbotRAG
+title Chatbot RAG Sequence Diagram
+
+actor Learner
+boundary "Chat UI" as UI
+control "Chat API" as API
+control "RAG Retriever" as RAG
+database "Knowledge Chunks" as DB
+participant "AI Provider" as AI
+
+Learner -> UI: Ask a learning question
+UI -> API: Send chat message
+API -> RAG: Retrieve relevant sources
+RAG -> DB: Query top-k knowledge chunks
+DB --> RAG: Return chunks and metadata
+RAG --> API: Return sources
+API -> API: Build grounded prompt
+API -> AI: Request AI completion
+AI --> API: Return generated answer
+API -> DB: Store chat log
+API --> UI: Return answer and sources
+UI --> Learner: Display Kami response
+
+alt Missing AI configuration or embedding data
+  API -> RAG: Run keyword fallback
+  RAG -> DB: Search matching content
+  DB --> RAG: Return fallback sources
+  RAG --> API: Return fallback context
+  API --> UI: Return fallback response
+end
+
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+title Recommendation Engine Function Design
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+
+actor Learner
+boundary "Dashboard /\nLearning Path UI" as UI
+control "Recommendation API" as API
+control "Recommendation Engine" as Engine
+database "learner_profiles" as Profile
+database "placement_results" as Placement
+database "user_vocabulary_progress" as Progress
+database "quiz_attempts" as Quiz
+database "activity_logs" as Activity
+
+Learner --> UI : Open dashboard / learning path
+UI --> API : Request recommendations
+API --> Engine : Generate learning actions
+
+Engine --> Profile : Load goals and study context
+Engine --> Placement : Load starting level
+Engine --> Progress : Load learned / review items
+Engine --> Quiz : Load quiz mastery evidence
+Engine --> Activity : Load recent activity
+
+Engine --> Engine : Score priority,\nmastery, risk, reasons
+Engine --> API : Ranked recommendations
+API --> UI : Tasks + reasons + target URLs
+UI --> Learner : Show next actions
+
+@enduml

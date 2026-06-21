@@ -2,342 +2,468 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, BookOpen, CheckCircle2, Circle, Clock, FileText, TrendingUp } from "lucide-react"
-import { StatsCard } from "@/components/app/stats-card"
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  Compass,
+  Flag,
+  GraduationCap,
+  ListChecks,
+  Sparkles,
+  Target,
+} from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useActivityLog } from "@/hooks/use-activity-log"
+import { Progress } from "@/components/ui/progress"
 import { useAdminContent } from "@/hooks/use-admin-content"
-import { useLearnerProfile } from "@/hooks/use-learner-profile"
+import { useLearnerProfile, type LearningGoal } from "@/hooks/use-learner-profile"
 import { useRecommendations } from "@/hooks/use-recommendations"
 import { useStudyProgress } from "@/hooks/use-study-progress"
+import { getCompletedGrammarPatternsFromActivities } from "@/lib/grammar/progress"
+import { useI18n, type Locale } from "@/lib/i18n"
+import type { Recommendation, RecommendationType } from "@/lib/recommendation/recommendation-engine"
 
-const paperCardStyle = {
-  backgroundColor: "transparent",
-  backgroundImage: "url('/assets/paper-card-bg-clean.png')",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "100% 100%",
-  backgroundPosition: "center",
-} as const
+const copy = {
+  vi: {
+    heroBadge: "Lộ trình cá nhân",
+    heroTitle: "Hôm nay nên học gì?",
+    heroDescription:
+      "Kami chọn vài việc học rõ ràng dựa trên mục tiêu, thời gian rảnh và tiến độ gần đây của bạn.",
+    continuePlan: "Tiếp tục lộ trình",
+    editProfile: "Chỉnh hồ sơ",
+    setupTitle: "Thiết lập điểm bắt đầu",
+    setupBody: "Hoàn tất hồ sơ hoặc bài kiểm tra ngắn để lộ trình khớp hơn với trình độ hiện tại.",
+    setupCta: "Thiết lập ngay",
+    currentGoal: "Mục tiêu hiện tại",
+    dailyPace: "Nhịp học",
+    progressN5: "Tiến độ N5",
+    recentDays: "Ngày học gần đây",
+    todayPlan: "Kế hoạch hôm nay",
+    todayPlanDescription: "Làm theo thứ tự này để học vừa sức trong một buổi.",
+    noPlanTitle: "Chưa có dữ liệu để tạo kế hoạch",
+    noPlanBody: "Hãy tạo hồ sơ học trước, sau đó Kami sẽ gợi ý bài phù hợp hơn.",
+    start: "Bắt đầu",
+    minutes: "phút",
+    vocabulary: "Từ vựng",
+    grammar: "Ngữ pháp",
+    quiz: "Kiểm tra",
+    review: "Ôn tập",
+    insightTitle: "Tín hiệu học tập",
+    insightDescription: "Các gợi ý dễ hiểu để bạn biết nên giữ nhịp hay ôn lại phần nào.",
+    insightEmpty: "Sau vài bài học hoặc quiz, khu vực này sẽ có nhận xét cụ thể hơn.",
+    learnedWords: "Từ đã học",
+    reviewWords: "Từ nên ôn",
+    quizAverage: "Điểm quiz TB",
+    quickLinks: "Đi nhanh",
+    vocabularyLink: "Học từ vựng",
+    grammarLink: "Học ngữ pháp",
+    quizLink: "Làm quiz",
+    pathLink: "Xem lộ trình",
+    goalJLPT: "Thi JLPT N5",
+    goalCommunication: "Giao tiếp cơ bản",
+    goalFromZero: "Bắt đầu từ số 0",
+    noGoal: "Chưa chọn mục tiêu",
+    kanaReady: "Kana khá ổn",
+    kanaHiragana: "Đã biết hiragana",
+    kanaNone: "Cần bắt đầu với kana",
+    placementReady: "Đã có kiểm tra đầu vào",
+    placementNeeded: "Có thể kiểm tra đầu vào để tinh chỉnh",
+    reasonProfile: "Hoàn tất hồ sơ để Kami biết bạn muốn học theo hướng nào.",
+    reasonPlacement: "Làm bài kiểm tra ngắn để xác định điểm bắt đầu.",
+    reasonVocab: "Tăng vốn từ trước khi sang câu mẫu dài hơn.",
+    reasonGrammar: "Củng cố mẫu câu để đọc và trả lời quiz chắc hơn.",
+    reasonQuiz: "Kiểm tra nhanh để biết phần nào cần ôn lại.",
+    reasonReview: "Ôn lại nội dung đã gặp để nhớ lâu hơn.",
+  },
+  en: {
+    heroBadge: "Personal path",
+    heroTitle: "What should you study today?",
+    heroDescription:
+      "Kami picks a few clear study actions from your goal, available time, and recent progress.",
+    continuePlan: "Continue path",
+    editProfile: "Edit profile",
+    setupTitle: "Set your starting point",
+    setupBody: "Complete your profile or a short check so the path fits your current level.",
+    setupCta: "Set up now",
+    currentGoal: "Current goal",
+    dailyPace: "Daily pace",
+    progressN5: "N5 progress",
+    recentDays: "Recent study days",
+    todayPlan: "Today plan",
+    todayPlanDescription: "Follow this order for a manageable study session.",
+    noPlanTitle: "Not enough data for a plan yet",
+    noPlanBody: "Create your study profile first, then Kami can suggest better lessons.",
+    start: "Start",
+    minutes: "minutes",
+    vocabulary: "Vocabulary",
+    grammar: "Grammar",
+    quiz: "Check",
+    review: "Review",
+    insightTitle: "Study signals",
+    insightDescription: "Learner-friendly cues for keeping pace or reviewing the right part.",
+    insightEmpty: "After a few lessons or quizzes, this area will show more specific notes.",
+    learnedWords: "Learned words",
+    reviewWords: "Words to review",
+    quizAverage: "Avg. quiz result",
+    quickLinks: "Quick links",
+    vocabularyLink: "Study vocabulary",
+    grammarLink: "Study grammar",
+    quizLink: "Take quiz",
+    pathLink: "View path",
+    goalJLPT: "JLPT N5",
+    goalCommunication: "Basic conversation",
+    goalFromZero: "Start from zero",
+    noGoal: "No goal yet",
+    kanaReady: "Kana is usable",
+    kanaHiragana: "Hiragana known",
+    kanaNone: "Start with kana",
+    placementReady: "Starting check completed",
+    placementNeeded: "Optional check can refine the path",
+    reasonProfile: "Complete your profile so Kami knows your learning direction.",
+    reasonPlacement: "Take a short check to find the right starting point.",
+    reasonVocab: "Build vocabulary before longer sentence patterns.",
+    reasonGrammar: "Strengthen sentence patterns for reading and quiz answers.",
+    reasonQuiz: "Use a quick check to see what needs review.",
+    reasonReview: "Review familiar content so it sticks longer.",
+  },
+  ja: {
+    heroBadge: "個別ルート",
+    heroTitle: "今日は何を学ぶ？",
+    heroDescription: "Kamiが目標、学習時間、最近の進み具合から今日の学習を選びます。",
+    continuePlan: "ルートを続ける",
+    editProfile: "プロフィール編集",
+    setupTitle: "開始位置を設定",
+    setupBody: "プロフィールや短い確認テストで、今のレベルに合うルートにします。",
+    setupCta: "設定する",
+    currentGoal: "現在の目標",
+    dailyPace: "学習ペース",
+    progressN5: "N5の進み具合",
+    recentDays: "最近学んだ日",
+    todayPlan: "今日の学習",
+    todayPlanDescription: "この順番なら、一回の学習で進めやすくなります。",
+    noPlanTitle: "まだ学習プランを作れません",
+    noPlanBody: "まず学習プロフィールを作ると、Kamiが合う教材を選びます。",
+    start: "始める",
+    minutes: "分",
+    vocabulary: "語彙",
+    grammar: "文法",
+    quiz: "確認",
+    review: "復習",
+    insightTitle: "学習のヒント",
+    insightDescription: "ペース維持や復習すべき部分をわかりやすく表示します。",
+    insightEmpty: "いくつか学習やクイズを行うと、ここに具体的なヒントが出ます。",
+    learnedWords: "学習済み語彙",
+    reviewWords: "復習する語彙",
+    quizAverage: "クイズ平均",
+    quickLinks: "すぐ始める",
+    vocabularyLink: "語彙を学ぶ",
+    grammarLink: "文法を学ぶ",
+    quizLink: "クイズをする",
+    pathLink: "ルートを見る",
+    goalJLPT: "JLPT N5",
+    goalCommunication: "基本会話",
+    goalFromZero: "ゼロから始める",
+    noGoal: "目標未設定",
+    kanaReady: "かなは読める",
+    kanaHiragana: "ひらがなは分かる",
+    kanaNone: "かなから始める",
+    placementReady: "開始チェック済み",
+    placementNeeded: "確認テストで調整できます",
+    reasonProfile: "プロフィールを作ると、Kamiが学習方向を把握できます。",
+    reasonPlacement: "短い確認テストで開始位置を決めます。",
+    reasonVocab: "長い文に入る前に語彙を増やします。",
+    reasonGrammar: "文型を固めると読解とクイズが安定します。",
+    reasonQuiz: "短い確認で復習すべき部分を見つけます。",
+    reasonReview: "一度見た内容を復習して記憶に残します。",
+  },
+} satisfies Record<Locale, Record<string, string>>
 
-const actionCardStyle = {
-  backgroundColor: "transparent",
-  backgroundImage: "url('/assets/image-removebg-preview.png')",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "100% 100%",
-  backgroundPosition: "center",
-} as const
+function getGoalLabel(goal: LearningGoal, text: (typeof copy)[Locale]) {
+  if (goal === "JLPT_N5") return text.goalJLPT
+  if (goal === "COMMUNICATION") return text.goalCommunication
+  return text.goalFromZero
+}
 
-function activityLabel(type: string) {
-  if (type === "vocabulary") return "Từ vựng"
-  if (type === "grammar") return "Ngữ pháp"
-  if (type === "quiz") return "Quiz"
-  return "Ôn tập"
+function getKanaLabel(kanaLevel: string, text: (typeof copy)[Locale]) {
+  if (kanaLevel === "hiragana_katakana") return text.kanaReady
+  if (kanaLevel === "hiragana") return text.kanaHiragana
+  return text.kanaNone
+}
+
+function getTypeLabel(type: RecommendationType, text: (typeof copy)[Locale]) {
+  if (type === "vocabulary") return text.vocabulary
+  if (type === "grammar") return text.grammar
+  if (type === "quiz") return text.quiz
+  return text.review
+}
+
+function getLearnerReason(recommendation: Recommendation, text: (typeof copy)[Locale]) {
+  if (recommendation.id.includes("onboarding")) return text.reasonProfile
+  if (recommendation.id.includes("placement")) return text.reasonPlacement
+  if (recommendation.type === "vocabulary") return text.reasonVocab
+  if (recommendation.type === "grammar") return text.reasonGrammar
+  if (recommendation.type === "quiz") return text.reasonQuiz
+  return text.reasonReview
+}
+
+function getAssetForType(type: RecommendationType) {
+  if (type === "vocabulary") return "/assets/vocab-card-clean.png"
+  if (type === "grammar") return "/assets/grammar-card-clean.png"
+  if (type === "quiz") return "/assets/quiz-card-clean.png"
+  return "/assets/paper-card-bg-clean.png"
+}
+
+function clampPercent(value: number) {
+  return Math.max(0, Math.min(100, Math.round(value)))
 }
 
 export default function DashboardPage() {
-  const { stats } = useStudyProgress()
+  const { locale } = useI18n()
+  const text = copy[locale] ?? copy.vi
   const { content } = useAdminContent()
-  const { recommendations } = useRecommendations()
-  const { activities } = useActivityLog()
+  const { stats } = useStudyProgress()
   const { profile, placement } = useLearnerProfile()
+  const { recommendations, activities } = useRecommendations()
 
   const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
   const totalGrammar = content.grammar.length || stats.totalGrammar
-  const completedGrammar = stats.completedGrammar
-  const safeVocabularyTotal = Math.max(totalVocabulary, 1)
-  const safeGrammarTotal = Math.max(totalGrammar, 1)
-  const n5Progress = Math.round(
-    ((stats.learnedVocabulary / safeVocabularyTotal) * 0.45 +
-      (completedGrammar / safeGrammarTotal) * 0.35 +
+  const completedGrammarCount = Math.max(
+    stats.completedGrammar,
+    getCompletedGrammarPatternsFromActivities(activities, content.grammar).size
+  )
+  const n5Progress = clampPercent(
+    ((stats.learnedVocabulary / Math.max(totalVocabulary, 1)) * 0.45 +
+      (completedGrammarCount / Math.max(totalGrammar, 1)) * 0.35 +
       (stats.latestQuizScore / 100) * 0.2) *
       100
   )
-  const hasActivity = activities.length > 0
-  const hasProgress = stats.learnedVocabulary > 0 || stats.completedGrammar > 0 || stats.quizAttempts > 0 || hasActivity
-  const coldStartLabel = profile.completedOnboarding
-    ? `${profile.coldStartScore}/100`
-    : "Chưa có"
-
-  const nextSteps = [
-    {
-      title: "Khởi tạo hồ sơ học tập",
-      description: profile.completedOnboarding
-        ? `Đã tạo cold-start point ${profile.coldStartScore}/100.`
-        : "Tài khoản mới cần mục tiêu, trình độ kana và thời gian học để tạo cold-start point.",
-      href: "/onboarding",
-      actionLabel: profile.completedOnboarding ? "Xem hồ sơ" : "Hoàn tất hồ sơ ngay",
-      done: profile.completedOnboarding,
-    },
-    {
-      title: "Làm kiểm tra đầu vào",
-      description: placement.completed
-        ? `Đã hoàn tất placement test với ${placement.percentage}%.`
-        : "Xác định bạn nên bắt đầu từ kana, từ vựng nền tảng hay ôn tập N5.",
-      href: "/placement-test",
-      actionLabel: placement.completed ? "Xem kết quả" : "Bắt đầu kiểm tra",
-      done: placement.completed,
-    },
-    {
-      title: "Xem AI gợi ý",
-      description: "BKT + SM-2 + cold-start point xếp hạng nội dung cần học tiếp theo.",
-      href: "/learning-path",
-      actionLabel: "Xem gợi ý AI",
-      done: hasProgress,
-    },
-  ]
+  const recentStudyDays = new Set(activities.slice(0, 12).map((activity) => activity.createdAt.slice(0, 10))).size
+  const hasProfile = profile.completedOnboarding
+  const todayItems = recommendations.slice(0, 4)
+  const hasSignals = stats.learnedVocabulary > 0 || stats.reviewVocabulary > 0 || stats.quizAttempts > 0
+  const setupHref = hasProfile ? "/placement-test" : "/onboarding"
 
   return (
-    <div className="-m-6 min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_8%_12%,rgba(243,200,189,0.55),transparent_28%),radial-gradient(circle_at_92%_10%,rgba(255,230,222,0.7),transparent_26%),linear-gradient(135deg,#fff8f1_0%,#fffdf8_48%,#f7d9d2_100%)] p-6">
-      <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-xl bg-[#fff8f1]/80 px-4 pb-4 pt-2">
-        <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)_220px] lg:items-center">
-          <div className="relative flex h-56 items-end justify-center overflow-visible">
-            <Image
-              src="/assets/hero-torii.png"
-              alt="Minh họa cổng torii và sách học tiếng Nhật"
-              width={520}
-              height={320}
-              priority
-              className="h-56 w-full object-contain object-left-bottom"
-            />
+    <div className="space-y-8" data-i18n-managed>
+      <section className="relative overflow-hidden rounded-[2rem] border bg-gradient-to-br from-rose-50 via-amber-50 to-sky-50 p-6 shadow-sm md:p-8">
+        <Image
+          src="/assets/hero-torii.png"
+          alt=""
+          width={360}
+          height={260}
+          className="pointer-events-none absolute bottom-0 right-0 hidden opacity-90 md:block"
+          priority
+        />
+        <div className="relative max-w-2xl space-y-5">
+          <Badge className="rounded-full bg-white/80 text-primary shadow-sm">
+            <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+            {text.heroBadge}
+          </Badge>
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">{text.heroTitle}</h1>
+            <p className="text-base leading-7 text-muted-foreground md:text-lg">{text.heroDescription}</p>
           </div>
-
-          <div className="pb-2 text-center lg:text-left">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Bắt đầu lộ trình học của bạn</h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-[#4f403b]">
-              Dashboard chỉ hiển thị tiến độ tài khoản hiện tại. Nếu bạn vừa tạo tài khoản mới, hãy hoàn tất hồ sơ học tập và placement test trước.
-            </p>
-          </div>
-
-          <div className="mx-auto w-full max-w-[220px]">
-            <div className="relative mx-auto h-40 w-40">
-              <Image
-                src="/assets/Flower.png"
-                alt=""
-                width={180}
-                height={180}
-                aria-hidden="true"
-                className="h-full w-full object-contain drop-shadow-[0_8px_16px_rgba(143,71,66,0.18)]"
-              />
-              <div className="absolute inset-0 grid place-items-center text-center">
-                <div className="max-w-24">
-                  <p className="text-xs font-medium leading-4 text-[#6f5952]">Tiến độ N5 tổng hợp</p>
-                  <p className="text-4xl font-semibold tracking-tight text-[#1f1a18]">{n5Progress}%</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold uppercase text-[#1f1a18]">
-              <span>Từ vựng<br />45%</span>
-              <span>Ngữ pháp<br />35%</span>
-              <span>Quiz<br />20%</span>
-            </div>
-            <p className="mt-2 text-center text-[11px] font-medium text-[#8f4742]">Cold-start {coldStartLabel}</p>
-          </div>
-        </div>
-
-        <div className="mt-3 grid gap-4 md:grid-cols-3">
-          {nextSteps.map((step) => (
-            <Card key={step.title} className="min-h-32 border-none bg-transparent shadow-none drop-shadow-[0_8px_10px_rgba(87,42,34,0.18)] transition-all hover:-translate-y-0.5 hover:drop-shadow-[0_12px_14px_rgba(87,42,34,0.22)]" style={actionCardStyle}>
-              <CardContent className="flex h-full items-center gap-4 px-8 py-5">
-                <div className={step.done ? "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#c8ead6]" : "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f3c8bd]/60"}>
-                  {step.done ? (
-                    <CheckCircle2 className="h-6 w-6 text-[#3f9b68]" />
-                  ) : (
-                    <Circle className="h-6 w-6 text-[#a34d48]" strokeWidth={1.75} />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 text-lg font-bold leading-6 text-foreground">{step.title}</p>
-                  <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#6f5952]">{step.description}</p>
-                  <Button className="mt-3 h-8 rounded-full bg-[#ee776c] px-4 text-sm text-white shadow-md hover:bg-[#dd675e]" asChild>
-                    <Link href={step.href}>{step.actionLabel}</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {!hasProgress && (
-        <Card className="border border-[#dfb6aa] bg-[#fff8f1] shadow-sm">
-          <CardHeader>
-            <CardTitle>Tài khoản mới chưa có dữ liệu học</CardTitle>
-            <CardDescription className="text-muted-foreground/80">
-              Đây là trạng thái đúng cho user mới. Hệ thống sẽ tạo gợi ý ban đầu từ onboarding và placement test.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href={profile.completedOnboarding ? "/placement-test" : "/onboarding"}>
-                {profile.completedOnboarding ? "Làm kiểm tra đầu vào" : "Tạo hồ sơ học tập"}
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="lg" className="rounded-2xl">
+              <Link href="/learning-path">
+                {text.continuePlan}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-2xl bg-white/70">
+              <Link href="/onboarding">{text.editProfile}</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="overflow-hidden border-0 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>{text.currentGoal}</CardDescription>
+            <CardTitle className="text-xl">{hasProfile ? getGoalLabel(profile.goal, text) : text.noGoal}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Badge variant="secondary" className="rounded-full">{getKanaLabel(profile.kanaLevel, text)}</Badge>
           </CardContent>
         </Card>
-      )}
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Vocab"
-          value={stats.learnedVocabulary}
-          description="Từ vựng đã học"
-          subtitle="Học từ vựng đầu tiên!"
-          icon={<Image src="/assets/vocab-card-clean.png" alt="" width={220} height={220} aria-hidden="true" className="h-32 w-32 bg-transparent object-contain" style={{ backgroundColor: "transparent" }} />}
-          className="relative min-h-36 overflow-hidden border-none bg-transparent shadow-none"
-          style={paperCardStyle}
-          contentClassName="px-7 py-5 pr-40"
-          descriptionClassName="text-sm font-medium text-foreground"
-          iconClassName="absolute right-2 top-3 bg-transparent p-0"
-          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
-          valueClassName="text-4xl font-bold leading-none tracking-tight"
-          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
-        />
-        <StatsCard
-          title="Grammar"
-          value={completedGrammar}
-          description="Ngữ pháp đã học"
-          subtitle="Học từ ngữ pháp đầu tiên!"
-          icon={<Image src="/assets/grammar-card-clean.png" alt="" width={220} height={220} aria-hidden="true" className="h-32 w-32 bg-transparent object-contain" style={{ backgroundColor: "transparent" }} />}
-          className="relative min-h-36 overflow-hidden border-none bg-transparent shadow-none"
-          style={paperCardStyle}
-          contentClassName="px-7 py-5 pr-40"
-          descriptionClassName="text-sm font-medium text-foreground"
-          iconClassName="absolute right-2 top-3 bg-transparent p-0"
-          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
-          valueClassName="text-4xl font-bold leading-none tracking-tight"
-          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
-        />
-        <StatsCard
-          title="Quiz"
-          value={stats.quizAttempts}
-          description="Quiz đã làm"
-          subtitle="Học từ làm đầu tiên!"
-          icon={<Image src="/assets/quiz-card-clean.png" alt="" width={220} height={220} aria-hidden="true" className="h-32 w-32 bg-transparent object-contain" style={{ backgroundColor: "transparent" }} />}
-          className="relative min-h-36 overflow-hidden border-none bg-transparent shadow-none"
-          style={paperCardStyle}
-          contentClassName="px-7 py-5 pr-40"
-          descriptionClassName="text-sm font-medium text-foreground"
-          iconClassName="absolute right-2 top-3 bg-transparent p-0"
-          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
-          valueClassName="text-4xl font-bold leading-none tracking-tight"
-          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
-        />
-        <StatsCard
-          title="Avg Score"
-          value={`${stats.averageQuizScore}%`}
-          description="Điểm trung bình"
-          subtitle="tất cả quiz"
-          icon={
-            <div className="grid h-16 w-16 place-items-center rounded-full border-[10px] border-[#e6d6bd] bg-[#fff8f1] text-[#c96b6b]">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-          }
-          className="relative min-h-32 overflow-hidden border-none bg-transparent shadow-none"
-          style={paperCardStyle}
-          contentClassName="px-7 py-5 pr-24"
-          iconClassName="absolute right-3 top-3 bg-transparent p-0"
-          descriptionClassName="text-sm font-medium text-foreground"
-          titleClassName="text-2xl font-extrabold leading-none tracking-tight text-foreground"
-          valueClassName="text-4xl font-bold leading-none tracking-tight"
-          subtitleClassName="mt-1 text-sm font-semibold text-[#8f4742]"
-        />
+        <Card className="overflow-hidden border-0 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>{text.dailyPace}</CardDescription>
+            <CardTitle className="text-xl">{profile.dailyMinutes || 30} {text.minutes}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            {placement.completed ? text.placementReady : text.placementNeeded}
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-0 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>{text.progressN5}</CardDescription>
+            <CardTitle className="text-xl">{n5Progress}%</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Progress value={n5Progress} className="h-2" />
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-0 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>{text.recentDays}</CardDescription>
+            <CardTitle className="text-xl">{recentStudyDays}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            {activities[0]?.content ?? text.insightEmpty}
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <Card className="overflow-visible border-none bg-transparent shadow-none">
-            <div className="relative -mx-2 aspect-[1849/929] overflow-visible sm:-mx-4">
-              <Image
-                src="/assets/times.png"
-                alt="Thời gian học 7 ngày qua"
-                width={1849}
-                height={929}
-                className="h-full w-full object-contain"
-              />
-              <div className="sr-only">Thời gian học 7 ngày qua. Số phút học được ghi từ activity thật của tài khoản.</div>
+      {!hasProfile || !placement.completed ? (
+        <Card className="overflow-hidden border-amber-200 bg-amber-50/70">
+          <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-amber-700 shadow-sm">
+                <Compass className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-semibold">{text.setupTitle}</h2>
+                <p className="text-sm text-muted-foreground">{text.setupBody}</p>
+              </div>
             </div>
-          </Card>
+            <Button asChild className="rounded-2xl">
+              <Link href={setupHref}>{text.setupCta}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
-          <Card className="border border-[#dfb6aa] bg-card shadow-sm">
+      <div className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
+        <Card className="overflow-hidden border-0 bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              {text.todayPlan}
+            </CardTitle>
+            <CardDescription>{text.todayPlanDescription}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {todayItems.length ? (
+              todayItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="relative overflow-hidden rounded-3xl border bg-muted/20 p-4"
+                >
+                  <Image
+                    src={getAssetForType(item.type)}
+                    alt=""
+                    width={180}
+                    height={120}
+                    className="pointer-events-none absolute right-0 top-0 hidden h-full w-44 object-cover opacity-25 sm:block"
+                  />
+                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 font-semibold text-primary">
+                        {index + 1}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary" className="rounded-full">
+                            {getTypeLabel(item.type, text)}
+                          </Badge>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3.5 w-3.5" />
+                            {item.estimatedTime}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold">{item.title}</h3>
+                        <p className="max-w-2xl text-sm text-muted-foreground">
+                          {getLearnerReason(item, text)}
+                        </p>
+                      </div>
+                    </div>
+                    <Button asChild variant="outline" className="rounded-2xl bg-white/80">
+                      <Link href={item.targetUrl}>
+                        {text.start}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-3xl border border-dashed p-8 text-center">
+                <GraduationCap className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                <h3 className="font-semibold">{text.noPlanTitle}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{text.noPlanBody}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="relative overflow-hidden border-0 bg-white shadow-sm">
+            <Image
+              src="/assets/Flower.png"
+              alt=""
+              width={120}
+              height={120}
+              className="absolute -right-5 -top-5 opacity-30"
+            />
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-success" />
-                Bài học đề xuất hôm nay
+                <ListChecks className="h-5 w-5 text-primary" />
+                {text.insightTitle}
               </CardTitle>
+              <CardDescription>{text.insightDescription}</CardDescription>
             </CardHeader>
-            <CardContent>
-              {recommendations.length ? (
-                <div className="divide-y divide-border/40">
-                  {recommendations.slice(0, 2).map((lesson) => (
-                    <div key={lesson.id} className="-mx-4 flex items-center justify-between gap-4 rounded-lg px-4 py-4 transition-colors hover:bg-muted/30">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          {lesson.type === "vocabulary" ? <BookOpen className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium">{lesson.title}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground/70">
-                            <Clock className="h-3 w-3" />
-                            {lesson.estimatedTime}
-                          </div>
-                          <p className="mt-1 text-xs leading-5 text-muted-foreground/70">{lesson.reason}</p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm" className="shrink-0" asChild>
-                        <Link href={lesson.targetUrl}>Học ngay</Link>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+            <CardContent className="space-y-3">
+              {hasSignals ? (
+                <>
+                  <div className="flex items-center justify-between rounded-2xl bg-muted/50 p-3">
+                    <span className="flex items-center gap-2 text-sm"><BookOpen className="h-4 w-4" />{text.learnedWords}</span>
+                    <strong>{stats.learnedVocabulary}/{totalVocabulary}</strong>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl bg-muted/50 p-3">
+                    <span className="flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4" />{text.reviewWords}</span>
+                    <strong>{stats.reviewVocabulary}</strong>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl bg-muted/50 p-3">
+                    <span className="flex items-center gap-2 text-sm"><Flag className="h-4 w-4" />{text.quizAverage}</span>
+                    <strong>{stats.quizAttempts ? `${stats.averageQuizScore}%` : "-"}</strong>
+                  </div>
+                </>
               ) : (
-                <div className="rounded-lg bg-muted/30 p-6 text-sm text-muted-foreground/80">
-                  Chưa có gợi ý vì tài khoản chưa có hồ sơ học tập. Hãy bắt đầu bằng onboarding.
-                </div>
+                <p className="rounded-2xl bg-muted/50 p-4 text-sm text-muted-foreground">{text.insightEmpty}</p>
               )}
             </CardContent>
           </Card>
-        </div>
 
-        <Card className="relative min-h-[520px] overflow-hidden border-none bg-transparent shadow-none">
-          <Image
-            src="/assets/quiz.png"
-            alt=""
-            width={900}
-            height={1400}
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-fill"
-          />
-          <div className="relative z-10 px-8 py-8">
-            <div className="mb-4 flex items-center gap-2">
-              <Clock className="h-5 w-5 text-[#8f4742]" />
-              <h2 className="text-xl font-bold">Hoạt động gần đây</h2>
-            </div>
-            {activities.length ? (
-              <div className="divide-y divide-border/40">
-                {activities.slice(0, 4).map((activity) => (
-                  <div key={activity.id} className="-mx-4 flex items-start gap-3 rounded-lg px-4 py-4 transition-colors hover:bg-muted/30">
-                    <Badge variant="outline" className="border-border/60 bg-muted/40 text-muted-foreground">
-                      {activityLabel(activity.type)}
-                    </Badge>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm leading-6">{activity.content}</p>
-                      <p className="text-xs text-muted-foreground/70">{new Date(activity.createdAt).toLocaleString("vi-VN")}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg bg-muted/30 p-6 text-sm text-muted-foreground/80">
-                Chưa có hoạt động học nào cho tài khoản này.
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
+          <Card className="overflow-hidden border-0 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle>{text.quickLinks}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              {[
+                { href: "/vocabulary", label: text.vocabularyLink, icon: BookOpen },
+                { href: "/grammar", label: text.grammarLink, icon: GraduationCap },
+                { href: "/quiz", label: text.quizLink, icon: CheckCircle2 },
+                { href: "/learning-path", label: text.pathLink, icon: Compass },
+              ].map((item) => (
+                <Button key={item.href} asChild variant="ghost" className="justify-between rounded-2xl">
+                  <Link href={item.href}>
+                    <span className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

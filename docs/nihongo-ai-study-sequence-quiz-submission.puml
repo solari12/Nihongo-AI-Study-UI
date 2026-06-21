@@ -1,0 +1,26 @@
+@startuml QuizSubmission
+title Quiz Submission Sequence Diagram
+
+actor Learner
+boundary "Quiz UI" as UI
+control "Quiz API" as API
+database "PostgreSQL" as DB
+control "Recommendation Engine" as REC
+
+Learner -> UI: Open quiz
+UI -> API: Request quiz questions
+API -> DB: Load questions and answers
+DB --> API: Return quiz data
+API --> UI: Display quiz
+Learner -> UI: Select answers and submit
+UI -> API: Submit quiz attempt
+API -> API: Calculate score and explanations
+API -> DB: Store quiz attempt
+API -> DB: Write activity log
+API -> REC: Update mastery evidence
+REC -> DB: Read latest quiz attempts\nand progress
+REC --> API: Return updated signals
+API --> UI: Return score, explanations,\nand next suggestions
+UI --> Learner: Display quiz result
+
+@enduml

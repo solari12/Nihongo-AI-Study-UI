@@ -8,6 +8,8 @@ type DbVocabulary = {
   vietnamese: string
   type: string
   topic: string
+  topicKey?: string
+  partOfSpeech?: string
   imageUrl?: string | null
   exampleJapanese: string
   exampleVietnamese: string
@@ -48,6 +50,8 @@ export function toVocabularyItem(item: DbVocabulary): VocabularyItem {
     vietnamese: item.vietnamese,
     type: item.type,
     topic: item.topic,
+    topicKey: item.topicKey,
+    partOfSpeech: item.partOfSpeech,
     imageUrl: item.imageUrl ?? null,
     example: {
       japanese: item.exampleJapanese,

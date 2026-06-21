@@ -1,0 +1,162 @@
+@startuml
+title Conceptual ERD of Nihongo AI Study
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide methods
+
+entity "users" as users {
+  * id
+  --
+  email
+  role
+  created_at
+}
+
+entity "auth_sessions" as auth_sessions {
+  * id
+  --
+  user_id
+  expires_at
+}
+
+entity "learner_profiles" as learner_profiles {
+  * id
+  --
+  user_id
+  goal
+  kana_level
+  daily_minutes
+}
+
+entity "placement_results" as placement_results {
+  * id
+  --
+  user_id
+  score
+  weak_areas
+}
+
+entity "vocabulary" as vocabulary {
+  * id
+  --
+  japanese
+  kana
+  meaning_vi
+  level
+}
+
+entity "grammar" as grammar {
+  * id
+  --
+  pattern
+  meaning
+  level
+}
+
+entity "quiz_questions" as quiz_questions {
+  * id
+  --
+  question
+  level
+  explanation
+}
+
+entity "quiz_answers" as quiz_answers {
+  * id
+  --
+  question_id
+  answer
+  is_correct
+}
+
+entity "quiz_attempts" as quiz_attempts {
+  * id
+  --
+  user_id
+  score
+  created_at
+}
+
+entity "user_vocabulary_progress" as user_vocabulary_progress {
+  * id
+  --
+  user_id
+  vocabulary_id
+  status
+  updated_at
+}
+
+entity "activity_logs" as activity_logs {
+  * id
+  --
+  user_id
+  activity_type
+  metadata
+  created_at
+}
+
+entity "saved_study_items" as saved_study_items {
+  * id
+  --
+  user_id
+  article_id
+  item_type
+  content
+}
+
+entity "chat_conversations" as chat_conversations {
+  * id
+  --
+  user_id
+  title
+  created_at
+}
+
+entity "chat_conversation_messages" as chat_conversation_messages {
+  * id
+  --
+  conversation_id
+  role
+  content
+  sources
+}
+
+entity "news_articles" as news_articles {
+  * id
+  --
+  title
+  level
+  category
+  source_url
+}
+
+entity "knowledge_chunks" as knowledge_chunks {
+  * id
+  --
+  source_type
+  source_id
+  content
+  embedding
+}
+
+users ||--o{ auth_sessions : has
+users ||--|| learner_profiles : owns
+users ||--o{ placement_results : takes
+users ||--o{ quiz_attempts : makes
+users ||--o{ activity_logs : creates
+users ||--o{ saved_study_items : saves
+users ||--o{ chat_conversations : has
+
+vocabulary ||--o{ user_vocabulary_progress : tracked_in
+users ||--o{ user_vocabulary_progress : owns
+quiz_questions ||--o{ quiz_answers : has
+
+chat_conversations ||--o{ chat_conversation_messages : contains
+news_articles ||--o{ saved_study_items : referenced_by
+
+knowledge_chunks }o--|| vocabulary : may_reference
+knowledge_chunks }o--|| grammar : may_reference
+knowledge_chunks }o--|| news_articles : may_reference
+
+@enduml

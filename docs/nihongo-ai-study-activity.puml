@@ -1,0 +1,41 @@
+@startuml
+title Activity Diagram of the Personalized Learning Flow
+
+start
+
+:Register / Log in;
+
+if (Learner profile exists?) then (No)
+  :Create learning profile;
+else (Yes)
+endif
+
+if (Placement needed?) then (Yes)
+  :Take placement test;
+  :Store placement result;
+else (No)
+endif
+
+:Load profile, placement result,\nprogress, quiz attempts,\nand activity logs;
+:Generate recommended learning actions;
+:Display learning path;
+:Select learning task;
+
+if (Task type?) then (Vocabulary)
+  :Study vocabulary session;
+elseif (Grammar)
+  :Study grammar session;
+elseif (Quiz)
+  :Take quiz;
+elseif (Reading)
+  :Read bilingual article;
+else (Chatbot)
+  :Chat with Kami AI;
+endif
+
+:Update progress and activity log;
+:Refresh recommendations;
+:Display updated learning path;
+
+stop
+@enduml

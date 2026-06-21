@@ -290,7 +290,7 @@ export default function ChatbotPage() {
       assistant: assistantWithProvider,
       providerLabel:
         assistantWithProvider?.provider === "openrouter"
-          ? "OpenRouter"
+          ? t("chatbot.provider.ready")
           : assistantWithProvider?.provider === "fallback"
             ? t("chatbot.provider.fallback")
             : t("chatbot.provider.none"),
@@ -643,9 +643,9 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 md:flex-row md:gap-6">
+    <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 rounded-xl bg-[#fff7ef] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center p-3 md:flex-row md:gap-6">
       <aside className="w-full shrink-0 md:w-72">
-        <Card className="flex max-h-72 flex-col md:h-full md:max-h-none">
+        <Card className="flex max-h-72 flex-col border-[#ead7c9] bg-white/90 shadow-sm md:h-full md:max-h-none">
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -722,7 +722,7 @@ export default function ChatbotPage() {
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-bold">
-              <Sparkles className="h-6 w-6 text-accent" />
+              <Sparkles className="h-6 w-6 text-[#d94f45]" />
               {t("chatbot.title")}
             </h1>
             <p className="text-muted-foreground">
@@ -777,7 +777,7 @@ export default function ChatbotPage() {
           </div>
         )}
 
-        <Card className="relative flex min-h-0 flex-1 flex-col">
+        <Card className="relative flex min-h-0 flex-1 flex-col border-[#ead7c9] bg-white/95 shadow-sm">
           <ScrollArea className="min-h-0 flex-1 p-4">
             <div className="space-y-6">
               {messages.map((message, index) => (
@@ -845,7 +845,7 @@ export default function ChatbotPage() {
           </div>
           )}
 
-          <div className="relative border-t p-4">
+          <div className="relative border-t border-[#ead7c9] bg-[#fffaf6] p-4">
             {!showSuggestions && (
               <Button
                 type="button"
@@ -882,7 +882,7 @@ export default function ChatbotPage() {
       </div>
 
       <div className="hidden w-80 shrink-0 lg:block">
-        <Card className="h-full">
+        <Card className="h-full border-[#ead7c9] bg-white/90 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <BookOpen className="h-4 w-4" />
@@ -916,14 +916,14 @@ export default function ChatbotPage() {
                     <div className="min-w-0">
                       <p className="text-sm font-medium leading-5">{source.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {sourceLabel(source.type, t)} · score {source.score}
+                        {sourceLabel(source.type, t)}
                       </p>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-[#ead7c9] bg-[#fffaf6] p-4 text-sm text-muted-foreground">
                 {t("chatbot.sources.empty")}
               </div>
             )}

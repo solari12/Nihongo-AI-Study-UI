@@ -1,0 +1,30 @@
+@startuml ChatbotRAGFunction
+title Chatbot RAG Function Design
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+
+actor Learner
+boundary "Chatbot UI" as UI
+control "Chat API" as API
+control "Intent / Prompt Builder" as Prompt
+control "RAG Retriever" as Retriever
+database "knowledge_chunks" as Chunks
+database "chat_conversations\nchat_messages" as ChatDB
+cloud "OpenRouter /\nOpenAI-compatible API" as AI
+
+Learner --> UI : Ask question
+UI --> API : Send message + history
+API --> Retriever : Retrieve sources
+Retriever --> Chunks : Query top-k chunks
+Chunks --> Retriever : Sources + metadata
+Retriever --> API : Retrieved context
+API --> Prompt : Build grounded prompt
+Prompt --> AI : Prompt + sources
+AI --> API : Generated answer
+API --> ChatDB : Store conversation/message
+API --> UI : Answer + sources
+UI --> Learner : Display Kami response
+
+@enduml

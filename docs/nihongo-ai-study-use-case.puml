@@ -1,0 +1,77 @@
+@startuml
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #eef7e8
+  BorderColor #6aa06a
+}
+skinparam rectangle {
+  BackgroundColor #f8fbff
+  BorderColor #2f6fbd
+}
+
+actor Learner
+actor Administrator
+actor "AI Provider / System" as AI
+
+rectangle "Nihongo AI Study" {
+  usecase "Register / Log in" as UC1
+  usecase "Create learning profile" as UC2
+  usecase "Take placement test" as UC3
+  usecase "Follow learning path" as UC4
+  usecase "Study vocabulary" as UC5
+  usecase "Study grammar" as UC6
+  usecase "Take quizzes" as UC7
+  usecase "Read bilingual articles" as UC8
+  usecase "Save study items" as UC9
+  usecase "Chat with Kami AI" as UC10
+  usecase "View learning history" as UC11
+
+  usecase "Manage vocabulary" as UC12
+  usecase "Manage grammar" as UC13
+  usecase "Manage quizzes" as UC14
+  usecase "Manage reading articles" as UC15
+  usecase "Manage knowledge chunks" as UC16
+  usecase "View and maintain learning data" as UC17
+
+  usecase "Generate chatbot responses" as UC18
+  usecase "Create embeddings" as UC19
+  usecase "Retrieve knowledge chunks" as UC20
+  usecase "Support recommendations" as UC21
+  usecase "Provide fallback responses" as UC22
+}
+
+Learner --> UC1
+Learner --> UC2
+Learner --> UC3
+Learner --> UC4
+Learner --> UC5
+Learner --> UC6
+Learner --> UC7
+Learner --> UC8
+Learner --> UC9
+Learner --> UC10
+Learner --> UC11
+
+Administrator --> UC12
+Administrator --> UC13
+Administrator --> UC14
+Administrator --> UC15
+Administrator --> UC16
+Administrator --> UC17
+
+AI --> UC18
+AI --> UC19
+AI --> UC20
+AI --> UC21
+AI --> UC22
+
+UC10 ..> UC20 : <<include>>
+UC10 ..> UC18 : <<include>>
+UC18 ..> UC22 : <<extend>>
+UC4 ..> UC21 : <<include>>
+
+@enduml

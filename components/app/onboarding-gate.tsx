@@ -45,7 +45,7 @@ export function OnboardingGate({ children, user }: OnboardingGateProps) {
             <div>
               <p className="font-semibold">Hoàn tất hồ sơ để gợi ý học chính xác hơn</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Bạn vẫn có thể xem các trang khác. Cold-start chỉ giúp app biết mục tiêu, trình độ và bài nên ưu tiên.
+                Bạn vẫn có thể xem các trang khác. Thiết lập ban đầu giúp app biết mục tiêu, trình độ và bài nên ưu tiên.
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">

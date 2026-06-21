@@ -1,7 +1,7 @@
 import { vietnameseVocabularyTerms } from "@/lib/vietnamese-vocabulary-dictionary"
 import type { VocabularyItem } from "@/lib/data/nihongo-study"
 
-const naturalExamples: Record<string, { japanese: string; vietnamese: string }> = {
+export const naturalVocabularyExamples: Record<string, { japanese: string; vietnamese: string }> = {
   学生: { japanese: "私は学生です。", vietnamese: "Tôi là học sinh." },
   先生: { japanese: "先生に質問します。", vietnamese: "Tôi hỏi giáo viên." },
   日本: { japanese: "日本へ行きます。", vietnamese: "Tôi đi Nhật Bản." },
@@ -75,7 +75,7 @@ function looksGeneratedExample(example?: VocabularyItem["example"]) {
 }
 
 export function getVocabularyExample(item: VocabularyItem) {
-  const natural = naturalExamples[item.japanese]
+  const natural = naturalVocabularyExamples[item.japanese]
   if (natural) return natural
   if (!looksGeneratedExample(item.example)) return item.example
 

@@ -3,6 +3,7 @@ import { z } from "zod"
 import { requireAdminUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { buildVocabularyChunk, toVocabularyItem } from "@/lib/mappers/study-content"
+import { normalizeVocabularyTopicKey } from "@/lib/vocabulary/topics"
 
 const vocabularySchema = z.object({
   id: z.number().int().positive().optional(),
@@ -18,6 +19,18 @@ const vocabularySchema = z.object({
     vietnamese: z.string().trim().min(1),
   }),
 })
+
+function partOfSpeechFromLabel(label: string) {
+  if (label.includes("Danh")) return "noun"
+  if (label.includes("Động")) return "verb"
+  if (label.includes("Tính từ い")) return "i_adjective"
+  if (label.includes("Tính từ な")) return "na_adjective"
+  if (label.includes("Tính")) return "i_adjective"
+  if (label.includes("Trạng") || label.includes("Phó")) return "adverb"
+  if (label.includes("Trợ")) return "particle"
+  if (label.includes("Lượng")) return "counter"
+  return "expression"
+}
 
 export async function GET() {
   const vocabulary = await prisma.vocabulary.findMany({
@@ -54,6 +67,8 @@ export async function POST(request: NextRequest) {
         vietnamese: item.vietnamese,
         type: item.type,
         topic: item.topic,
+        topicKey: normalizeVocabularyTopicKey(item.topic),
+        partOfSpeech: partOfSpeechFromLabel(item.type),
         imageUrl: item.imageUrl || null,
         exampleJapanese: item.example.japanese,
         exampleVietnamese: item.example.vietnamese,
@@ -95,6 +110,8 @@ export async function PUT(request: NextRequest) {
         vietnamese: item.vietnamese,
         type: item.type,
         topic: item.topic,
+        topicKey: normalizeVocabularyTopicKey(item.topic),
+        partOfSpeech: partOfSpeechFromLabel(item.type),
         imageUrl: item.imageUrl || null,
         exampleJapanese: item.example.japanese,
         exampleVietnamese: item.example.vietnamese,

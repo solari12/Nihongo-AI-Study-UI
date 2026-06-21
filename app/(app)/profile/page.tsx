@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import Link from "next/link"
 import {
   Calendar,
   Clock,
@@ -23,7 +24,10 @@ import { Separator } from "@/components/ui/separator"
 import { useActivityLog, type LearningActivity } from "@/hooks/use-activity-log"
 import { useAuth } from "@/hooks/use-auth"
 import { useLearnerProfile } from "@/hooks/use-learner-profile"
+import { useRecommendations } from "@/hooks/use-recommendations"
 import { useStudyProgress } from "@/hooks/use-study-progress"
+import { grammarData } from "@/lib/data/nihongo-study"
+import { getCompletedGrammarPatternsFromActivities } from "@/lib/grammar/progress"
 
 function initials(name?: string) {
   if (!name) return "U"
@@ -62,15 +66,21 @@ export default function ProfilePage() {
   const { stats } = useStudyProgress()
   const { activities } = useActivityLog()
   const { profile, placement } = useLearnerProfile()
+  const { recommendations } = useRecommendations()
+  const topRecommendation = recommendations[0]
 
   const totalMinutes = useMemo(
     () => activities.reduce((total, activity) => total + (activity.durationMinutes ?? 0), 0),
     [activities]
   )
   const studyStreak = useMemo(() => buildStudyStreak(activities), [activities])
+  const completedGrammarCount = Math.max(
+    stats.completedGrammar,
+    getCompletedGrammarPatternsFromActivities(activities, grammarData).size
+  )
   const totalProgress = Math.round(
     ((stats.learnedVocabulary / Math.max(stats.totalVocabulary, 1)) * 0.45 +
-      (stats.completedGrammar / Math.max(stats.totalGrammar, 1)) * 0.35 +
+      (completedGrammarCount / Math.max(stats.totalGrammar, 1)) * 0.35 +
       (stats.averageQuizScore / 100) * 0.2) *
       100
   )
@@ -190,15 +200,56 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <Button className="mt-6 w-full" variant="outline">
+              <Button className="mt-6 w-full" variant="outline" asChild>
+                <Link href="/onboarding">
                 <Pencil className="mr-2 h-4 w-4" />
                 Chỉnh sửa hồ sơ
+                </Link>
               </Button>
             </div>
           </CardContent>
         </Card>
 
         <div className="space-y-6 lg:col-span-2">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Hồ sơ học</CardTitle>
+                <CardDescription>Dữ liệu từ onboarding</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p><span className="text-muted-foreground">Mục tiêu:</span> {profile.completedOnboarding ? profile.goal.replaceAll("_", " ") : "Chưa thiết lập"}</p>
+                <p><span className="text-muted-foreground">Kana:</span> {profile.completedOnboarding ? profile.kanaLevel.replaceAll("_", " ") : "Chưa thiết lập"}</p>
+                <p><span className="text-muted-foreground">Thời lượng:</span> {profile.completedOnboarding ? `${profile.dailyMinutes} phút/ngày` : "Chưa thiết lập"}</p>
+                <p><span className="text-muted-foreground">Chủ đề:</span> {profile.preferredTopics.length ? profile.preferredTopics.join(", ") : "Chưa chọn"}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Placement</CardTitle>
+                <CardDescription>Dữ liệu kiểm tra đầu vào</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p><span className="text-muted-foreground">Trạng thái:</span> {placement.completed ? "Đã hoàn thành" : "Chưa làm"}</p>
+                <p><span className="text-muted-foreground">Điểm:</span> {placement.completed ? `${placement.score}/${placement.total} (${placement.percentage}%)` : "-"}</p>
+                <p><span className="text-muted-foreground">Điểm yếu:</span> {placement.weakAreas.length ? placement.weakAreas.join(", ") : "Chưa ghi nhận"}</p>
+                <p><span className="text-muted-foreground">Bắt đầu:</span> {placement.completed ? placement.recommendedStart : "-"}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">AI gợi ý</CardTitle>
+                <CardDescription>Từ recommendation engine</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p className="font-medium">{topRecommendation?.title ?? "Chưa có gợi ý"}</p>
+                <p><span className="text-muted-foreground">Mastery:</span> {topRecommendation ? `${topRecommendation.masteryScore}/100` : "-"}</p>
+                <p><span className="text-muted-foreground">Mức cần hỗ trợ:</span> {topRecommendation ? `${topRecommendation.riskScore}/100` : "-"}</p>
+                <p className="text-muted-foreground">{topRecommendation?.action ?? "Hoàn tất hồ sơ hoặc làm quiz để tạo dữ liệu gợi ý."}</p>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Tiến độ học tập</CardTitle>
@@ -227,10 +278,10 @@ export default function ProfilePage() {
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm">Ngữ pháp</span>
                     <span className="text-sm font-medium">
-                      {stats.completedGrammar}/{stats.totalGrammar}
+                      {completedGrammarCount}/{stats.totalGrammar}
                     </span>
                   </div>
-                  <Progress value={(stats.completedGrammar / Math.max(stats.totalGrammar, 1)) * 100} className="h-2" />
+                  <Progress value={(completedGrammarCount / Math.max(stats.totalGrammar, 1)) * 100} className="h-2" />
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="mb-2 flex items-center justify-between">

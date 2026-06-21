@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Volume2, CheckCircle2, BookmarkPlus } from "lucide-react"
+import { Volume2, PlayCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/i18n"
 import { localizeVocabularyMeaning } from "@/lib/localized-study-content"
@@ -21,10 +21,10 @@ interface VocabularyCardProps {
     hiragana?: string
     vietnamese: string
   }
-  isLearned?: boolean
+  statusLabel?: string
   onListen?: () => void
-  onMarkLearned?: () => void
-  onAddToReview?: () => void
+  onStudy?: () => void
+  isStarting?: boolean
   className?: string
 }
 
@@ -70,10 +70,10 @@ export function VocabularyCard({
   type,
   imageUrl,
   example,
-  isLearned = false,
+  statusLabel,
   onListen,
-  onMarkLearned,
-  onAddToReview,
+  onStudy,
+  isStarting = false,
   className,
 }: VocabularyCardProps) {
   const { locale } = useI18n()
@@ -121,7 +121,11 @@ export function VocabularyCard({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h3 className="text-3xl font-bold tracking-tight text-[#2a211f]">{japanese}</h3>
-              {isLearned && <CheckCircle2 className="h-5 w-5 text-[#3f9b68]" />}
+              {statusLabel && (
+                <Badge variant="outline" className="border-[#b9d7bd] bg-[#edf6ea] text-[#315d41]">
+                  {statusLabel}
+                </Badge>
+              )}
             </div>
             <p className="text-lg text-[#8f4742]">{hiragana}</p>
             <p className="text-sm font-medium text-[#6f5952]">{romaji}</p>
@@ -190,25 +194,14 @@ export function VocabularyCard({
           Nghe
         </Button>
         <Button
-          variant={isLearned ? "secondary" : "ghost"}
+          variant="secondary"
           size="sm"
-          onClick={onMarkLearned}
-          className={cn(
-            "flex-1 rounded-full",
-            isLearned ? "bg-[#dcebd9] text-[#315d41] hover:bg-[#d0e4cd]" : "text-[#702f2a] hover:bg-white/70"
-          )}
+          onClick={onStudy}
+          disabled={isStarting}
+          className="flex-1 rounded-full bg-[#dcebd9] text-[#315d41] hover:bg-[#d0e4cd]"
         >
-          <CheckCircle2 className="mr-2 h-4 w-4" />
-          {isLearned ? "Đã học" : "Đánh dấu"}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onAddToReview}
-          className="flex-1 rounded-full text-[#702f2a] hover:bg-white/70"
-        >
-          <BookmarkPlus className="mr-2 h-4 w-4" />
-          Ôn tập
+          <PlayCircle className="mr-2 h-4 w-4" />
+          {isStarting ? "Đang mở..." : "Học từ này"}
         </Button>
       </CardFooter>
     </Card>

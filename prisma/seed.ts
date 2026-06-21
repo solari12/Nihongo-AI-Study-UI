@@ -2,6 +2,7 @@ import { config } from "dotenv"
 import { randomBytes, scryptSync } from "node:crypto"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../lib/generated/prisma/client"
+import { normalizeVocabularyTopicKey } from "../lib/vocabulary/topics"
 import {
   grammarData,
   quizQuestions,
@@ -78,6 +79,12 @@ async function main() {
         vietnamese: item.vietnamese,
         type: item.type,
         topic: item.topic,
+        topicKey: normalizeVocabularyTopicKey(item.topic),
+        partOfSpeech:
+          item.type.includes("Danh") ? "noun" :
+          item.type.includes("Động") ? "verb" :
+          item.type.includes("Tính") ? "i_adjective" :
+          "expression",
         exampleJapanese: item.example.japanese,
         exampleVietnamese: item.example.vietnamese,
       },
@@ -89,6 +96,12 @@ async function main() {
         vietnamese: item.vietnamese,
         type: item.type,
         topic: item.topic,
+        topicKey: normalizeVocabularyTopicKey(item.topic),
+        partOfSpeech:
+          item.type.includes("Danh") ? "noun" :
+          item.type.includes("Động") ? "verb" :
+          item.type.includes("Tính") ? "i_adjective" :
+          "expression",
         exampleJapanese: item.example.japanese,
         exampleVietnamese: item.example.vietnamese,
       },
@@ -104,15 +117,26 @@ async function main() {
         },
       },
       update: {
-        status: "learned",
+        stage: "review",
+        repetitions: 1,
+        intervalDays: 1,
+        easeFactor: 2.5,
+        lastQuality: 5,
+        lapses: 0,
         lastReviewedAt: new Date(),
-        nextReviewAt: null,
+        dueAt: new Date(),
       },
       create: {
         userId: "demo-learner",
         vocabularyId,
-        status: "learned",
+        stage: "review",
+        repetitions: 1,
+        intervalDays: 1,
+        easeFactor: 2.5,
+        lastQuality: 5,
+        lapses: 0,
         lastReviewedAt: new Date(),
+        dueAt: new Date(),
       },
     })
   }
@@ -126,16 +150,26 @@ async function main() {
         },
       },
       update: {
-        status: "review",
+        stage: "learning",
+        repetitions: 0,
+        intervalDays: 1,
+        easeFactor: 2.5,
+        lastQuality: 1,
+        lapses: 1,
         lastReviewedAt: new Date(),
-        nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
       create: {
         userId: "demo-learner",
         vocabularyId,
-        status: "review",
+        stage: "learning",
+        repetitions: 0,
+        intervalDays: 1,
+        easeFactor: 2.5,
+        lastQuality: 1,
+        lapses: 1,
         lastReviewedAt: new Date(),
-        nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       },
     })
   }

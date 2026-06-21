@@ -41,6 +41,38 @@ test.describe("PRD defense smoke flows", () => {
     await expect(page.getByText(/lộ trình|learning path/i).first()).toBeVisible()
   })
 
+  test("vocabulary session reveals, rates, advances, and resumes", async ({ page }) => {
+    await login(page)
+    await page.goto("/vocabulary")
+
+    const continueButton = page.getByRole("button", { name: /tiếp tục phiên học/i })
+    if (await continueButton.count()) {
+      await continueButton.click()
+    } else {
+      await page.getByRole("button", { name: /học 10 từ mới/i }).click()
+    }
+
+    await expect(page).toHaveURL(/\/vocabulary\/session\//)
+    const position = page.getByText(/từ\s+\d+\/\d+/i)
+    await expect(position).toBeVisible()
+    const positionText = await position.textContent()
+    const currentPosition = Number(positionText?.match(/(\d+)\//)?.[1] ?? "1")
+
+    const remembered = page.getByRole("button", { name: /^nhớ$/i })
+    await expect(remembered).toBeDisabled()
+    await page.getByRole("button", { name: /lật thẻ để xem nghĩa/i }).click()
+    await expect(remembered).toBeEnabled()
+
+    const frontWord = page.locator("main button p").first()
+    const wordBefore = await frontWord.textContent()
+    await remembered.click()
+    await expect(page.getByText(new RegExp(`từ\\s+${currentPosition + 1}\\/\\d+`, "i"))).toBeVisible()
+    await expect(frontWord).not.toHaveText(wordBefore ?? "")
+
+    await page.reload()
+    await expect(page.getByText(new RegExp(`từ\\s+${currentPosition + 1}\\/\\d+`, "i"))).toBeVisible()
+  })
+
   test("quiz can be answered and submitted", async ({ page }) => {
     await login(page)
     await page.goto("/quiz")

@@ -4,14 +4,14 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { Brain, CheckCircle2, Home, RotateCcw, Sparkles } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Spinner } from "@/components/ui/spinner"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { evaluatePlacement, placementQuestions } from "@/lib/onboarding/placement-test"
 import { useLearnerProfile } from "@/hooks/use-learner-profile"
+import { buildPlacementQuestions, describePlacementContext, evaluatePlacement } from "@/lib/onboarding/placement-test"
+import { cn } from "@/lib/utils"
 
 type TestState = "playing" | "result"
 
@@ -27,6 +27,12 @@ const levelLabels = {
   n5_review: "Ôn tập N5",
 }
 
+const goalLabels = {
+  FROM_ZERO: "Bắt đầu từ số 0",
+  JLPT_N5: "Thi JLPT N5",
+  COMMUNICATION: "Giao tiếp cơ bản",
+}
+
 export default function PlacementTestPage() {
   const router = useRouter()
   const { isLoaded, profile, placement, savePlacementResult } = useLearnerProfile()
@@ -34,12 +40,14 @@ export default function PlacementTestPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [result, setResult] = useState(placement)
-  const question = placementQuestions[currentQuestion]
-  const progress = ((currentQuestion + 1) / placementQuestions.length) * 100
+  const questions = useMemo(() => buildPlacementQuestions(profile), [profile])
+  const placementContext = useMemo(() => describePlacementContext(profile), [profile])
+  const question = questions[currentQuestion]
+  const progress = ((currentQuestion + 1) / questions.length) * 100
 
   const evaluatedResult = useMemo(
-    () => evaluatePlacement({ answers, goal: profile.goal, kanaLevel: profile.kanaLevel }),
-    [answers, profile.goal, profile.kanaLevel]
+    () => evaluatePlacement({ answers, goal: profile.goal, kanaLevel: profile.kanaLevel, questions }),
+    [answers, profile.goal, profile.kanaLevel, questions]
   )
 
   useEffect(() => {
@@ -55,6 +63,11 @@ export default function PlacementTestPage() {
       setTestState("result")
     }
   }, [isLoaded, placement, profile.completedOnboarding, router])
+
+  useEffect(() => {
+    setAnswers({})
+    setCurrentQuestion(0)
+  }, [questions])
 
   if (!isLoaded) {
     return (
@@ -89,7 +102,7 @@ export default function PlacementTestPage() {
   }
 
   const handleNext = () => {
-    if (currentQuestion === placementQuestions.length - 1) {
+    if (currentQuestion === questions.length - 1) {
       submitTest()
       return
     }
@@ -123,12 +136,12 @@ export default function PlacementTestPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Cold-start point</CardTitle>
+              <CardTitle className="text-base">Hồ sơ đã dùng</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-primary">{profile.coldStartScore}/100</p>
+              <p className="text-base font-bold text-primary">{goalLabels[profile.goal]}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Dùng khi tài khoản mới chưa có lịch sử học.
+                Câu hỏi được chọn từ mục tiêu, kana và trạng thái ôn lại của bạn.
               </p>
             </CardContent>
           </Card>
@@ -159,7 +172,7 @@ export default function PlacementTestPage() {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Mục tiêu học</CardTitle>
+              <CardTitle className="text-base">Nhịp học</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="font-medium">{profile.dailyMinutes} phút/ngày</p>
@@ -203,14 +216,19 @@ export default function PlacementTestPage() {
       <div>
         <Badge variant="outline" className="mb-3">Bước 2/2</Badge>
         <h1 className="text-2xl font-bold">Kiểm tra đầu vào</h1>
-        <p className="mt-1 text-muted-foreground">
-          Bài test ngắn để xác định điểm bắt đầu trước khi sinh lộ trình học.
-        </p>
+        <p className="mt-1 text-muted-foreground">{placementContext}</p>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <Badge variant="secondary">{goalLabels[profile.goal]}</Badge>
+          <Badge variant="secondary">{profile.dailyMinutes} phút/ngày</Badge>
+          {profile.preferredTopics.slice(0, 3).map((topic) => (
+            <Badge key={topic} variant="outline">{topic}</Badge>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <span>Câu {currentQuestion + 1}/{placementQuestions.length}</span>
+          <span>Câu {currentQuestion + 1}/{questions.length}</span>
           <Badge variant="secondary">{areaLabels[question.area]}</Badge>
         </div>
         <Progress value={progress} className="h-2" />
@@ -258,7 +276,7 @@ export default function PlacementTestPage() {
           Câu trước
         </Button>
         <Button disabled={!answers[question.id]} onClick={handleNext}>
-          {currentQuestion === placementQuestions.length - 1 ? (
+          {currentQuestion === questions.length - 1 ? (
             <>
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Chấm điểm

@@ -1,0 +1,41 @@
+@startuml
+title System Architecture of Nihongo AI Study
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+actor "User Browser" as U
+
+package "Frontend Layer" {
+  component "Next.js UI Pages\nand Components" as UI
+  component "Client Hooks\nand State" as Hooks
+}
+
+package "Backend Layer" {
+  component "Next.js\nRoute Handlers" as API
+  component "Domain Modules" as Domain
+  component "RAG Module" as RAG
+  component "Recommendation\nEngine" as Rec
+}
+
+package "Data Layer" {
+  component "Prisma ORM" as Prisma
+  database "PostgreSQL\nDatabase" as DB
+}
+
+cloud "OpenRouter /\nOpenAI-compatible API" as AI
+
+U --> UI
+UI --> Hooks
+Hooks --> API
+API --> Domain
+Domain --> Prisma
+Prisma --> DB
+Domain --> RAG
+Domain --> Rec
+RAG --> DB
+Rec --> DB
+RAG --> AI
+
+@enduml

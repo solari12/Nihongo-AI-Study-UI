@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useMemo, useState } from "react"
 import { CheckCircle2, Eye, EyeOff, GraduationCap, LockKeyhole, UserPlus } from "lucide-react"
@@ -44,13 +45,13 @@ export default function RegisterPage() {
     hasAccount: isJapanese ? "\u3059\u3067\u306b\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u3042\u308a\u307e\u3059\u304b\uff1f" : "\u0110\u00e3 c\u00f3 t\u00e0i kho\u1ea3n?",
     login: isJapanese ? "\u30ed\u30b0\u30a4\u30f3" : "\u0110\u0103ng nh\u1eadp",
     sideKicker: isJapanese ? "N5\u5b66\u7fd2\u30a2\u30ab\u30a6\u30f3\u30c8\u4f5c\u6210" : "T\u1ea1o t\u00e0i kho\u1ea3n h\u1ecdc N5",
-    sideTitle: isJapanese ? "\u5b66\u7fd2\u8005\u3054\u3068\u306b\u30c7\u30fc\u30bf\u3068\u9032\u6357\u3092\u7ba1\u7406\u3002" : "M\u1ed7i ng\u01b0\u1eddi h\u1ecdc c\u00f3 d\u1eef li\u1ec7u v\u00e0 ti\u1ebfn \u0111\u1ed9 ri\u00eang.",
+    sideTitle: isJapanese ? "\u3042\u306a\u305f\u306b\u5408\u3046N5\u5b66\u7fd2\u3092\u306f\u3058\u3081\u3088\u3046\u3002" : "B\u1eaft \u0111\u1ea7u N5 theo l\u1ed9 tr\u00ecnh c\u1ee7a ri\u00eang b\u1ea1n.",
     sideDescription: isJapanese
-      ? "\u767b\u9332\u5f8c\u3001PostgreSQL\u306b\u30e6\u30fc\u30b6\u30fc\u3092\u4f5c\u6210\u3057\u3001\u30d1\u30b9\u30ef\u30fc\u30c9\u3092\u30cf\u30c3\u30b7\u30e5\u5316\u3057\u3066\u81ea\u52d5\u7684\u306b\u30bb\u30c3\u30b7\u30e7\u30f3\u3092\u958b\u59cb\u3057\u307e\u3059\u3002"
-      : "Sau khi \u0111\u0103ng k\u00fd, h\u1ec7 th\u1ed1ng t\u1ea1o user trong PostgreSQL, hash m\u1eadt kh\u1ea9u v\u00e0 m\u1edf phi\u00ean \u0111\u0103ng nh\u1eadp t\u1ef1 \u0111\u1ed9ng.",
-    realAccount: isJapanese ? "\u672c\u756a\u30a2\u30ab\u30a6\u30f3\u30c8" : "T\u00e0i kho\u1ea3n th\u1eadt",
-    hashedPassword: isJapanese ? "\u30cf\u30c3\u30b7\u30e5\u5316\u30d1\u30b9\u30ef\u30fc\u30c9" : "M\u1eadt kh\u1ea9u hash",
-    privateOnboarding: isJapanese ? "\u500b\u5225\u30aa\u30f3\u30dc\u30fc\u30c7\u30a3\u30f3\u30b0" : "Onboarding ri\u00eang",
+      ? "\u767b\u9332\u5f8c\u3001\u76ee\u6a19\u3084\u5b66\u7fd2\u6642\u9593\u3092\u9078\u3093\u3067\u3001\u6700\u521d\u306e\u8ab2\u984c\u307e\u3067\u9032\u3081\u307e\u3059\u3002"
+      : "Sau khi \u0111\u0103ng k\u00fd, b\u1ea1n s\u1ebd ch\u1ecdn m\u1ee5c ti\u00eau, th\u1eddi gian h\u1ecdc v\u00e0 nh\u1eadn b\u01b0\u1edbc h\u1ecdc \u0111\u1ea7u ti\u00ean.",
+    realAccount: isJapanese ? "\u5b66\u7fd2\u30a2\u30ab\u30a6\u30f3\u30c8" : "T\u00e0i kho\u1ea3n h\u1ecdc t\u1eadp",
+    hashedPassword: isJapanese ? "\u5b89\u5fc3\u3057\u3066\u5229\u7528" : "S\u1eed d\u1ee5ng an t\u00e2m",
+    privateOnboarding: isJapanese ? "\u81ea\u5206\u306e\u5b66\u7fd2\u8a08\u753b" : "L\u1ed9 tr\u00ecnh ri\u00eang",
   }
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -107,36 +108,50 @@ export default function RegisterPage() {
   }
 
   return (
-    <div data-i18n-managed className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-      <section className="hidden border-r bg-muted/40 lg:flex lg:items-center lg:justify-center lg:p-12">
+    <div
+      data-i18n-managed
+      className="grid min-h-screen bg-[#fbf5ee] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]"
+    >
+      <section className="hidden border-r border-[#ead7c9] bg-[#fffaf5]/70 lg:flex lg:items-center lg:justify-center lg:p-12">
         <div className="max-w-xl space-y-8">
+          <div className="relative overflow-hidden rounded-xl border border-[#ead7c9] bg-white/80 p-4 shadow-sm">
+            <Image src="/assets/vocab-card-clean.png" alt="" aria-hidden="true" width={640} height={260} className="h-48 w-full object-contain" />
+          </div>
           <div className="space-y-3">
-            <p className="text-sm font-medium text-primary">{copy.sideKicker}</p>
-            <h1 className="text-4xl font-bold text-balance">{copy.sideTitle}</h1>
-            <p className="text-muted-foreground text-balance">{copy.sideDescription}</p>
+            <p className="text-sm font-medium text-[#d94f45]">{copy.sideKicker}</p>
+            <h1 className="text-4xl font-bold text-[#2c211c] text-balance">{copy.sideTitle}</h1>
+            <p className="text-[#6f5952] text-balance">{copy.sideDescription}</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border bg-card p-4">
-              <UserPlus className="mb-3 h-5 w-5 text-primary" />
+            <div className="rounded-lg border border-[#ead7c9] bg-white/85 p-4">
+              <UserPlus className="mb-3 h-5 w-5 text-[#d94f45]" />
               <p className="text-sm font-medium">{copy.realAccount}</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
-              <LockKeyhole className="mb-3 h-5 w-5 text-primary" />
+            <div className="rounded-lg border border-[#ead7c9] bg-white/85 p-4">
+              <LockKeyhole className="mb-3 h-5 w-5 text-[#d94f45]" />
               <p className="text-sm font-medium">{copy.hashedPassword}</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
-              <GraduationCap className="mb-3 h-5 w-5 text-primary" />
+            <div className="rounded-lg border border-[#ead7c9] bg-white/85 p-4">
+              <GraduationCap className="mb-3 h-5 w-5 text-[#d94f45]" />
               <p className="text-sm font-medium">{copy.privateOnboarding}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="flex items-center justify-center px-6 py-10">
-        <Card className="w-full max-w-md border shadow-sm">
+      <section className="relative flex items-center justify-center px-6 py-10">
+        <Image
+          src="/assets/Flower.png"
+          alt=""
+          aria-hidden="true"
+          width={120}
+          height={120}
+          className="pointer-events-none absolute right-6 top-8 hidden h-24 opacity-70 sm:block"
+        />
+        <Card className="w-full max-w-md border-[#ead7c9] bg-white/92 shadow-[0_18px_50px_rgba(76,48,35,0.12)] backdrop-blur">
           <CardHeader className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#d94f45] text-white shadow-sm">
                 <span className="text-xl font-bold">{"\u65e5"}</span>
               </div>
               <LanguageSwitcher />
@@ -218,7 +233,7 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div className="grid gap-2 rounded-lg border bg-muted/30 p-3">
+              <div className="grid gap-2 rounded-lg border border-[#ead7c9] bg-[#fff7ef] p-3">
                 {passwordChecks.map((check) => (
                   <div key={check.label} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className={cn("h-4 w-4", check.valid ? "text-success" : "text-muted-foreground")} />
@@ -227,7 +242,7 @@ export default function RegisterPage() {
                 ))}
               </div>
 
-              <Button className="w-full" size="lg" type="submit" disabled={isSubmitting || !isLoaded || !canSubmit}>
+              <Button className="w-full bg-[#d94f45] hover:bg-[#c7443b]" size="lg" type="submit" disabled={isSubmitting || !isLoaded || !canSubmit}>
                 {isSubmitting ? (
                   <>
                     <Spinner className="mr-2 h-4 w-4" />

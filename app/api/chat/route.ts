@@ -978,8 +978,9 @@ async function getStudyProgress(userId: string) {
     prisma.grammar.count(),
     prisma.grammar.count({ where: { status: "completed" } }),
   ])
-  const learnedVocabulary = vocabularyProgress.filter((item) => item.status === "learned").length
-  const reviewVocabulary = vocabularyProgress.filter((item) => item.status === "review").length
+  const now = new Date()
+  const learnedVocabulary = vocabularyProgress.length
+  const reviewVocabulary = vocabularyProgress.filter((item) => item.dueAt <= now).length
   const averageQuizScore = quizAttempts.length
     ? Math.round(quizAttempts.reduce((sum, attempt) => sum + attempt.percentage, 0) / quizAttempts.length)
     : 0
@@ -1803,47 +1804,82 @@ export async function POST(request: NextRequest) {
   const tools = createStudyAgentTools(user)
   const toolChoice = diagnosticRequest ? { type: "tool" as const, toolName: "getDiagnosticQuiz" as const } : "auto"
 
-  const result = await generateText({
-    model: openrouter.chat(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
-    system: nihongoTutorSystemPrompt,
-    prompt,
-    tools,
-    toolChoice,
-    stopWhen: stepCountIs(6),
-    temperature: 0.25,
-    maxOutputTokens: 1200,
-  })
+  try {
+    const maxOutputTokens = Number.parseInt(process.env.OPENROUTER_MAX_OUTPUT_TOKENS ?? "700", 10)
+    const result = await generateText({
+      model: openrouter.chat(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
+      system: nihongoTutorSystemPrompt,
+      prompt,
+      tools,
+      toolChoice,
+      stopWhen: stepCountIs(6),
+      temperature: 0.25,
+      maxOutputTokens: Number.isFinite(maxOutputTokens) ? maxOutputTokens : 700,
+    })
 
-  const answer = isUsefulModelText(result.text)
-    ? result.text
-    : diagnosticRequest
+    const answer = isUsefulModelText(result.text)
+      ? result.text
+      : diagnosticRequest
+        ? await buildDiagnosticQuizFallbackAnswer(message)
+        : buildFallbackAnswer(message, sources)
+    const quizCards = quizCardsPayload(answer, shouldParseQuizCards)
+    const persisted = await persistConversationTurn({
+      userId: user.id,
+      conversationId: requestConversationId,
+      message,
+      answer,
+      provider: "openrouter",
+      sources: sourcePayload,
+      quizCards,
+    })
+
+    await logChat({
+      userId: user.id,
+      message,
+      answer,
+      provider: "openrouter",
+      sources: sourcePayload,
+    })
+
+    return NextResponse.json({
+      answer,
+      provider: "openrouter",
+      sources: sourcePayload,
+      quizCards,
+      activeSource: responseActiveSource ?? null,
+      ...persisted,
+    })
+  } catch (error) {
+    console.warn("[chat] OpenRouter unavailable, using fallback answer.", error)
+    const fallbackAnswer = diagnosticRequest
       ? await buildDiagnosticQuizFallbackAnswer(message)
       : buildFallbackAnswer(message, sources)
-  const quizCards = quizCardsPayload(answer, shouldParseQuizCards)
-  const persisted = await persistConversationTurn({
-    userId: user.id,
-    conversationId: requestConversationId,
-    message,
-    answer,
-    provider: "openrouter",
-    sources: sourcePayload,
-    quizCards,
-  })
+    const quizCards = quizCardsPayload(fallbackAnswer, shouldParseQuizCards)
+    const persisted = await persistConversationTurn({
+      userId: user.id,
+      conversationId: requestConversationId,
+      message,
+      answer: fallbackAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+      quizCards,
+    })
 
-  await logChat({
-    userId: user.id,
-    message,
-    answer,
-    provider: "openrouter",
-    sources: sourcePayload,
-  })
+    await logChat({
+      userId: user.id,
+      message,
+      answer: fallbackAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
 
-  return NextResponse.json({
-    answer,
-    provider: "openrouter",
-    sources: sourcePayload,
-    quizCards,
-    activeSource: responseActiveSource ?? null,
-    ...persisted,
-  })
+    return NextResponse.json({
+      answer: fallbackAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+      quizCards,
+      activeSource: responseActiveSource ?? null,
+      ...persisted,
+    })
+  }
 }

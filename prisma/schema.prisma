@@ -34,9 +34,29 @@ enum SavedStudyItemType {
   grammar
 }
 
-enum VocabularyProgressStatus {
-  learned
+enum VocabularyLearningStage {
+  learning
   review
+  mastered
+}
+
+enum VocabularyStudySessionKind {
+  new
+  review
+  topic
+  seeded
+}
+
+enum VocabularyStudySessionStatus {
+  active
+  completed
+  abandoned
+}
+
+enum VocabularyRating {
+  forgot
+  hard
+  remembered
 }
 
 enum LearningGoal {
@@ -79,6 +99,7 @@ model User {
   savedStudyItems    SavedStudyItem[]
   learnerProfile     LearnerProfile?
   placementResult    PlacementResult?
+  vocabularyStudySessions VocabularyStudySession[]
   createdAt          DateTime                 @default(now()) @map("created_at")
   updatedAt          DateTime                 @updatedAt @map("updated_at")
 
@@ -141,11 +162,14 @@ model Vocabulary {
   vietnamese         String
   type               String
   topic              String
+  topicKey           String                   @default("other") @map("topic_key")
+  partOfSpeech       String                   @default("expression") @map("part_of_speech")
   imageUrl           String?                  @map("image_url")
   exampleJapanese    String                   @map("example_japanese")
   exampleVietnamese  String                   @map("example_vietnamese")
   userProgress       UserVocabularyProgress[]
   knowledgeChunks    KnowledgeChunk[]
+  studySessionItems  VocabularyStudySessionItem[]
   createdAt          DateTime                 @default(now()) @map("created_at")
   updatedAt          DateTime                 @updatedAt @map("updated_at")
 
@@ -197,18 +221,57 @@ model QuizAnswer {
 }
 
 model UserVocabularyProgress {
-  userId         String                   @map("user_id")
-  vocabularyId   Int                      @map("vocabulary_id")
-  status         VocabularyProgressStatus
-  lastReviewedAt DateTime?                @map("last_reviewed_at")
-  nextReviewAt   DateTime?                @map("next_review_at")
-  createdAt      DateTime                 @default(now()) @map("created_at")
-  updatedAt      DateTime                 @updatedAt @map("updated_at")
-  user           User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vocabulary     Vocabulary               @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+  userId         String                  @map("user_id")
+  vocabularyId   Int                     @map("vocabulary_id")
+  stage          VocabularyLearningStage @default(learning)
+  repetitions    Int                     @default(0)
+  intervalDays   Int                     @default(0) @map("interval_days")
+  easeFactor     Float                   @default(2.5) @map("ease_factor")
+  lastQuality    Int?                    @map("last_quality")
+  lapses         Int                     @default(0)
+  lastReviewedAt DateTime?               @map("last_reviewed_at")
+  dueAt          DateTime                @default(now()) @map("due_at")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  updatedAt      DateTime                @updatedAt @map("updated_at")
+  user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabulary     Vocabulary              @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
 
   @@id([userId, vocabularyId])
+  @@index([userId, dueAt])
   @@map("user_vocabulary_progress")
+}
+
+model VocabularyStudySession {
+  id              String                       @id @default(uuid())
+  userId          String                       @map("user_id")
+  kind            VocabularyStudySessionKind
+  topicKey        String?                      @map("topic_key")
+  seedVocabularyId Int?                        @map("seed_vocabulary_id")
+  status          VocabularyStudySessionStatus @default(active)
+  currentPosition Int                          @default(0) @map("current_position")
+  totalItems      Int                          @map("total_items")
+  user            User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           VocabularyStudySessionItem[]
+  createdAt       DateTime                     @default(now()) @map("created_at")
+  updatedAt       DateTime                     @updatedAt @map("updated_at")
+  completedAt     DateTime?                    @map("completed_at")
+
+  @@index([userId, status, kind, topicKey])
+  @@map("vocabulary_study_sessions")
+}
+
+model VocabularyStudySessionItem {
+  sessionId    String                 @map("session_id")
+  vocabularyId Int                    @map("vocabulary_id")
+  position     Int
+  rating       VocabularyRating?
+  answeredAt   DateTime?              @map("answered_at")
+  session      VocabularyStudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  vocabulary   Vocabulary             @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, vocabularyId])
+  @@unique([sessionId, position])
+  @@map("vocabulary_study_session_items")
 }
 
 model QuizAttempt {

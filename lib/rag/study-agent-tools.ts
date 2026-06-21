@@ -64,13 +64,14 @@ export function createStudyAgentTools(user: ToolUser) {
             prisma.userVocabularyProgress.count({
               where: {
                 userId: user.id,
-                status: "learned",
               },
             }),
             prisma.userVocabularyProgress.count({
               where: {
                 userId: user.id,
-                status: "review",
+                dueAt: {
+                  lte: new Date(),
+                },
               },
             }),
             prisma.grammar.count(),

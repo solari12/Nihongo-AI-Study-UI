@@ -1,0 +1,35 @@
+@startuml
+title Data-Flow Design of Nihongo AI Study
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+left to right direction
+
+actor Learner
+
+rectangle "Next.js UI" as UI
+rectangle "Next.js API Routes" as API
+database "PostgreSQL" as DB
+rectangle "Recommendation Engine" as REC
+rectangle "RAG Retriever" as RAG
+cloud "OpenRouter /\nOpenAI-compatible API" as AI
+
+Learner --> UI : Learner actions
+UI --> API : API requests
+
+API --> DB : Store / load\nprofile, progress,\nquiz, activity logs
+DB --> REC : Profile, placement,\nprogress, quiz attempts,\nactivity logs
+REC --> API : Ranked learning actions
+API --> UI : Learning path\nand recommendations
+
+UI --> API : Chat message
+API --> RAG : Retrieve sources
+RAG --> DB : Query knowledge chunks
+DB --> RAG : Relevant chunks
+RAG --> API : Grounding context
+API --> AI : Prompt with context
+AI --> API : Generated answer
+API --> DB : Store chat log
+API --> UI : Answer with sources
+
+@enduml

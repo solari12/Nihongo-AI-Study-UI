@@ -1,0 +1,25 @@
+@startuml LearningPathRecommendation
+title Learning Path Recommendation Sequence Diagram
+
+actor Learner
+boundary "Learning Path UI" as UI
+control "Recommendation API" as API
+control "Recommendation Engine" as REC
+database "PostgreSQL" as DB
+
+Learner -> UI: Open learning path
+UI -> API: Request recommendations
+API -> REC: Generate recommendations
+REC -> DB: Load learner profile
+REC -> DB: Load placement result
+REC -> DB: Load vocabulary and grammar progress
+REC -> DB: Load quiz attempts
+REC -> DB: Load activity logs
+REC -> REC: Calculate priority, mastery,\nrisk, and reasons
+REC --> API: Return ranked learning actions
+API --> UI: Return learning path tasks
+UI --> Learner: Display tasks with reasons\nand estimated time
+Learner -> UI: Select a task
+UI --> Learner: Navigate to selected session
+
+@enduml

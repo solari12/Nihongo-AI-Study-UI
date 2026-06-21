@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { readJsonResponse } from "@/lib/http"
-import { grammarData, quizQuestions, vocabularyData } from "@/lib/data/nihongo-study"
+import { grammarData, quizQuestions } from "@/lib/data/nihongo-study"
+import type { VocabularyProgressSummary } from "@/lib/vocabulary/types"
 
 type QuizAttempt = {
   id: string
@@ -17,6 +18,7 @@ type StudyProgress = {
   learnedVocabularyIds: number[]
   reviewVocabularyIds: number[]
   quizAttempts: QuizAttempt[]
+  vocabulary: VocabularyProgressSummary
 }
 
 const storageKey = "nihongo-ai-study-progress"
@@ -25,6 +27,13 @@ const defaultProgress: StudyProgress = {
   learnedVocabularyIds: [],
   reviewVocabularyIds: [],
   quizAttempts: [],
+  vocabulary: {
+    total: 0,
+    studied: 0,
+    mastered: 0,
+    dueReview: 0,
+    learning: 0,
+  },
 }
 
 function readProgress(): StudyProgress {
@@ -136,16 +145,18 @@ export function useStudyProgress() {
       : 0
 
     return {
-      learnedVocabulary: progress.learnedVocabularyIds.length,
-      totalVocabulary: vocabularyData.length,
-      reviewVocabulary: progress.reviewVocabularyIds.length,
+      learnedVocabulary: progress.vocabulary.studied,
+      totalVocabulary: progress.vocabulary.total,
+      reviewVocabulary: progress.vocabulary.dueReview,
+      masteredVocabulary: progress.vocabulary.mastered,
+      learningVocabulary: progress.vocabulary.learning,
       completedGrammar: 0,
       totalGrammar: grammarData.length,
       quizAttempts: progress.quizAttempts.length,
       averageQuizScore,
       latestQuizScore: latestAttempt?.percentage ?? 0,
       n5Progress: Math.round(
-        ((progress.learnedVocabularyIds.length / vocabularyData.length) * 0.45 +
+        ((progress.vocabulary.studied / Math.max(progress.vocabulary.total, 1)) * 0.45 +
           0 +
           ((latestAttempt?.percentage ?? 0) / 100) * 0.2) *
           100
@@ -224,6 +235,7 @@ export function useStudyProgress() {
   return {
     progress,
     stats,
+    isLoaded,
     learnedVocabularySet,
     reviewVocabularySet,
     markVocabularyLearned,

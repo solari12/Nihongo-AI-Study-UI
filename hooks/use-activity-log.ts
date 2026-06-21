@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { readJsonResponse } from "@/lib/http"
 
-export type ActivityType = "vocabulary" | "review" | "quiz" | "grammar"
+export type ActivityType = "vocabulary" | "vocabulary_session" | "review" | "quiz" | "grammar" | "grammar_session"
 
 export type LearningActivity = {
   id: string
@@ -17,6 +17,14 @@ export type LearningActivity = {
 }
 
 const storageKey = "nihongo-ai-activity-log"
+
+function createActivityId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID()
+  }
+
+  return `activity-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
 
 function readActivities(): LearningActivity[] {
   if (typeof window === "undefined") return []
@@ -94,7 +102,7 @@ export function useActivityLog() {
   const addActivity = (activity: Omit<LearningActivity, "id" | "createdAt">) => {
     const optimisticActivity = {
       ...activity,
-      id: crypto.randomUUID(),
+      id: createActivityId(),
       createdAt: new Date().toISOString(),
     }
 
@@ -103,11 +111,15 @@ export function useActivityLog() {
       ...current,
     ])
 
-    void saveActivity(activity).then((savedActivity) => {
-      setActivities((current) =>
-        current.map((entry) => (entry.id === optimisticActivity.id ? savedActivity : entry))
-      )
-    })
+    void saveActivity(activity)
+      .then((savedActivity) => {
+        setActivities((current) =>
+          current.map((entry) => (entry.id === optimisticActivity.id ? savedActivity : entry))
+        )
+      })
+      .catch(() => {
+        // Keep the optimistic local activity when the API is temporarily unavailable.
+      })
   }
 
   const clearActivities = () => {
