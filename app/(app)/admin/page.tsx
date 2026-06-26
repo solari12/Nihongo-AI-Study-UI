@@ -1,8 +1,7 @@
 ﻿"use client"
 
-import { ChangeEvent, FormEvent, useRef, useState } from "react"
+import { ChangeEvent, FormEvent, type ReactNode, useRef, useState } from "react"
 import Link from "next/link"
-import { StatsCard } from "@/components/app/stats-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -77,6 +76,14 @@ const emptyQuiz: Omit<QuizQuestionItem, "id"> = {
 }
 
 type EditorMode = "create" | "edit"
+
+const adminButtonClass =
+  "rounded-full border-[#f0c4c0] bg-white/80 text-[#7a3f45] shadow-sm hover:bg-[#fff0ef] hover:text-[#c94955]"
+
+const adminPrimaryButtonClass =
+  "rounded-full bg-[#e96f78] text-white shadow-sm shadow-[#e96f78]/25 hover:bg-[#d94f5b]"
+
+const adminPanelClass = "border-[#f0c4c0] bg-white/90 shadow-sm shadow-[#e96f78]/10"
 
 export default function AdminPage() {
   const { activeUser } = useAuth()
@@ -294,15 +301,17 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6 rounded-3xl border border-[#f3d7d2] bg-[#fff7f6] p-4 shadow-sm md:p-6">
+      <div className="flex flex-col gap-4 rounded-2xl border border-[#f0c4c0] bg-white/85 px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Settings className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold flex items-center gap-2 text-[#7a3f45]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ffe7e4]">
+              <Settings className="h-5 w-5 text-[#d94f5b]" />
+            </span>
             Quản trị nội dung N5
           </h1>
-          <p className="text-muted-foreground">
-            Thêm và chỉnh sửa dữ liệu học tập. Dữ liệu được lưu trên trình duyệt của bạn.
+          <p className="mt-2 text-sm text-[#8a6665]">
+            Thêm và chỉnh sửa dữ liệu học tập. Dữ liệu được lưu trong PostgreSQL và đồng bộ cho trải nghiệm học.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -313,13 +322,13 @@ export default function AdminPage() {
             className="hidden"
             onChange={importContent}
           />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={!isLoaded}>
+          <Button variant="outline" className={adminButtonClass} onClick={() => fileInputRef.current?.click()} disabled={!isLoaded}>
             Nhập JSON
           </Button>
-          <Button variant="outline" onClick={exportContent} disabled={!isLoaded}>
+          <Button variant="outline" className={adminButtonClass} onClick={exportContent} disabled={!isLoaded}>
             Xuất JSON
           </Button>
-          <Button variant="outline" onClick={resetContent} disabled={!isLoaded}>
+          <Button variant="outline" className={adminButtonClass} onClick={resetContent} disabled={!isLoaded}>
             <RotateCcw className="mr-2 h-4 w-4" />
             Khôi phục dữ liệu mẫu
           </Button>
@@ -331,56 +340,41 @@ export default function AdminPage() {
       {!isLoaded && <ContentLoadingCard label="Đang tải dữ liệu quản trị..." />}
 
       {importMessage && (
-        <Card>
-          <CardContent className="py-3 text-sm text-muted-foreground">
+        <Card className={adminPanelClass}>
+          <CardContent className="py-3 text-sm text-[#8a6665]">
             {importMessage}
           </CardContent>
         </Card>
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatsCard
-          title="Từ vựng"
-          value={content.vocabulary.length}
-          subtitle="mục đang quản lý"
-          icon={<BookOpen className="h-5 w-5" />}
-        />
-        <StatsCard
-          title="Ngữ pháp"
-          value={content.grammar.length}
-          subtitle="mẫu câu"
-          icon={<FileText className="h-5 w-5" />}
-        />
-        <StatsCard
-          title="Quiz"
-          value={content.quiz.length}
-          subtitle="câu hỏi"
-          icon={<HelpCircle className="h-5 w-5" />}
-        />
+        <AdminStatCard title="Từ vựng" value={content.vocabulary.length} subtitle="mục đang quản lý" icon={<BookOpen className="h-5 w-5" />} />
+        <AdminStatCard title="Ngữ pháp" value={content.grammar.length} subtitle="mẫu câu" icon={<FileText className="h-5 w-5" />} />
+        <AdminStatCard title="Quiz" value={content.quiz.length} subtitle="câu hỏi" icon={<HelpCircle className="h-5 w-5" />} />
       </div>
 
       <Tabs defaultValue="vocabulary">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="vocabulary">Từ vựng</TabsTrigger>
-          <TabsTrigger value="grammar">Ngữ pháp</TabsTrigger>
-          <TabsTrigger value="quiz">Quiz</TabsTrigger>
+        <TabsList className="grid h-11 w-full grid-cols-3 rounded-full border border-[#f0c4c0] bg-[#fff0ef] p-1 text-[#8a6665]">
+          <TabsTrigger value="vocabulary" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-[#c94955] data-[state=active]:shadow-sm">Từ vựng</TabsTrigger>
+          <TabsTrigger value="grammar" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-[#c94955] data-[state=active]:shadow-sm">Ngữ pháp</TabsTrigger>
+          <TabsTrigger value="quiz" className="rounded-full data-[state=active]:bg-white data-[state=active]:text-[#c94955] data-[state=active]:shadow-sm">Quiz</TabsTrigger>
         </TabsList>
 
         <TabsContent value="vocabulary" className="mt-6">
-          <Card>
+          <Card className={adminPanelClass}>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div>
-                <CardTitle>Danh sách từ vựng</CardTitle>
-                <CardDescription>Nhập dần bộ từ vựng N5 theo chủ đề.</CardDescription>
+                <CardTitle className="text-[#7a3f45]">Danh sách từ vựng</CardTitle>
+                <CardDescription className="text-[#9a7472]">Nhập dần bộ từ vựng N5 theo chủ đề.</CardDescription>
               </div>
-              <Button onClick={openNewVocabulary} disabled={!isLoaded}>
+              <Button className={adminPrimaryButtonClass} onClick={openNewVocabulary} disabled={!isLoaded}>
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm từ
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border">
-                <div className="grid grid-cols-[1.1fr_1.1fr_1.2fr_0.8fr_0.9fr_96px] gap-3 border-b px-4 py-3 text-sm font-medium text-muted-foreground">
+              <div className="overflow-x-auto rounded-2xl border border-[#f0c4c0] bg-[#fffaf9]">
+                <div className="grid min-w-[900px] grid-cols-[1.1fr_1.1fr_1.2fr_0.8fr_0.9fr_96px] gap-3 border-b border-[#f0c4c0] bg-[#fff0ef] px-4 py-3 text-sm font-medium text-[#7a3f45]">
                   <span>Tiếng Nhật</span>
                   <span>Hiragana</span>
                   <span>Tiếng Việt</span>
@@ -391,12 +385,12 @@ export default function AdminPage() {
                 {content.vocabulary.map((item) => (
                   <div
                     key={item.id}
-                    className="grid grid-cols-[1.1fr_1.1fr_1.2fr_0.8fr_0.9fr_96px] items-center gap-3 border-b px-4 py-3 text-sm last:border-b-0"
+                    className="grid min-w-[900px] grid-cols-[1.1fr_1.1fr_1.2fr_0.8fr_0.9fr_96px] items-center gap-3 border-b border-[#f5d6d3] px-4 py-3 text-sm text-[#6f5655] transition hover:bg-[#fff4f2] last:border-b-0"
                   >
-                    <span className="font-medium">{item.japanese}</span>
+                    <span className="font-semibold text-[#2b211c]">{item.japanese}</span>
                     <span>{item.hiragana}</span>
                     <span>{item.vietnamese}</span>
-                    <Badge variant="outline">{item.type}</Badge>
+                    <Badge className="w-fit rounded-full border border-[#f0c4c0] bg-[#fff0ef] text-[#c94955] shadow-none">{item.type}</Badge>
                     <span>{item.topic}</span>
                     <RowActions
                       onEdit={() => openEditVocabulary(item)}
@@ -411,20 +405,20 @@ export default function AdminPage() {
         </TabsContent>
 
         <TabsContent value="grammar" className="mt-6">
-          <Card>
+          <Card className={adminPanelClass}>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div>
-                <CardTitle>Danh sách ngữ pháp</CardTitle>
-                <CardDescription>Quản lý mẫu câu, cách dùng và ví dụ N5.</CardDescription>
+                <CardTitle className="text-[#7a3f45]">Danh sách ngữ pháp</CardTitle>
+                <CardDescription className="text-[#9a7472]">Quản lý mẫu câu, cách dùng và ví dụ N5.</CardDescription>
               </div>
-              <Button onClick={openNewGrammar} disabled={!isLoaded}>
+              <Button className={adminPrimaryButtonClass} onClick={openNewGrammar} disabled={!isLoaded}>
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm mẫu
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border">
-                <div className="grid grid-cols-[1.1fr_1fr_0.8fr_0.9fr_96px] gap-3 border-b px-4 py-3 text-sm font-medium text-muted-foreground">
+              <div className="overflow-x-auto rounded-2xl border border-[#f0c4c0] bg-[#fffaf9]">
+                <div className="grid min-w-[760px] grid-cols-[1.1fr_1fr_0.8fr_0.9fr_96px] gap-3 border-b border-[#f0c4c0] bg-[#fff0ef] px-4 py-3 text-sm font-medium text-[#7a3f45]">
                   <span>Mẫu câu</span>
                   <span>Ý nghĩa</span>
                   <span>Độ khó</span>
@@ -434,11 +428,11 @@ export default function AdminPage() {
                 {content.grammar.map((item) => (
                   <div
                     key={item.id}
-                    className="grid grid-cols-[1.1fr_1fr_0.8fr_0.9fr_96px] items-center gap-3 border-b px-4 py-3 text-sm last:border-b-0"
+                    className="grid min-w-[760px] grid-cols-[1.1fr_1fr_0.8fr_0.9fr_96px] items-center gap-3 border-b border-[#f5d6d3] px-4 py-3 text-sm text-[#6f5655] transition hover:bg-[#fff4f2] last:border-b-0"
                   >
-                    <span className="font-medium">{item.pattern}</span>
+                    <span className="font-semibold text-[#2b211c]">{item.pattern}</span>
                     <span>{item.meaning}</span>
-                    <Badge variant="outline">{item.difficulty}</Badge>
+                    <Badge className="w-fit rounded-full border border-[#ead0df] bg-[#fff3f8] text-[#a7557c] shadow-none">{item.difficulty}</Badge>
                     <span>{item.status}</span>
                     <RowActions
                       onEdit={() => openEditGrammar(item)}
@@ -453,20 +447,20 @@ export default function AdminPage() {
         </TabsContent>
 
         <TabsContent value="quiz" className="mt-6">
-          <Card>
+          <Card className={adminPanelClass}>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div>
-                <CardTitle>Danh sách câu hỏi quiz</CardTitle>
-                <CardDescription>Tạo câu hỏi luyện tập từ vựng và ngữ pháp.</CardDescription>
+                <CardTitle className="text-[#7a3f45]">Danh sách câu hỏi quiz</CardTitle>
+                <CardDescription className="text-[#9a7472]">Tạo câu hỏi luyện tập từ vựng và ngữ pháp.</CardDescription>
               </div>
-              <Button onClick={openNewQuiz} disabled={!isLoaded}>
+              <Button className={adminPrimaryButtonClass} onClick={openNewQuiz} disabled={!isLoaded}>
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm câu hỏi
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border">
-                <div className="grid grid-cols-[1.8fr_0.8fr_0.8fr_1fr_96px] gap-3 border-b px-4 py-3 text-sm font-medium text-muted-foreground">
+              <div className="overflow-x-auto rounded-2xl border border-[#f0c4c0] bg-[#fffaf9]">
+                <div className="grid min-w-[820px] grid-cols-[1.8fr_0.8fr_0.8fr_1fr_96px] gap-3 border-b border-[#f0c4c0] bg-[#fff0ef] px-4 py-3 text-sm font-medium text-[#7a3f45]">
                   <span>Câu hỏi</span>
                   <span>Loại</span>
                   <span>Độ khó</span>
@@ -476,10 +470,10 @@ export default function AdminPage() {
                 {content.quiz.map((item) => (
                   <div
                     key={item.id}
-                    className="grid grid-cols-[1.8fr_0.8fr_0.8fr_1fr_96px] items-center gap-3 border-b px-4 py-3 text-sm last:border-b-0"
+                    className="grid min-w-[820px] grid-cols-[1.8fr_0.8fr_0.8fr_1fr_96px] items-center gap-3 border-b border-[#f5d6d3] px-4 py-3 text-sm text-[#6f5655] transition hover:bg-[#fff4f2] last:border-b-0"
                   >
-                    <span className="font-medium">{item.question}</span>
-                    <Badge variant="outline">{item.type === "vocabulary" ? "Từ vựng" : "Ngữ pháp"}</Badge>
+                    <span className="line-clamp-2 font-semibold text-[#2b211c]">{item.question}</span>
+                    <Badge className="w-fit rounded-full border border-[#f3d2bf] bg-[#fff4ed] text-[#c7633f] shadow-none">{item.type === "vocabulary" ? "Từ vựng" : "Ngữ pháp"}</Badge>
                     <span>{item.difficulty}</span>
                     <span>{item.topic}</span>
                     <RowActions
@@ -496,11 +490,11 @@ export default function AdminPage() {
       </Tabs>
 
       <Dialog open={vocabularyDialogOpen} onOpenChange={setVocabularyDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="border-[#f0c4c0] bg-[#fffaf9] sm:max-w-2xl">
           <form onSubmit={saveVocabulary} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{editorMode === "create" ? "Thêm từ vựng" : "Sửa từ vựng"}</DialogTitle>
-              <DialogDescription>Nhập đầy đủ kana, romaji, nghĩa và ví dụ để dùng trong học/quiz.</DialogDescription>
+              <DialogTitle className="text-[#7a3f45]">{editorMode === "create" ? "Thêm từ vựng" : "Sửa từ vựng"}</DialogTitle>
+              <DialogDescription className="text-[#9a7472]">Nhập đầy đủ kana, romaji, nghĩa và ví dụ để dùng trong học/quiz.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Tiếng Nhật" value={vocabularyForm.japanese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, japanese: value })} />
@@ -514,19 +508,19 @@ export default function AdminPage() {
             <Field label="Ví dụ tiếng Nhật" value={vocabularyForm.example.japanese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, japanese: value } })} />
             <Field label="Dịch ví dụ" value={vocabularyForm.example.vietnamese} onChange={(value) => setVocabularyForm({ ...vocabularyForm, example: { ...vocabularyForm.example, vietnamese: value } })} />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setVocabularyDialogOpen(false)}>Hủy</Button>
-              <Button type="submit" disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
+              <Button type="button" variant="outline" className={adminButtonClass} onClick={() => setVocabularyDialogOpen(false)}>Hủy</Button>
+              <Button type="submit" className={adminPrimaryButtonClass} disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={grammarDialogOpen} onOpenChange={setGrammarDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="border-[#f0c4c0] bg-[#fffaf9] sm:max-w-2xl">
           <form onSubmit={saveGrammar} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{editorMode === "create" ? "Thêm ngữ pháp" : "Sửa ngữ pháp"}</DialogTitle>
-              <DialogDescription>Mỗi mẫu nên có cấu trúc, cách dùng và một ví dụ ngắn.</DialogDescription>
+              <DialogTitle className="text-[#7a3f45]">{editorMode === "create" ? "Thêm ngữ pháp" : "Sửa ngữ pháp"}</DialogTitle>
+              <DialogDescription className="text-[#9a7472]">Mỗi mẫu nên có cấu trúc, cách dùng và một ví dụ ngắn.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Mẫu câu" value={grammarForm.pattern} onChange={(value) => setGrammarForm({ ...grammarForm, pattern: value })} />
@@ -537,23 +531,23 @@ export default function AdminPage() {
             <Field label="Ví dụ tiếng Nhật" value={grammarForm.example.japanese} onChange={(value) => setGrammarForm({ ...grammarForm, example: { ...grammarForm.example, japanese: value } })} />
             <Field label="Dịch ví dụ" value={grammarForm.example.vietnamese} onChange={(value) => setGrammarForm({ ...grammarForm, example: { ...grammarForm.example, vietnamese: value } })} />
             <div className="space-y-2">
-              <Label>Ghi chú sử dụng</Label>
-              <Textarea value={grammarForm.usageNote} onChange={(event) => setGrammarForm({ ...grammarForm, usageNote: event.target.value })} />
+              <Label className="text-[#7a3f45]">Ghi chú sử dụng</Label>
+              <Textarea className="border-[#f0c4c0] bg-white/80 focus-visible:ring-[#e96f78]/30" value={grammarForm.usageNote} onChange={(event) => setGrammarForm({ ...grammarForm, usageNote: event.target.value })} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setGrammarDialogOpen(false)}>Hủy</Button>
-              <Button type="submit" disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
+              <Button type="button" variant="outline" className={adminButtonClass} onClick={() => setGrammarDialogOpen(false)}>Hủy</Button>
+              <Button type="submit" className={adminPrimaryButtonClass} disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={quizDialogOpen} onOpenChange={setQuizDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="border-[#f0c4c0] bg-[#fffaf9] sm:max-w-2xl">
           <form onSubmit={saveQuiz} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{editorMode === "create" ? "Thêm câu hỏi quiz" : "Sửa câu hỏi quiz"}</DialogTitle>
-              <DialogDescription>Câu hỏi có 4 đáp án A-D và một đáp án đúng.</DialogDescription>
+              <DialogTitle className="text-[#7a3f45]">{editorMode === "create" ? "Thêm câu hỏi quiz" : "Sửa câu hỏi quiz"}</DialogTitle>
+              <DialogDescription className="text-[#9a7472]">Câu hỏi có 4 đáp án A-D và một đáp án đúng.</DialogDescription>
             </DialogHeader>
             <Field label="Câu hỏi" value={quizForm.question} onChange={(value) => setQuizForm({ ...quizForm, question: value })} />
             <div className="grid gap-4 sm:grid-cols-3">
@@ -578,12 +572,12 @@ export default function AdminPage() {
             </div>
             <Field label="Đáp án đúng (a/b/c/d)" value={quizForm.correctAnswer} onChange={(value) => setQuizForm({ ...quizForm, correctAnswer: value })} />
             <div className="space-y-2">
-              <Label>Giải thích</Label>
-              <Textarea value={quizForm.explanation} onChange={(event) => setQuizForm({ ...quizForm, explanation: event.target.value })} />
+              <Label className="text-[#7a3f45]">Giải thích</Label>
+              <Textarea className="border-[#f0c4c0] bg-white/80 focus-visible:ring-[#e96f78]/30" value={quizForm.explanation} onChange={(event) => setQuizForm({ ...quizForm, explanation: event.target.value })} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setQuizDialogOpen(false)}>Hủy</Button>
-              <Button type="submit" disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
+              <Button type="button" variant="outline" className={adminButtonClass} onClick={() => setQuizDialogOpen(false)}>Hủy</Button>
+              <Button type="submit" className={adminPrimaryButtonClass} disabled={isSaving}>{isSaving ? "Đang lưu..." : "Lưu"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -603,9 +597,40 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+      <Label className="text-[#7a3f45]">{label}</Label>
+      <Input
+        className="border-[#f0c4c0] bg-white/80 text-[#6f5655] focus-visible:ring-[#e96f78]/30"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </div>
+  )
+}
+
+function AdminStatCard({
+  title,
+  value,
+  subtitle,
+  icon,
+}: {
+  title: string
+  value: number
+  subtitle: string
+  icon: ReactNode
+}) {
+  return (
+    <Card className={adminPanelClass}>
+      <CardContent className="flex items-center justify-between gap-4 p-5">
+        <div>
+          <p className="text-sm font-medium text-[#8a6665]">{title}</p>
+          <div className="mt-1 text-3xl font-bold text-[#7a3f45]">{value}</div>
+          <p className="mt-1 text-xs text-[#9a7472]">{subtitle}</p>
+        </div>
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ffe7e4] text-[#d94f5b]">
+          {icon}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -620,11 +645,25 @@ function RowActions({
 }) {
   return (
     <div className="flex items-center justify-end gap-1">
-      <Button type="button" variant="ghost" size="icon" onClick={onEdit} disabled={disabled}>
-        <Pencil className="h-4 w-4" />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 rounded-full text-[#c94955] hover:bg-[#ffe7e4] hover:text-[#c94955]"
+        onClick={onEdit}
+        disabled={disabled}
+      >
+        <Pencil className="h-3.5 w-3.5" />
       </Button>
-      <Button type="button" variant="ghost" size="icon" onClick={onDelete} disabled={disabled}>
-        <Trash2 className="h-4 w-4 text-destructive" />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 rounded-full text-[#d45a4c] hover:bg-[#fff0ef] hover:text-[#b94438]"
+        onClick={onDelete}
+        disabled={disabled}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
       </Button>
     </div>
   )

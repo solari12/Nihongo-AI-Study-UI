@@ -25,6 +25,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/hooks/use-auth"
 import { CHAT_ACTIVE_SOURCE_STORAGE_KEY, type ActiveChatSource } from "@/lib/chat/active-source"
+import { openKamiChat } from "@/components/app/kami-floating-chat"
 import { cn } from "@/lib/utils"
 
 type ReadingArticle = {
@@ -557,7 +558,7 @@ export function ReadingPageClient() {
     }
 
     window.sessionStorage.setItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY, JSON.stringify(activeSource))
-    router.push("/chatbot")
+    openKamiChat()
   }
 
   const goToPreviousQuestion = () => {

@@ -19,3 +19,5 @@ tsconfig.tsbuildinfo
 *.log
 *.rar
 playwright-report/
+test-results/
+.codex-admin-cookie.txt

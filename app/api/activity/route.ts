@@ -3,6 +3,9 @@ import { z } from "zod"
 import { getCurrentUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 const activitySchema = z.object({
   type: z.string().trim().min(1),
   content: z.string().trim().min(1),
@@ -25,18 +28,25 @@ export async function GET() {
     },
   })
 
-  return NextResponse.json({
-    items: activities.map((activity) => ({
-      id: activity.id,
-      type: activity.type,
-      content: activity.content,
-      topic: activity.topic ?? undefined,
-      result: activity.result ?? undefined,
-      score: activity.score ?? undefined,
-      durationMinutes: activity.durationMinutes ?? undefined,
-      createdAt: activity.createdAt.toISOString(),
-    })),
-  })
+  return NextResponse.json(
+    {
+      items: activities.map((activity) => ({
+        id: activity.id,
+        type: activity.type,
+        content: activity.content,
+        topic: activity.topic ?? undefined,
+        result: activity.result ?? undefined,
+        score: activity.score ?? undefined,
+        durationMinutes: activity.durationMinutes ?? undefined,
+        createdAt: activity.createdAt.toISOString(),
+      })),
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  )
 }
 
 export async function POST(request: NextRequest) {

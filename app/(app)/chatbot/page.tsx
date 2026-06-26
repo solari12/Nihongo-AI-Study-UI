@@ -11,7 +11,7 @@ import { CHAT_ACTIVE_SOURCE_STORAGE_KEY, type ActiveChatSource } from "@/lib/cha
 import { type ChatQuizCard } from "@/lib/chat/quiz"
 import { readJsonResponse } from "@/lib/http"
 import { useI18n } from "@/lib/i18n"
-import { BookOpen, ChevronUp, FileText, HelpCircle, MessageSquare, Newspaper, Plus, Send, Sparkles, Square, Trash2, X } from "lucide-react"
+import { ArrowRight, BookmarkPlus, BookOpen, FileText, HelpCircle, MessageSquare, Newspaper, Plus, Send, Square, Trash2, Volume2, X } from "lucide-react"
 
 type ChatSource = {
   id: string
@@ -92,13 +92,12 @@ type StoredChatMessage = {
   createdAt: string
 }
 
-const suggestedQuestionKeys = [
-  "chatbot.suggestion.word",
-  "chatbot.suggestion.pattern",
-  "chatbot.suggestion.kosoado",
-  "chatbot.suggestion.particles",
-  "chatbot.suggestion.plan",
-] as const
+type ReadingArticleSummary = {
+  id: string
+  title: string
+  level: string | null
+  audioUrl?: string | null
+}
 
 const chatAutoScrollThreshold = 120
 
@@ -128,6 +127,20 @@ function sourceIcon(type: ChatSource["type"]) {
   if (type === "quiz") return <HelpCircle className="h-4 w-4 text-accent" />
   if (type === "news") return <Newspaper className="h-4 w-4 text-primary" />
   return <BookOpen className="h-4 w-4 text-primary" />
+}
+
+function sourceHref(source: ChatSource) {
+  if (source.href) return source.href
+
+  const sourceId = source.sourceId ?? source.id
+  const numericId = sourceId.match(/\d+/)?.[0]
+
+  if (source.type === "news") return `/reading?article=${encodeURIComponent(sourceId)}`
+  if (source.type === "grammar") return numericId ? `/grammar?grammar=${numericId}` : "/grammar"
+  if (source.type === "vocabulary") return numericId ? `/vocabulary?word=${numericId}` : "/vocabulary"
+  if (source.type === "quiz") return numericId ? `/quiz?question=${numericId}` : "/quiz"
+
+  return undefined
 }
 
 function latestAssistantQuizState(messages: ChatMessageItem[]) {
@@ -178,7 +191,18 @@ function isNearScrollBottom(element: HTMLElement) {
   return element.scrollHeight - element.scrollTop - element.clientHeight <= chatAutoScrollThreshold
 }
 
-export default function ChatbotPage() {
+function sourceFromActiveSource(activeSource: ActiveChatSource): ChatSource {
+  return {
+    id: activeSource.id,
+    sourceId: activeSource.id,
+    title: activeSource.title,
+    href: activeSource.type === "news" ? `/reading?article=${activeSource.id}` : undefined,
+    type: activeSource.type,
+    score: 100,
+  }
+}
+
+export default function ChatbotPage({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useI18n()
   const initialMessages = useMemo<ChatMessageItem[]>(
     () => [
@@ -190,13 +214,12 @@ export default function ChatbotPage() {
     ],
     [t]
   )
-  const suggestedQuestions = useMemo(() => suggestedQuestionKeys.map((key) => t(key)), [t])
   const [messages, setMessages] = useState<ChatMessageItem[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState("")
-  const [showSuggestions, setShowSuggestions] = useState(true)
   const [activeSource, setActiveSource] = useState<ActiveChatSource | null>(null)
+  const [activeArticle, setActiveArticle] = useState<ReadingArticleSummary | null>(null)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<ChatConversationSummary[]>([])
   const [loadingConversations, setLoadingConversations] = useState(true)
@@ -250,7 +273,6 @@ export default function ChatbotPage() {
       }))
     )
     setActionMessage("")
-    setShowSuggestions(data.messages.length === 0)
   }
 
   useEffect(() => {
@@ -308,6 +330,37 @@ export default function ChatbotPage() {
   }, [activeSource])
 
   useEffect(() => {
+    let cancelled = false
+
+    async function loadActiveArticle() {
+      if (activeSource?.type !== "news") {
+        setActiveArticle(null)
+        return
+      }
+
+      try {
+        const response = await fetch("/api/reading", { cache: "no-store" })
+        const data = await readJsonResponse<{ items: ReadingArticleSummary[] }>(response)
+        if (cancelled) return
+
+        const article = data.items.find((item) => item.id === activeSource.id)
+        setActiveArticle(article ?? { id: activeSource.id, title: activeSource.title, level: null })
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load active reading article", error)
+          setActiveArticle({ id: activeSource.id, title: activeSource.title, level: null })
+        }
+      }
+    }
+
+    void loadActiveArticle()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeSource])
+
+  useEffect(() => {
     if (!forceScrollToBottomRef.current && !shouldStickToBottomRef.current) return
 
     const behavior = forceScrollToBottomRef.current ? "auto" : "smooth"
@@ -319,7 +372,16 @@ export default function ChatbotPage() {
     const assistantWithProvider = [...messages]
       .reverse()
       .find((message) => message.role === "assistant" && message.provider && !message.isStreaming)
-    const sources = assistantWithProvider?.sources ?? []
+    const activeSourceItem = activeSource ? sourceFromActiveSource(activeSource) : null
+    const assistantSources = assistantWithProvider?.sources ?? []
+    const sources = activeSourceItem
+      ? [
+          activeSourceItem,
+          ...assistantSources.filter(
+            (source) => source.id !== activeSourceItem.id && source.sourceId !== activeSourceItem.id
+          ),
+        ]
+      : assistantSources
     const counts = sources.reduce<Record<ChatSource["type"], number>>(
       (nextCounts, source) => {
         nextCounts[source.type] = (nextCounts[source.type] ?? 0) + 1
@@ -332,6 +394,8 @@ export default function ChatbotPage() {
         news: 0,
       }
     )
+    const questionCount = messages.filter((message) => message.role === "user").length
+    const hasConversationActivity = questionCount > 0 || Boolean(activeSource) || Boolean(conversationId)
 
     return {
       assistant: assistantWithProvider,
@@ -340,12 +404,14 @@ export default function ChatbotPage() {
           ? t("chatbot.provider.ready")
           : assistantWithProvider?.provider === "fallback"
             ? t("chatbot.provider.fallback")
-            : t("chatbot.provider.none"),
-      questionCount: messages.filter((message) => message.role === "user").length,
+            : hasConversationActivity
+              ? t("chatbot.provider.ready")
+              : t("chatbot.provider.none"),
+      questionCount: Math.max(questionCount, activeSource ? 1 : 0),
       sources,
       sourceCounts: counts,
     }
-  }, [messages, t])
+  }, [activeSource, conversationId, messages, t])
 
   async function handleSend(nextMessage = inputValue) {
     const message = nextMessage.trim()
@@ -581,6 +647,33 @@ export default function ChatbotPage() {
     void handleSend(`${prefix} ${t("chatbot.createQuizPromptSuffix")}`)
   }
 
+  function activeArticleMessage(): ChatMessageItem | null {
+    if (activeSource?.type !== "news") return null
+
+    return {
+      role: "assistant",
+      content: activeSource.title,
+      timestamp: formatTime(),
+      sources: [sourceFromActiveSource(activeSource)],
+    }
+  }
+
+  function saveActiveArticle() {
+    const message = activeArticleMessage()
+    if (!message) return
+    void saveFirstSource(message)
+  }
+
+  function createQuizFromActiveArticle() {
+    const message = activeArticleMessage()
+    if (message) {
+      createMiniQuiz(message)
+      return
+    }
+
+    void handleSend(t("chatbot.suggestion.readingQuiz"))
+  }
+
   async function logChatActivity(message: ChatMessageItem) {
     if (!window.confirm(t("chatbot.logActivityConfirm"))) return
 
@@ -663,7 +756,6 @@ export default function ChatbotPage() {
     setInputValue("")
     setActionMessage(t("chatbot.newStarted"))
     setActiveSource(null)
-    setShowSuggestions(true)
   }
 
   async function deleteConversation(id: string) {
@@ -759,8 +851,14 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col gap-4 rounded-xl bg-[#fff7ef] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center p-3 md:flex-row md:gap-6">
-      <aside className="w-full shrink-0 md:w-72">
+    <div
+      className={
+        compact
+          ? "flex h-full min-h-0 flex-col rounded-2xl bg-[#fff7ef] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center p-3"
+          : "flex h-[calc(100vh-8rem)] flex-col gap-4 rounded-xl bg-[#fff7ef] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center p-3 md:flex-row md:gap-6"
+      }
+    >
+      <aside className={compact ? "hidden" : "w-full shrink-0 md:w-72"}>
         <Card className="flex max-h-72 flex-col border-[#ead7c9] bg-white/90 shadow-sm md:h-full md:max-h-none">
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -834,14 +932,14 @@ export default function ChatbotPage() {
           </CardContent>
         </Card>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className={compact ? "mb-3 flex items-center justify-between gap-3" : "mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"}>
           <div>
-            <h1 className="flex items-center gap-2 text-2xl font-bold">
-              <Sparkles className="h-6 w-6 text-[#d94f45]" />
+            <h1 className={compact ? "flex items-center gap-2 text-lg font-bold" : "flex items-center gap-2 text-2xl font-bold"}>
+              <img src="/assets/kami-logo.png" alt="" className={compact ? "h-7 w-7 object-contain" : "h-8 w-8 object-contain"} aria-hidden="true" />
               {t("chatbot.title")}
             </h1>
-            <p className="text-muted-foreground">
+            <p className={compact ? "line-clamp-1 text-xs text-muted-foreground" : "text-muted-foreground"}>
               {t("chatbot.description")}
             </p>
           </div>
@@ -895,7 +993,7 @@ export default function ChatbotPage() {
 
         <Card className="relative flex min-h-0 flex-1 flex-col border-[#ead7c9] bg-white/95 shadow-sm">
           <ScrollArea
-            className="min-h-0 flex-1 p-4"
+            className={compact ? "min-h-0 flex-1 p-3" : "min-h-0 flex-1 p-4"}
             viewportRef={messagesViewportRef}
             onViewportScroll={handleMessagesScroll}
           >
@@ -926,8 +1024,8 @@ export default function ChatbotPage() {
               })}
               {isLoading && !messages[messages.length - 1]?.provider && (
                 <div className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
-                    <span className="text-[10px] font-bold text-accent-foreground">Kami</span>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#ffe7e4]">
+                    <img src="/assets/kami-logo.png" alt="Kami" className="h-full w-full object-contain p-0.5" />
                   </div>
                   <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-3">
                     <div className="text-sm text-muted-foreground">
@@ -939,51 +1037,7 @@ export default function ChatbotPage() {
             </div>
           </ScrollArea>
 
-          {showSuggestions && (
-          <div className="border-t p-3">
-            <div className="mb-2 flex items-center justify-end">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 shrink-0 text-muted-foreground"
-                onClick={() => setShowSuggestions((value) => !value)}
-                aria-label="Toggle suggested questions"
-              >
-                <ChevronUp className="h-3.5 w-3.5 rotate-180" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {suggestedQuestions.map((question) => (
-                <Button
-                  key={question}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-auto rounded-full px-3 py-1.5 text-xs"
-                  onClick={() => void handleSend(question)}
-                  disabled={isLoading}
-                >
-                  {question}
-                </Button>
-              ))}
-            </div>
-          </div>
-          )}
-
-          <div className="relative border-t border-[#ead7c9] bg-[#fffaf6] p-4">
-            {!showSuggestions && (
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="absolute right-4 top-0 h-6 w-6 -translate-y-1/2 rounded-full bg-background shadow-sm"
-                onClick={() => setShowSuggestions(true)}
-                aria-label="Show suggested questions"
-              >
-                <ChevronUp className="h-3.5 w-3.5" />
-              </Button>
-            )}
+          <div className={compact ? "relative border-t border-[#ead7c9] bg-[#fffaf6] p-3" : "relative border-t border-[#ead7c9] bg-[#fffaf6] p-4"}>
             <form
               onSubmit={(event) => {
                 event.preventDefault()
@@ -996,10 +1050,15 @@ export default function ChatbotPage() {
                 onChange={(event) => setInputValue(event.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t("chatbot.input.placeholder")}
-                className="min-h-12 flex-1 resize-none"
+                className="min-h-12 flex-1 resize-none border-[#f0c4c0] bg-white focus-visible:ring-[#e96f78]/35"
                 maxLength={1500}
               />
-              <Button type="submit" size="icon" disabled={!inputValue.trim() || isLoading}>
+              <Button
+                type="submit"
+                size="icon"
+                className="bg-[#e96f78] text-white shadow-sm shadow-[#e96f78]/25 hover:bg-[#d94f5b] disabled:bg-[#f2b4b8] disabled:text-white"
+                disabled={!inputValue.trim() || isLoading}
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </form>
@@ -1007,7 +1066,7 @@ export default function ChatbotPage() {
         </Card>
       </div>
 
-      <div className="hidden w-80 shrink-0 lg:block">
+      <div className={compact ? "hidden" : "hidden w-80 shrink-0 lg:block"}>
         <Card className="h-full border-[#ead7c9] bg-white/90 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -1016,54 +1075,127 @@ export default function ChatbotPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border bg-muted/35 p-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("chatbot.provider.label")}</span>
-                <Badge variant={chatStats.assistant?.provider === "openrouter" ? "default" : "secondary"}>
-                  {chatStats.providerLabel}
-                </Badge>
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-muted-foreground">{t("chatbot.questionCount")}</span>
-                <span className="font-medium">{chatStats.questionCount}</span>
-              </div>
-              {isLoading && (
-                <div className="mt-2 rounded-md bg-background px-2 py-1 text-xs text-muted-foreground">
-                  {t("chatbot.agent.toolsLoading")}
-                </div>
-              )}
-            </div>
+            {activeSource?.type === "news" && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div className="flex items-start gap-3">
+                  <Newspaper className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase text-muted-foreground">
+                      {t("chatbot.reading.current")}
+                    </p>
+                    <a
+                      href={`/reading?article=${activeSource.id}`}
+                      className="mt-1 block text-sm font-semibold leading-5 text-foreground hover:text-primary hover:underline"
+                    >
+                      {activeSource.title}
+                    </a>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="rounded-full">
+                        {t("chatbot.reading.level")}: {activeArticle?.level ?? t("chatbot.reading.levelUnknown")}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2 text-xs"
+                        onClick={() => {
+                          if (activeArticle?.audioUrl) {
+                            window.open(activeArticle.audioUrl, "_blank", "noopener,noreferrer")
+                            return
+                          }
 
-            {chatStats.sources.length ? (
-              chatStats.sources.map((source) => (
-                <div key={source.id} className="rounded-lg border p-3 transition-colors hover:bg-muted/50">
-                  <div className="flex items-start gap-3">
-                    {sourceIcon(source.type)}
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium leading-5">{source.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {sourceLabel(source.type, t)}
-                      </p>
+                          void handleSend(t("chatbot.suggestion.readingListen"))
+                        }}
+                        disabled={isLoading}
+                      >
+                        <Volume2 className="mr-1 h-3 w-3" />
+                        {t("chatbot.action.listen")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2 text-xs"
+                        onClick={saveActiveArticle}
+                        disabled={isLoading}
+                      >
+                        <BookmarkPlus className="mr-1 h-3 w-3" />
+                        {t("chatbot.action.saveShort")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2 text-xs"
+                        onClick={createQuizFromActiveArticle}
+                        disabled={isLoading}
+                      >
+                        <HelpCircle className="mr-1 h-3 w-3" />
+                        {t("chatbot.action.quizShort")}
+                      </Button>
                     </div>
                   </div>
                 </div>
-              ))
+              </div>
+            )}
+
+            {chatStats.sources.length ? (
+              <div className="space-y-2">
+                {chatStats.sources.map((source) => {
+                  const href = sourceHref(source)
+
+                  return href ? (
+                  <a
+                    key={source.id}
+                    href={href}
+                    className="group block rounded-xl border border-[#ead7c9] bg-[#fffaf6] p-3 transition-colors hover:border-[#e96f78]/50 hover:bg-[#fff3ef]"
+                  >
+                    <div className="flex items-start gap-3">
+                      {sourceIcon(source.type)}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium leading-5">{source.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {sourceLabel(source.type, t)}
+                        </p>
+                      </div>
+                      <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-[#d94f5b]" />
+                    </div>
+                  </a>
+                ) : (
+                  <div key={source.id} className="rounded-xl border border-[#ead7c9] bg-[#fffaf6] p-3">
+                    <div className="flex items-start gap-3">
+                      {sourceIcon(source.type)}
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-5">{source.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {sourceLabel(source.type, t)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+                })}
+              </div>
             ) : (
               <div className="rounded-lg border border-dashed border-[#ead7c9] bg-[#fffaf6] p-4 text-sm text-muted-foreground">
                 {t("chatbot.sources.empty")}
               </div>
             )}
 
-            <div className="border-t pt-4">
-              <h4 className="mb-2 text-sm font-medium">{t("chatbot.sources.recent")}</h4>
-              <div className="flex flex-wrap gap-2">
-                {(["vocabulary", "grammar", "quiz", "news"] as const).map((type) => (
-                  <Badge key={type} variant="outline" className="rounded-full">
-                    {sourceLabel(type, t)} {chatStats.sourceCounts[type] ?? 0}
-                  </Badge>
-                ))}
+            {(isLoading || chatStats.assistant) && (
+              <div className="rounded-lg border bg-muted/25 px-3 py-2 text-xs text-muted-foreground">
+                {isLoading ? (
+                  t("chatbot.agent.toolsLoading")
+                ) : (
+                  <div className="flex items-center justify-between gap-3">
+                    <span>{t("chatbot.provider.label")}</span>
+                    <span className="font-medium text-foreground">{chatStats.providerLabel}</span>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

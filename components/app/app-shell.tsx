@@ -1,10 +1,13 @@
 "use client"
 
-import { useState, createContext, useContext } from "react"
+import { useMemo, useState, createContext, useContext } from "react"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
+import { KamiFloatingChat } from "./kami-floating-chat"
 import { cn } from "@/lib/utils"
+import { ActivityLogProvider, useActivityLog } from "@/hooks/use-activity-log"
 import { type ClientAuthUser, useAuth } from "@/hooks/use-auth"
+import { buildStudyStreak } from "@/lib/activity/streak"
 
 interface SidebarContextType {
   collapsed: boolean
@@ -24,8 +27,18 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, user: initialUser }: AppShellProps) {
+  return (
+    <ActivityLogProvider>
+      <AppShellFrame user={initialUser}>{children}</AppShellFrame>
+    </ActivityLogProvider>
+  )
+}
+
+function AppShellFrame({ children, user: initialUser }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false)
   const { activeUser } = useAuth(initialUser)
+  const { activities } = useActivityLog()
+  const learningStreak = useMemo(() => buildStudyStreak(activities), [activities])
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
@@ -46,9 +59,11 @@ export function AppShell({ children, user: initialUser }: AppShellProps) {
             userName={activeUser?.name}
             userEmail={activeUser?.email}
             userRole={activeUser?.role}
+            learningStreak={learningStreak}
           />
           <main className="flex-1 p-6">{children}</main>
         </div>
+        <KamiFloatingChat />
       </div>
     </SidebarContext.Provider>
   )

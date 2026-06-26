@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { type ChatQuizCard, parseChatQuizCards } from "@/lib/chat/quiz"
@@ -69,32 +69,108 @@ function SourceIcon({ type }: { type: string }) {
   return <BookmarkPlus className="h-3 w-3" />
 }
 
-function renderInternalMarkdownLinks(text: string) {
-  const nodes: React.ReactNode[] = []
-  const linkPattern = /\[([^\]]+)\]\(((?:\/reading|https?:\/\/reading)\?article=[^)]+)\)/g
+function renderInlineMarkdown(text: string, keyPrefix: string) {
+  const nodes: ReactNode[] = []
+  const inlinePattern = /(\[([^\]]+)\]\(((?:\/reading|https?:\/\/reading)\?article=[^)]+)\))|(\*\*([^*]+)\*\*)/g
   let lastIndex = 0
 
-  for (const match of text.matchAll(linkPattern)) {
+  for (const match of text.matchAll(inlinePattern)) {
     const index = match.index ?? 0
     if (index > lastIndex) nodes.push(text.slice(lastIndex, index))
-    const href = match[2].replace(/^https?:\/\/reading/i, "/reading")
 
-    nodes.push(
-      <a
-        key={`${href}-${index}`}
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        className="font-medium text-primary underline underline-offset-2"
-      >
-        {match[1]}
-      </a>
-    )
+    if (match[2] && match[3]) {
+      const href = match[3].replace(/^https?:\/\/reading/i, "/reading")
+      nodes.push(
+        <a
+          key={`${keyPrefix}-link-${index}`}
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="font-medium text-primary underline underline-offset-2"
+        >
+          {match[2]}
+        </a>
+      )
+    } else if (match[5]) {
+      nodes.push(
+        <strong key={`${keyPrefix}-strong-${index}`} className="font-semibold text-foreground">
+          {renderInlineMarkdown(match[5], `${keyPrefix}-strong-${index}`)}
+        </strong>
+      )
+    }
+
     lastIndex = index + match[0].length
   }
 
   if (lastIndex < text.length) nodes.push(text.slice(lastIndex))
   return nodes
+}
+
+function renderMarkdownContent(text: string) {
+  const lines = text.split(/\r?\n/)
+  const blocks: ReactNode[] = []
+  let index = 0
+
+  while (index < lines.length) {
+    const line = lines[index]
+    const trimmed = line.trim()
+
+    if (!trimmed) {
+      index += 1
+      continue
+    }
+
+    const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/)
+    if (bulletMatch) {
+      const items: string[] = []
+
+      while (index < lines.length) {
+        const itemMatch = lines[index].trim().match(/^[-*]\s+(.+)$/)
+        if (!itemMatch) break
+        items.push(itemMatch[1])
+        index += 1
+      }
+
+      blocks.push(
+        <ul key={`ul-${index}`} className="my-2 list-disc space-y-1 pl-5">
+          {items.map((item, itemIndex) => (
+            <li key={`${item}-${itemIndex}`}>{renderInlineMarkdown(item, `ul-${index}-${itemIndex}`)}</li>
+          ))}
+        </ul>
+      )
+      continue
+    }
+
+    const orderedMatch = trimmed.match(/^\d+\.\s+(.+)$/)
+    if (orderedMatch) {
+      const items: string[] = []
+
+      while (index < lines.length) {
+        const itemMatch = lines[index].trim().match(/^\d+\.\s+(.+)$/)
+        if (!itemMatch) break
+        items.push(itemMatch[1])
+        index += 1
+      }
+
+      blocks.push(
+        <ol key={`ol-${index}`} className="my-2 list-decimal space-y-1 pl-5">
+          {items.map((item, itemIndex) => (
+            <li key={`${item}-${itemIndex}`}>{renderInlineMarkdown(item, `ol-${index}-${itemIndex}`)}</li>
+          ))}
+        </ol>
+      )
+      continue
+    }
+
+    blocks.push(
+      <p key={`p-${index}`} className="my-1">
+        {renderInlineMarkdown(trimmed, `p-${index}`)}
+      </p>
+    )
+    index += 1
+  }
+
+  return blocks
 }
 
 function QuizCards({
@@ -330,9 +406,12 @@ export function ChatMessage({
     <div className={cn("flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
       <Avatar className="h-8 w-8 shrink-0">
         {isUser ? (
-          <AvatarFallback className="bg-primary text-xs text-primary-foreground">U</AvatarFallback>
+          <AvatarFallback className="bg-[#e96f78] text-xs font-semibold text-white shadow-sm">U</AvatarFallback>
         ) : (
-          <AvatarFallback className="bg-accent text-[10px] font-bold text-accent-foreground">Kami</AvatarFallback>
+          <>
+            <AvatarImage src="/assets/kami-logo.png" alt="Kami" className="object-contain p-0.5" />
+            <AvatarFallback className="bg-[#ffe7e4] text-[10px] font-bold text-[#d94f45]">Kami</AvatarFallback>
+          </>
         )}
       </Avatar>
 
@@ -340,10 +419,12 @@ export function ChatMessage({
         <div
           className={cn(
             "rounded-2xl px-4 py-3 shadow-sm",
-            isUser ? "rounded-tr-sm bg-primary text-primary-foreground" : "rounded-tl-sm bg-muted"
+            isUser
+              ? "rounded-tr-sm bg-[#e96f78] text-white shadow-[#e96f78]/20"
+              : "rounded-tl-sm bg-muted"
           )}
         >
-          {visibleContent && <div className="whitespace-pre-wrap text-sm leading-7">{renderInternalMarkdownLinks(visibleContent)}</div>}
+          {visibleContent && <div className="space-y-1 text-sm leading-7">{renderMarkdownContent(visibleContent)}</div>}
           {!isUser && (
             <QuizCards cards={cards} onSubmit={onQuizSubmit} quizState={quizState} onStateChange={onQuizStateChange} />
           )}

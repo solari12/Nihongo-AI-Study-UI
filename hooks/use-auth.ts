@@ -41,10 +41,16 @@ export function useAuth(initialUser?: ClientAuthUser | null) {
 
     let cancelled = false
 
-    fetch("/api/auth/me")
+    fetch("/api/auth/me", {
+      cache: "no-store",
+      credentials: "include",
+    })
       .then((response) => readJsonResponse<{ user?: ClientAuthUser | null }>(response))
       .then((data: { user?: ClientAuthUser | null }) => {
         if (!cancelled) setUser(data.user ?? null)
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null)
       })
       .finally(() => {
         if (!cancelled) setIsLoaded(true)

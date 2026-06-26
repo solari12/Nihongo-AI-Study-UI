@@ -3,6 +3,9 @@ import { z } from "zod"
 import { getCurrentUser } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 const vocabularyProgressSchema = z.object({
   type: z.literal("vocabulary"),
   vocabularyId: z.number().int().positive(),
@@ -51,25 +54,32 @@ export async function GET() {
   const masteredVocabulary = vocabularyProgress.filter((item) => item.stage === "mastered")
   const learningVocabulary = vocabularyProgress.filter((item) => item.stage === "learning")
 
-  return NextResponse.json({
-    learnedVocabularyIds: vocabularyProgress.map((item) => item.vocabularyId),
-    reviewVocabularyIds: dueVocabulary.map((item) => item.vocabularyId),
-    vocabulary: {
-      total: vocabularyTotal,
-      studied: vocabularyProgress.length,
-      mastered: masteredVocabulary.length,
-      dueReview: dueVocabulary.length,
-      learning: learningVocabulary.length,
+  return NextResponse.json(
+    {
+      learnedVocabularyIds: vocabularyProgress.map((item) => item.vocabularyId),
+      reviewVocabularyIds: dueVocabulary.map((item) => item.vocabularyId),
+      vocabulary: {
+        total: vocabularyTotal,
+        studied: vocabularyProgress.length,
+        mastered: masteredVocabulary.length,
+        dueReview: dueVocabulary.length,
+        learning: learningVocabulary.length,
+      },
+      quizAttempts: quizAttempts.map((attempt) => ({
+        id: attempt.id,
+        date: attempt.createdAt.toISOString(),
+        quizType: attempt.quizType,
+        score: attempt.score,
+        total: attempt.total,
+        percentage: attempt.percentage,
+      })),
     },
-    quizAttempts: quizAttempts.map((attempt) => ({
-      id: attempt.id,
-      date: attempt.createdAt.toISOString(),
-      quizType: attempt.quizType,
-      score: attempt.score,
-      total: attempt.total,
-      percentage: attempt.percentage,
-    })),
-  })
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  )
 }
 
 export async function POST(request: NextRequest) {

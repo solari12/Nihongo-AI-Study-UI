@@ -21,11 +21,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { useActivityLog, type LearningActivity } from "@/hooks/use-activity-log"
+import { Spinner } from "@/components/ui/spinner"
+import { useActivityLog } from "@/hooks/use-activity-log"
 import { useAuth } from "@/hooks/use-auth"
 import { useLearnerProfile } from "@/hooks/use-learner-profile"
 import { useRecommendations } from "@/hooks/use-recommendations"
 import { useStudyProgress } from "@/hooks/use-study-progress"
+import { buildStudyStreak } from "@/lib/activity/streak"
 import { grammarData } from "@/lib/data/nihongo-study"
 import { getCompletedGrammarPatternsFromActivities } from "@/lib/grammar/progress"
 
@@ -48,26 +50,14 @@ function formatMinutes(minutes: number) {
   return `${hours} giờ ${remainingMinutes} phút`
 }
 
-function buildStudyStreak(activities: LearningActivity[]) {
-  const activeDays = new Set(activities.map((activity) => activity.createdAt.slice(0, 10)))
-  let streak = 0
-  const cursor = new Date()
-
-  while (activeDays.has(cursor.toISOString().slice(0, 10))) {
-    streak += 1
-    cursor.setDate(cursor.getDate() - 1)
-  }
-
-  return streak
-}
-
 export default function ProfilePage() {
-  const { activeUser } = useAuth()
-  const { stats } = useStudyProgress()
-  const { activities } = useActivityLog()
-  const { profile, placement } = useLearnerProfile()
+  const { activeUser, isLoaded: isAuthLoaded } = useAuth()
+  const { stats, isLoaded: isProgressLoaded } = useStudyProgress()
+  const { activities, isLoaded: isActivityLoaded } = useActivityLog()
+  const { profile, placement, isLoaded: isProfileLoaded } = useLearnerProfile()
   const { recommendations } = useRecommendations()
   const topRecommendation = recommendations[0]
+  const isPageLoaded = isAuthLoaded && isProfileLoaded && isProgressLoaded && isActivityLoaded
 
   const totalMinutes = useMemo(
     () => activities.reduce((total, activity) => total + (activity.durationMinutes ?? 0), 0),
@@ -129,6 +119,17 @@ export default function ProfilePage() {
       earned: totalProgress >= 100,
     },
   ]
+
+  if (!isPageLoaded) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
+          <Spinner className="h-4 w-4" />
+          <span>Đang tải hồ sơ học tập...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

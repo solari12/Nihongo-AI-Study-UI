@@ -284,6 +284,40 @@ function activityTypeLabel(activity: LearningActivity, text: (typeof copy)[Local
   return text.review
 }
 
+function friendlyTopicLabel(activity: LearningActivity, text: (typeof copy)[Locale]) {
+  const topic = activity.topic?.trim()
+  if (!topic) return activityTypeLabel(activity, text)
+
+  const topicLabels: Record<string, string> = {
+    adjectives: "Tính từ",
+    colors: "Màu sắc",
+    family: "Gia đình",
+    food: "Đồ ăn",
+    greetings: "Chào hỏi",
+    health: "Cơ thể & sức khỏe",
+    nature: "Thiên nhiên",
+    numbers: "Số đếm",
+    objects: "Đồ vật",
+    "people-jobs": "Người & nghề nghiệp",
+    places: "Địa điểm",
+    school: "Trường học",
+    time: "Thời gian",
+    transport: "Di chuyển",
+    verbs: "Động từ",
+    n5: "N5",
+  }
+
+  return topicLabels[topic.toLowerCase()] ?? topic
+}
+
+function completedActivityTitle(activity: LearningActivity, text: (typeof copy)[Locale]) {
+  if (activity.type === "vocabulary_session") return "Phiên từ vựng đã xong"
+  if (activity.type === "grammar_session") return "Phiên ngữ pháp đã xong"
+  if (activity.type === "quiz") return "Quiz đã hoàn thành"
+  if (activity.type === "review") return "Ôn tập đã xong"
+  return `${activityTypeLabel(activity, text)} đã xong`
+}
+
 function reasonFor(item: Recommendation, text: (typeof copy)[Locale]) {
   if (item.id.includes("onboarding")) return text.reasonProfile
   if (item.id.includes("placement")) return text.reasonPlacement
@@ -457,8 +491,8 @@ export default function LearningPathPage() {
                     <div key={activity.id} className="flex items-center gap-3 rounded-2xl bg-white/75 px-4 py-3 text-sm">
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-[#315d41]" />
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-[#2b211c]">{activity.topic ?? activityTypeLabel(activity, text)}</p>
-                        <p className="truncate text-[#6f7d66]">{activity.content}</p>
+                        <p className="truncate font-medium text-[#2b211c]">{completedActivityTitle(activity, text)}</p>
+                        <p className="truncate text-[#6f7d66]">{friendlyTopicLabel(activity, text)}</p>
                       </div>
                     </div>
                   ))}
@@ -467,72 +501,89 @@ export default function LearningPathPage() {
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {steps.length ? (
-              steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className="relative min-h-[205px] overflow-hidden p-6"
-                  style={scrollCardStyle}
-                >
-                  <Image
-                    src={assetForType(step.type)}
-                    alt=""
-                    width={110}
-                    height={88}
-                    className="pointer-events-none absolute left-5 top-7 h-16 w-20 object-contain opacity-80"
-                  />
-                  <div className="relative flex h-full flex-col justify-between gap-4 pt-14">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-xs font-bold text-[#9f3f33] shadow-sm">
-                          {index + 1}
-                        </span>
-                        <Badge className={`rounded-full ${accentForType(step.type)}`}>
-                          {typeLabel(step.type, text)}
-                        </Badge>
-                        <Badge className={index === 0 ? "rounded-full bg-[#fff3cf] text-[#83572a]" : "rounded-full bg-white/80 text-[#7c6257]"}>
-                          {index === 0 ? text.inProgress : text.notStarted}
-                        </Badge>
+              {steps.length ? (
+                steps.map((step, index) => (
+                  <div
+                    key={step.id}
+className="relative flex min-h-[300px] overflow-hidden px-10 pt-9 pb-14 sm:px-12"                    style={scrollCardStyle}
+                  >
+                    <Image
+                      src={assetForType(step.type)}
+                      alt=""
+                      width={110}
+                      height={88}
+                      className="pointer-events-none absolute left-10 top-7 h-14 w-[72px] object-contain opacity-65 sm:left-12"
+                      aria-hidden="true"
+                    />
+
+                    <div className="relative mx-auto flex min-h-0 w-full max-w-[240px] flex-col justify-between gap-3 pt-9">
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f8d8cc] text-xs font-bold text-[#9f3f33]">
+                            {index + 1}
+                          </span>
+
+                          <Badge className={`rounded-full ${accentForType(step.type)}`}>
+                            {typeLabel(step.type, text)}
+                          </Badge>
+
+                          <Badge
+                            className={
+                              index === 0
+                                ? "rounded-full bg-[#fff3cf] text-[#83572a]"
+                                : "rounded-full bg-white/80 text-[#7c6257]"
+                            }
+                          >
+                            {index === 0 ? text.inProgress : text.notStarted}
+                          </Badge>
+                        </div>
+
                         <span className="flex items-center gap-1 text-xs text-[#7c6257]">
                           <Clock className="h-3.5 w-3.5" />
                           {step.estimatedTime}
                         </span>
+
+                        <h3 className="line-clamp-2 text-lg font-bold text-[#2b211c]">
+                          {step.title}
+                        </h3>
+
+                        <p className="line-clamp-3 text-sm leading-6 text-[#755f55]">
+                          {reasonFor(step, text)}
+                        </p>
                       </div>
-                      <h3 className="line-clamp-2 text-lg font-bold text-[#2b211c]">{step.title}</h3>
-                      <p className="line-clamp-3 text-sm leading-6 text-[#755f55]">{reasonFor(step, text)}</p>
+
+                      <Button
+                        asChild
+                        size="sm"
+                        className={
+                          index === 0
+                            ? "mx-auto min-h-10 w-full max-w-[220px] rounded-full bg-[#f46f61] text-white shadow-md hover:bg-[#d95b51]"
+                            : "mx-auto min-h-10 w-full max-w-[220px] rounded-full border-[#c89984] bg-white/80 text-[#6f372f] hover:bg-[#fff2ee]"
+                        }
+                        variant={index === 0 ? "default" : "outline"}
+                      >
+                        <Link href={step.targetUrl} className="min-w-0">
+                          {index === 0 ? text.continue : text.start}
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
                     </div>
-                    <Button
-                      asChild
-                      size="sm"
-                      className={
-                        index === 0
-                          ? "rounded-full bg-[#f46f61] text-white shadow-md hover:bg-[#d95b51]"
-                          : "rounded-full border-[#c89984] bg-white/80 text-[#6f372f] hover:bg-[#fff2ee]"
-                      }
-                      variant={index === 0 ? "default" : "outline"}
-                    >
-                      <Link href={step.targetUrl}>
-                        {index === 0 ? text.continue : text.start}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
                   </div>
+                ))
+              ) : (
+                <div className="col-span-full rounded-3xl border border-dashed border-[#d9a492] bg-white/60 p-8 text-center">
+                  <Sparkles className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                  <h3 className="font-semibold">{dailyPlan.isGoalComplete ? text.allDoneTitle : text.emptyTitle}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {dailyPlan.isGoalComplete ? text.allDoneDescription : text.emptyDescription}
+                  </p>
+                  <Button asChild className="mt-4 rounded-full bg-[#9f3f33]">
+                    <Link href={dailyPlan.isGoalComplete ? "/vocabulary" : "/onboarding"}>
+                      {dailyPlan.isGoalComplete ? text.studyMore : text.createProfile}
+                    </Link>
+                  </Button>
                 </div>
-              ))
-            ) : (
-              <div className="col-span-full rounded-3xl border border-dashed border-[#d9a492] bg-white/60 p-8 text-center">
-                <Sparkles className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-                <h3 className="font-semibold">{dailyPlan.isGoalComplete ? text.allDoneTitle : text.emptyTitle}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {dailyPlan.isGoalComplete ? text.allDoneDescription : text.emptyDescription}
-                </p>
-                <Button asChild className="mt-4 rounded-full bg-[#9f3f33]">
-                  <Link href={dailyPlan.isGoalComplete ? "/vocabulary" : "/onboarding"}>
-                    {dailyPlan.isGoalComplete ? text.studyMore : text.createProfile}
-                  </Link>
-                </Button>
-              </div>
-            )}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -609,7 +660,7 @@ export default function LearningPathPage() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="relative min-h-[120px] overflow-hidden rounded-2xl border border-[#ead4c7] bg-white/70 p-4"
+                  className="relative min-h-[132px] overflow-hidden rounded-2xl border border-[#ead4c7] bg-white/70 p-5"
                   style={progressCardStyle}
                 >
                   <Image
@@ -619,10 +670,10 @@ export default function LearningPathPage() {
                     height={75}
                     className="absolute -right-3 -top-2 h-20 w-24 object-contain opacity-40"
                   />
-                  <div className="relative space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-[#7c6257]">
+                  <div className="relative min-w-0 space-y-3">
+                    <div className="flex min-w-0 items-center gap-2 text-sm text-[#7c6257]">
                       <item.icon className="h-4 w-4 text-[#a84c42]" />
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
                     </div>
                     <div className="text-2xl font-bold text-[#2b211c]">{item.value}</div>
                     <Progress value={item.progress} className="h-2" />

@@ -17,11 +17,11 @@ import {
   Languages,
   LogOut,
   Menu,
-  MessageSquare,
   Newspaper,
   Route,
   Settings,
   User,
+  UsersRound,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -39,11 +39,11 @@ const navItems = [
   { href: "/vocabulary", labelKey: "nav.vocabulary", viLabel: "T\u1eeb v\u1ef1ng", jaLabel: "\u8a9e\u5f59", icon: BookOpen },
   { href: "/grammar", labelKey: "nav.grammar", viLabel: "Ng\u1eef ph\u00e1p", jaLabel: "\u6587\u6cd5", icon: FileText },
   { href: "/quiz", labelKey: "nav.quiz", viLabel: "Quiz", jaLabel: "\u30af\u30a4\u30ba", icon: HelpCircle },
-  { href: "/chatbot", labelKey: "nav.chatbot", viLabel: "Kami", jaLabel: "Kami", icon: MessageSquare },
   { href: "/learning-path", labelKey: "nav.learningPath", viLabel: "L\u1ed9 tr\u00ecnh h\u1ecdc", jaLabel: "\u5b66\u7fd2\u30eb\u30fc\u30c8", icon: Route },
   { href: "/history", labelKey: "nav.history", viLabel: "L\u1ecbch s\u1eed h\u1ecdc t\u1eadp", jaLabel: "\u5b66\u7fd2\u5c65\u6b74", icon: History },
   { href: "/profile", labelKey: "nav.profile", viLabel: "H\u1ed3 s\u01a1", jaLabel: "\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb", icon: User },
-  { href: "/admin", labelKey: "nav.admin", viLabel: "Qu\u1ea3n tr\u1ecb", jaLabel: "\u7ba1\u7406", icon: Settings },
+  { href: "/admin", labelKey: "nav.admin", viLabel: "Qu\u1ea3n tr\u1ecb", jaLabel: "\u7ba1\u7406", icon: Settings, adminOnly: true },
+  { href: "/admin/learners", labelKey: "nav.adminLearners", viLabel: "Qu\u1ea3n l\u00fd h\u1ecdc vi\u00ean", jaLabel: "\u5b66\u7fd2\u8005\u7ba1\u7406", icon: UsersRound, adminOnly: true },
 ] as const
 
 interface SidebarProps {
@@ -62,7 +62,7 @@ function SidebarContent({
   const router = useRouter()
   const { logout } = useAuth()
   const { locale } = useI18n()
-  const visibleNavItems = navItems.filter((item) => role === "admin" || item.href !== "/admin")
+  const visibleNavItems = navItems.filter((item) => role === "admin" || !("adminOnly" in item && item.adminOnly))
 
   const handleLogout = async () => {
     await logout()
@@ -112,7 +112,7 @@ function SidebarContent({
       <nav className="relative flex-1 overflow-y-auto p-3">
         <ul className="space-y-1">
           {visibleNavItems.map((item) => {
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`))
             const label = locale === "ja" ? item.jaLabel : item.viLabel
 
             return (

@@ -4,6 +4,9 @@ import { getCurrentUser } from "@/lib/auth"
 import { readJsonRequest } from "@/lib/auth-validation"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 const stringArraySchema = z.array(z.string().trim().min(1))
 
 const profileSchema = z.object({
@@ -48,35 +51,42 @@ export async function GET() {
     }),
   ])
 
-  return NextResponse.json({
-    profile: profile
-      ? {
-          goal: profile.goal,
-          kanaLevel: profile.kanaLevel,
-          dailyMinutes: profile.dailyMinutes,
-          experience: profile.experience,
-          preferredTopics: asStringArray(profile.preferredTopics),
-          coldStartScore: profile.coldStartScore,
-          coldStartReasons: asStringArray(profile.coldStartReasons),
-          guideCompletedSteps: asStringArray(profile.guideCompletedSteps),
-          completedOnboarding: profile.completedOnboarding,
-          createdAt: profile.createdAt.toISOString(),
-          updatedAt: profile.updatedAt.toISOString(),
-        }
-      : null,
-    placement: placement
-      ? {
-          completed: true,
-          score: placement.score,
-          total: placement.total,
-          percentage: placement.percentage,
-          level: placement.level,
-          weakAreas: asStringArray(placement.weakAreas),
-          recommendedStart: placement.recommendedStart,
-          completedAt: placement.completedAt.toISOString(),
-        }
-      : null,
-  })
+  return NextResponse.json(
+    {
+      profile: profile
+        ? {
+            goal: profile.goal,
+            kanaLevel: profile.kanaLevel,
+            dailyMinutes: profile.dailyMinutes,
+            experience: profile.experience,
+            preferredTopics: asStringArray(profile.preferredTopics),
+            coldStartScore: profile.coldStartScore,
+            coldStartReasons: asStringArray(profile.coldStartReasons),
+            guideCompletedSteps: asStringArray(profile.guideCompletedSteps),
+            completedOnboarding: profile.completedOnboarding,
+            createdAt: profile.createdAt.toISOString(),
+            updatedAt: profile.updatedAt.toISOString(),
+          }
+        : null,
+      placement: placement
+        ? {
+            completed: true,
+            score: placement.score,
+            total: placement.total,
+            percentage: placement.percentage,
+            level: placement.level,
+            weakAreas: asStringArray(placement.weakAreas),
+            recommendedStart: placement.recommendedStart,
+            completedAt: placement.completedAt.toISOString(),
+          }
+        : null,
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  )
 }
 
 export async function POST(request: NextRequest) {

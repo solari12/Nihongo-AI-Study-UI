@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { createContext, createElement, useContext, useEffect, useState, type ReactNode } from "react"
 import { readJsonResponse } from "@/lib/http"
 
 export type ActivityType = "vocabulary" | "vocabulary_session" | "review" | "quiz" | "grammar" | "grammar_session"
@@ -17,6 +17,15 @@ export type LearningActivity = {
 }
 
 const storageKey = "nihongo-ai-activity-log"
+
+type ActivityLogContextValue = {
+  isLoaded: boolean
+  activities: LearningActivity[]
+  addActivity: (activity: Omit<LearningActivity, "id" | "createdAt">) => void
+  clearActivities: () => void
+}
+
+const ActivityLogContext = createContext<ActivityLogContextValue | null>(null)
 
 function createActivityId() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -38,7 +47,10 @@ function readActivities(): LearningActivity[] {
 }
 
 async function fetchActivities() {
-  const response = await fetch("/api/activity")
+  const response = await fetch("/api/activity", {
+    cache: "no-store",
+    credentials: "include",
+  })
 
   const data = await readJsonResponse<{
     items: LearningActivity[]
@@ -71,7 +83,7 @@ async function deleteActivities() {
   }
 }
 
-export function useActivityLog() {
+function useActivityLogState(): ActivityLogContextValue {
   const [activities, setActivities] = useState<LearningActivity[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -128,8 +140,23 @@ export function useActivityLog() {
   }
 
   return {
+    isLoaded,
     activities,
     addActivity,
     clearActivities,
   }
+}
+
+export function ActivityLogProvider({ children }: { children: ReactNode }) {
+  const value = useActivityLogState()
+
+  return createElement(ActivityLogContext.Provider, { value }, children)
+}
+
+export function useActivityLog() {
+  const context = useContext(ActivityLogContext)
+
+  if (context) return context
+
+  return useActivityLogState()
 }

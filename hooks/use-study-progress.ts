@@ -53,7 +53,10 @@ function readProgress(): StudyProgress {
 }
 
 async function fetchProgress() {
-  const response = await fetch("/api/progress")
+  const response = await fetch("/api/progress", {
+    cache: "no-store",
+    credentials: "include",
+  })
 
   return readJsonResponse<StudyProgress>(response)
 }

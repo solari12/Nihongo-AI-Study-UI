@@ -84,7 +84,10 @@ type LearnerProfileResponse = {
 }
 
 async function fetchLearnerProfile() {
-  const response = await fetch("/api/learner-profile")
+  const response = await fetch("/api/learner-profile", {
+    cache: "no-store",
+    credentials: "include",
+  })
   return readJsonResponse<LearnerProfileResponse>(response)
 }
 
