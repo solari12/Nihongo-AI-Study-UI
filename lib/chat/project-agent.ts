@@ -35,7 +35,12 @@ function normalize(value: string) {
 
 function compactJson(value: unknown, maxLength = 1400) {
   if (value === null || value === undefined) return ""
+  if (Array.isArray(value) && value.length === 0) return ""
+  if (typeof value === "object" && Object.keys(value).length === 0) return ""
+
   const text = typeof value === "string" ? value : JSON.stringify(value)
+  if (text === "[]" || text === "{}") return ""
+
   return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text
 }
 
@@ -59,6 +64,56 @@ function requestedArticleCount(message: string) {
 
 function excludedArticleId(message: string) {
   return message.toLowerCase().match(/\bexclude active article id\s+([a-z0-9-]+)/)?.[1] ?? null
+}
+
+function isBeginnerReadingRequest(message: string) {
+  const normalized = normalize(message)
+  return (
+    normalized.includes("nguoi moi") ||
+    normalized.includes("moi hoc") ||
+    normalized.includes("de doc") ||
+    normalized.includes("nhe nhang") ||
+    normalized.includes("co ban") ||
+    normalized.includes("beginner")
+  )
+}
+
+function isLightBeginnerTopic(article: Pick<NewsArticleMatch, "title" | "category" | "articleText">) {
+  const searchable = normalize([article.title, article.category ?? "", article.articleText].join(" "))
+  const lightTopicSignals = [
+    "do an",
+    "an uong",
+    "chuoi",
+    "banana",
+    "dong vat",
+    "thu cung",
+    "meo",
+    "cho",
+    "truong hoc",
+    "hoc sinh",
+    "gia dinh",
+    "thoi tiet",
+    "mua",
+    "nang",
+  ]
+
+  return lightTopicSignals.some((signal) => searchable.includes(signal))
+}
+
+function isInternalTestArticle(article: Pick<NewsArticleMatch, "title" | "category" | "articleText">) {
+  const title = normalize(article.title)
+  const category = normalize(article.category ?? "")
+  const content = normalize(article.articleText)
+  const combined = [title, category, content.slice(0, 1000)].join(" ")
+
+  return (
+    /\btest\b/.test(title) ||
+    /\blocal\b/.test(title) ||
+    /\bimport\b/.test(title) ||
+    combined.includes("test local") ||
+    combined.includes("local import") ||
+    combined.includes("test import")
+  )
 }
 
 function isNewsIntent(message: string) {
@@ -110,6 +165,10 @@ function articleUrl(id: string) {
 }
 
 function articleSource(article: NewsArticleMatch, score = article.score): RagSource {
+  const vocabulary = compactJson(article.vocabulary)
+  const grammar = compactJson(article.grammar)
+  const questions = compactJson(article.questions)
+
   return {
     id: `news-article-${article.id}`,
     sourceId: article.id,
@@ -124,15 +183,9 @@ function articleSource(article: NewsArticleMatch, score = article.score): RagSou
       "",
       "Noi dung bai:",
       article.articleText.slice(0, 8000),
-      "",
-      "Tu vung trong bai:",
-      compactJson(article.vocabulary),
-      "",
-      "Ngu phap trong bai:",
-      compactJson(article.grammar),
-      "",
-      "Cau hoi co san:",
-      compactJson(article.questions),
+      vocabulary ? ["", "Tu vung trong bai:", vocabulary].join("\n") : null,
+      grammar ? ["", "Ngu phap trong bai:", grammar].join("\n") : null,
+      questions ? ["", "Cau hoi co san:", questions].join("\n") : null,
     ]
       .filter((item) => item !== null)
       .join("\n"),
@@ -155,7 +208,8 @@ function formatArticleList(articles: NewsArticleMatch[]) {
 
 async function searchNewsArticles(message: string) {
   const normalized = normalize(message)
-  const level = requestedLevel(message)
+  const beginnerRequest = isBeginnerReadingRequest(message)
+  const level = requestedLevel(message) ?? (beginnerRequest ? "N5" : null)
   const excludedId = excludedArticleId(message)
   const limit = requestedArticleCount(message) ?? (isNewsIntent(message) ? 5 : 3)
   const tokens = normalized
@@ -172,6 +226,7 @@ async function searchNewsArticles(message: string) {
 
   return articles
     .filter((article) => article.id !== excludedId)
+    .filter((article) => !isInternalTestArticle(article))
     .map((article) => {
       const searchable = [
         article.title,
@@ -183,7 +238,14 @@ async function searchNewsArticles(message: string) {
       ].join("\n")
 
       const levelScore = level && article.level === level ? 45 : 0
-      const score = textScore(tokens, searchable) + levelScore + (isNewsIntent(message) ? 8 : 0)
+      const beginnerLevelScore = beginnerRequest && article.level === "N5" ? 80 : 0
+      const lightTopicScore = beginnerRequest && isLightBeginnerTopic(article) ? 35 : 0
+      const score =
+        textScore(tokens, searchable) +
+        levelScore +
+        beginnerLevelScore +
+        lightTopicScore +
+        (isNewsIntent(message) ? 8 : 0)
 
       return {
         id: article.id,
@@ -199,7 +261,7 @@ async function searchNewsArticles(message: string) {
         score,
       }
     })
-    .filter((article) => article.score > 0 || Boolean(level))
+    .filter((article) => article.score > 0 || Boolean(level) || beginnerRequest)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
 }
@@ -258,6 +320,9 @@ export async function buildProjectAgentContext(message: string, userId: string):
           "Bat buoc neu tra loi ve bai doc:",
           "- Neu liet ke bai, hay kem link noi bo dang Markdown: [tieu de](/reading?article=<id>).",
           "- Khong dua link TODAII/sourceUrl ra cau tra loi. Chi dung link noi bo cua app.",
+          "- Tra loi bang tieng Viet co dau, tu nhien, khong dung tieng Viet khong dau trong cau tra loi cuoi.",
+          "- Neu tu vung, ngu phap hoac cau hoi rong/khong co du lieu, bo qua muc do; khong hien thi [] hoac {}.",
+          "- Neu user noi 'nguoi moi hoc', 'moi hoc', 'de doc' hoac 'nhe nhang', uu tien bai N5 va chu de doi song nhu do an, dong vat, truong hoc, gia dinh, thoi tiet.",
           "- Neu user hoi noi dung/tom tat/quiz cua bai da tim thay, hay dung noi dung day du trong source tuong ung.",
           "- Neu co nhieu bai trung keyword va user chua ro bai nao, hay dua 2-5 ung vien va hoi user chon.",
         ].join("\n")

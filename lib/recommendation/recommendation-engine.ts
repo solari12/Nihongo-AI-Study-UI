@@ -1,6 +1,7 @@
 import type { LearningActivity } from "@/hooks/use-activity-log"
 import type { AdminContent } from "@/hooks/use-admin-content"
 import type { LearnerProfile, PlacementResult } from "@/hooks/use-learner-profile"
+import { getCompletedGrammarPatternsFromActivities } from "@/lib/grammar/progress"
 import { buildGrammarSessionHref } from "@/lib/grammar/session-config"
 import { buildVocabularySessionHref } from "@/lib/vocabulary/session-config"
 
@@ -200,8 +201,14 @@ export function generateRecommendations({
   const learnedVocabularyRatio = content.vocabulary.length
     ? progress.learnedVocabularyIds.length / content.vocabulary.length
     : 0
+  const completedGrammarPatterns = getCompletedGrammarPatternsFromActivities(activities, content.grammar)
+  const completedGrammarIds = new Set(
+    content.grammar
+      .filter((item) => item.status === "Đã hoàn thành" || completedGrammarPatterns.has(item.pattern))
+      .map((item) => item.id)
+  )
   const completedGrammarRatio = content.grammar.length
-    ? content.grammar.filter((item) => item.status === "Đã hoàn thành").length / content.grammar.length
+    ? completedGrammarIds.size / content.grammar.length
     : 0
   const reviewLoad = content.vocabulary.length
     ? progress.reviewVocabularyIds.length / content.vocabulary.length
@@ -230,9 +237,8 @@ export function generateRecommendations({
     profile?.preferredTopics,
     completedVocabularyTopicsToday
   )
-  const incompleteGrammar = content.grammar.filter((item) => item.status !== "Đã hoàn thành")
-  const nextGrammar =
-    incompleteGrammar.find((item) => !completedGrammarPatternsToday.has(item.pattern)) ?? incompleteGrammar[0]
+  const incompleteGrammar = content.grammar.filter((item) => !completedGrammarIds.has(item.id))
+  const nextGrammar = incompleteGrammar.find((item) => !completedGrammarPatternsToday.has(item.pattern))
 
   const recommendations: BaseRecommendation[] = []
   const coldStartScore = profile?.coldStartScore ?? 0

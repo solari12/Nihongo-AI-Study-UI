@@ -101,3 +101,21 @@ export async function POST(request: NextRequest) {
     },
   })
 }
+
+export async function DELETE(request: NextRequest) {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+
+  const id = request.nextUrl.searchParams.get("id")?.trim()
+  if (!id) return NextResponse.json({ error: "Saved item id is required" }, { status: 400 })
+
+  const result = await prisma.savedStudyItem.deleteMany({
+    where: {
+      id,
+      userId: user.id,
+    },
+  })
+
+  if (result.count === 0) return NextResponse.json({ error: "Saved item not found" }, { status: 404 })
+  return NextResponse.json({ ok: true })
+}

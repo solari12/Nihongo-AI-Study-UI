@@ -44,7 +44,7 @@ const ratingCopy: Record<VocabularyRating, { label: string; className: string; i
     icon: Brain,
   },
   remembered: {
-    label: "Nhớ",
+    label: "Dễ",
     className: "border-[#9ec8a6] bg-[#edf6ea] text-[#315d41] hover:bg-[#dcebd9]",
     icon: CheckCircle2,
   },
@@ -119,7 +119,7 @@ export function VocabularySessionClient({ initialSession }: VocabularySessionCli
   )
 
   async function handleRating(rating: VocabularyRating) {
-    if (!currentItem || !isFlipped || isSaving) return
+    if (!currentItem || isSaving) return
     setIsSaving(true)
     setError(null)
     setLastRating(rating)
@@ -336,7 +336,7 @@ export function VocabularySessionClient({ initialSession }: VocabularySessionCli
                   key={rating}
                   variant="outline"
                   className={cn("rounded-full", config.className)}
-                  disabled={!isFlipped || isSaving}
+                  disabled={isSaving}
                   onClick={() => void handleRating(rating)}
                 >
                   <Icon className="mr-2 h-4 w-4" />
@@ -348,7 +348,7 @@ export function VocabularySessionClient({ initialSession }: VocabularySessionCli
 
           {!isFlipped && (
             <p className="mt-3 text-center text-xs font-medium text-[#8f4742]">
-              Hãy lật thẻ trước khi tự đánh giá.
+              Nhấn vào thẻ để xem đáp án nếu cần, hoặc tự đánh giá luôn bằng Quên, Khó, Dễ.
             </p>
           )}
           {error && (

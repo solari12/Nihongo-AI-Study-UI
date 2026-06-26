@@ -102,7 +102,9 @@ Trong thu muc project tren may moi, tao `.env.local`:
 ```env
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/nihongo_ai?schema=public"
 OPENROUTER_API_KEY="YOUR_OPENROUTER_KEY"
-OPENROUTER_MODEL="openai/gpt-4o-mini"
+OPENROUTER_MODEL="google/gemma-4-31b-it:free"
+OPENROUTER_FALLBACK_MODELS="qwen/qwen3-next-80b-a3b-instruct:free,openrouter/free"
+OPENROUTER_MODEL_TIMEOUT_MS="30000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 

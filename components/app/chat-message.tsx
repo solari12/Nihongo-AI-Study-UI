@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,13 @@ type QuizSubmitResult = {
   correctCount: number
   total: number
   percentage: number
+  answeredCount: number
+  wrongCount: number
+  userAnswers: Record<string, string>
+  submittedAt: string
+  jlptLevel?: string
+  quizId?: string
+  articleId?: string
 }
 
 export type ChatQuizState = {
@@ -35,6 +42,10 @@ interface ChatMessageProps {
   sources?: ChatSource[]
   quizCards?: ChatQuizCard[]
   showActions?: boolean
+  listenLabel?: string
+  saveLabel?: string
+  createQuizLabel?: string
+  logActivityLabel?: string
   onSave?: () => void
   onCreateQuiz?: () => void
   onLogActivity?: () => void
@@ -100,7 +111,13 @@ function QuizCards({
   const { t } = useI18n()
   const [selected, setSelected] = useState<Record<string, string>>(quizState?.selected ?? {})
   const [submitted, setSubmitted] = useState(Boolean(quizState?.submitted))
+  const [validationMessage, setValidationMessage] = useState("")
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "failed">("idle")
+
+  useEffect(() => {
+    setSelected(quizState?.selected ?? {})
+    setSubmitted(Boolean(quizState?.submitted))
+  }, [quizState?.selected, quizState?.submitted])
 
   if (!cards.length) return null
 
@@ -108,16 +125,39 @@ function QuizCards({
   const correctCount = cards.filter((card) => card.answer && selected[card.id] === card.answer).length
   const hasAnswerKey = cards.every((card) => Boolean(card.answer))
   const canSubmit = hasAnswerKey && answeredCount === cards.length
+  const answeredSummaryCount = submitted ? quizState?.result?.answeredCount ?? answeredCount : answeredCount
+  const submittedSummary =
+    saveStatus === "saved"
+      ? `Bạn đã hoàn thành ${answeredSummaryCount}/${cards.length} câu. ${t("chatbot.action.savedToHistory")}.`
+      : saveStatus === "failed"
+        ? `Bạn đã hoàn thành ${answeredSummaryCount}/${cards.length} câu. Chưa lưu được lịch sử học.`
+        : saveStatus === "saving"
+          ? `Bạn đã hoàn thành ${answeredSummaryCount}/${cards.length} câu. Đang lưu lịch sử học...`
+          : `Bạn đã hoàn thành ${answeredSummaryCount}/${cards.length} câu.`
 
   async function submitQuiz() {
-    if (!canSubmit) return
+    if (!hasAnswerKey) return
+    if (answeredCount === 0) {
+      setValidationMessage("Bạn chưa chọn đáp án nào. Hãy chọn câu trả lời trước khi nộp bài nhé.")
+      return
+    }
+    if (!canSubmit) {
+      setValidationMessage(`Bạn đã chọn ${answeredCount}/${cards.length} câu. Hãy trả lời đủ các câu trước khi nộp bài nhé.`)
+      return
+    }
 
     const percentage = Math.round((correctCount / cards.length) * 100)
     const result = {
       correctCount,
       total: cards.length,
       percentage,
+      answeredCount,
+      wrongCount: cards.length - correctCount,
+      userAnswers: selected,
+      submittedAt: new Date().toISOString(),
+      quizId: cards.map((card) => card.id).join(","),
     }
+    setValidationMessage("")
     setSubmitted(true)
     onStateChange?.({
       selected,
@@ -175,6 +215,7 @@ function QuizCards({
                         ...selected,
                         [card.id]: option.label,
                       }
+                      setValidationMessage("")
                       setSelected(nextSelected)
                       onStateChange?.({
                         selected: nextSelected,
@@ -218,11 +259,8 @@ function QuizCards({
           {!hasAnswerKey
             ? t("chatbot.quiz.missingAnswerKey")
             : submitted
-            ? `${t("chatbot.quiz.resultPrefix")} ${correctCount}/${cards.length} ${t("chatbot.correctUnit")}.`
+            ? submittedSummary
             : `${t("chatbot.quiz.selectedCountPrefix")} ${answeredCount}/${cards.length}.`}
-          {saveStatus === "saving" ? ` ${t("chatbot.quiz.saving")}` : null}
-          {saveStatus === "saved" ? ` ${t("chatbot.quiz.saved")}` : null}
-          {saveStatus === "failed" ? ` ${t("chatbot.quiz.failed")}` : null}
         </span>
         <div className="flex items-center gap-2">
           {submitted && (
@@ -234,6 +272,7 @@ function QuizCards({
               onClick={() => {
                 setSelected({})
                 setSubmitted(false)
+                setValidationMessage("")
                 setSaveStatus("idle")
                 onStateChange?.({
                   selected: {},
@@ -245,12 +284,15 @@ function QuizCards({
             </Button>
           )}
           {!submitted && (
-            <Button type="button" size="sm" className="h-8 text-xs" onClick={() => void submitQuiz()} disabled={!canSubmit}>
+            <Button type="button" size="sm" className="h-8 text-xs" onClick={() => void submitQuiz()} disabled={!hasAnswerKey}>
               {t("chatbot.quiz.submit")}
             </Button>
           )}
         </div>
       </div>
+      {validationMessage && (
+        <p className="text-xs font-medium text-destructive">{validationMessage}</p>
+      )}
     </div>
   )
 }
@@ -262,6 +304,10 @@ export function ChatMessage({
   sources,
   quizCards,
   showActions = true,
+  listenLabel,
+  saveLabel,
+  createQuizLabel,
+  logActivityLabel,
   onSave,
   onCreateQuiz,
   onLogActivity,
@@ -278,6 +324,7 @@ export function ChatMessage({
   )
   const cards = quizCards?.length ? quizCards : []
   const visibleContent = cards.length ? parsedQuiz.text : content
+  const hasAnyAction = Boolean(onListen || onSave || onCreateQuiz || onLogActivity)
 
   return (
     <div className={cn("flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
@@ -325,44 +372,52 @@ export function ChatMessage({
           </div>
         )}
 
-        {!isUser && showActions && (
+        {!isUser && showActions && hasAnyAction && (
           <div className="flex flex-wrap items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onListen}
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <Volume2 className="mr-1 h-3 w-3" />
-              {t("chatbot.action.listen")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onSave}
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <BookmarkPlus className="mr-1 h-3 w-3" />
-              {t("chatbot.action.saveSource")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCreateQuiz}
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <HelpCircle className="mr-1 h-3 w-3" />
-              {t("chatbot.action.createQuiz")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onLogActivity}
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <CheckCircle2 className="mr-1 h-3 w-3" />
-              {t("chatbot.action.logActivity")}
-            </Button>
+            {onListen && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onListen}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <Volume2 className="mr-1 h-3 w-3" />
+                {listenLabel ?? t("chatbot.action.listen")}
+              </Button>
+            )}
+            {onSave && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onSave}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <BookmarkPlus className="mr-1 h-3 w-3" />
+                {saveLabel ?? t("chatbot.action.saveSource")}
+              </Button>
+            )}
+            {onCreateQuiz && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onCreateQuiz}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <HelpCircle className="mr-1 h-3 w-3" />
+                {createQuizLabel ?? t("chatbot.action.createQuiz")}
+              </Button>
+            )}
+            {onLogActivity && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onLogActivity}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <CheckCircle2 className="mr-1 h-3 w-3" />
+                {logActivityLabel ?? t("chatbot.action.logActivity")}
+              </Button>
+            )}
           </div>
         )}
 

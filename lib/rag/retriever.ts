@@ -64,11 +64,23 @@ function splitJapaneseTerms(value: string) {
 }
 
 function tokenize(value: string) {
-  const normalized = normalize(value)
+  const expandedValue = expandSearchText(value)
+  const normalized = normalize(expandedValue)
   const wordTokens = normalized.split(" ").filter((token) => token.length >= 2)
-  const japaneseTokens = splitJapaneseTerms(value).filter((token) => token.length >= 1)
+  const japaneseTokens = splitJapaneseTerms(expandedValue).filter((token) => token.length >= 1)
 
   return Array.from(new Set([normalized, ...wordTokens, ...japaneseTokens].filter(Boolean)))
+}
+
+function expandSearchText(value: string) {
+  const normalized = normalize(value)
+  const additions: string[] = []
+
+  if (normalized.includes("world cup") || normalized.includes("worldcup")) {
+    additions.push("ワールドカップ", "W杯")
+  }
+
+  return additions.length ? `${value} ${additions.join(" ")}` : value
 }
 
 function isVocabularyMeaningQuery(query: string) {
@@ -169,6 +181,20 @@ function sortSources(sources: RagSource[], query: string, limit: number, options
     .filter((source) => !options.requireJapaneseTermMatch || sourceMatchesJapaneseTerms(query, source))
     .sort((a, b) => b.score + typeBoost(b.type, query, options) - (a.score + typeBoost(a.type, query, options)))
     .slice(0, limit)
+}
+
+function isInternalTestNewsSource(source: RagSource) {
+  if (source.type !== "news") return false
+  const searchable = normalize(`${source.title}\n${source.content.slice(0, 1000)}`)
+
+  return (
+    /\btest\b/.test(normalize(source.title)) ||
+    /\blocal\b/.test(normalize(source.title)) ||
+    /\bimport\b/.test(normalize(source.title)) ||
+    searchable.includes("test local") ||
+    searchable.includes("local import") ||
+    searchable.includes("test import")
+  )
 }
 
 function mapChunkType(sourceType: string): RagSource["type"] {
@@ -347,20 +373,48 @@ export async function retrieveSourcesFromDatabase(
     }),
     queryEmbedding(query),
   ])
+  const newsChunkSourceIds = Array.from(
+    new Set(chunks.filter((chunk) => chunk.sourceType === "todaii-news").map((chunk) => chunk.sourceId))
+  )
+  const newsArticles = newsChunkSourceIds.length
+    ? await prisma.newsArticle.findMany({
+        where: {
+          OR: [
+            {
+              id: {
+                in: newsChunkSourceIds,
+              },
+            },
+            {
+              sourceUrl: {
+                in: newsChunkSourceIds,
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          sourceUrl: true,
+        },
+      })
+    : []
+  const newsArticleBySource = new Map(newsArticles.flatMap((article) => [[article.id, article], [article.sourceUrl, article]]))
 
   const chunkSources = chunks.map((chunk) => {
-    const keywordScore = scoreSource(queryTokens, `${chunk.title}\n${chunk.sourceType}\n${chunk.content}`)
+    const keywordScore = scoreSource(queryTokens, expandSearchText(`${chunk.title}\n${chunk.sourceType}\n${chunk.content}`))
     const vectorScore = embedding && isEmbeddingVector(chunk.embedding)
       ? Math.max(0, cosineSimilarity(embedding, chunk.embedding)) * 100
       : 0
     const type = mapChunkType(chunk.sourceType)
+    const newsArticle = type === "news" ? newsArticleBySource.get(chunk.sourceId) : null
+    const sourceId = newsArticle?.id ?? chunk.sourceId
 
     return {
       id: chunk.id,
-      sourceId: chunk.sourceId,
+      sourceId,
       type,
       title: chunk.title,
-      href: type === "news" ? `/reading?article=${encodeURIComponent(chunk.sourceId)}` : undefined,
+      href: type === "news" ? `/reading?article=${encodeURIComponent(sourceId)}` : undefined,
       content: chunk.content,
       score: vectorScore > 0 ? vectorScore + keywordScore * 0.15 : keywordScore,
     }
@@ -376,7 +430,7 @@ export async function retrieveSourcesFromDatabase(
     }
   }
 
-  return sortSources(Array.from(deduped.values()), query, limit, options)
+  return sortSources(Array.from(deduped.values()).filter((source) => !isInternalTestNewsSource(source)), query, limit, options)
 }
 
 function lineValue(content: string, label: string) {
@@ -385,19 +439,35 @@ function lineValue(content: string, label: string) {
   return line?.slice(line.indexOf(":") + 1).trim() ?? ""
 }
 
+function inlineValue(content: string, labels: string[], followingLabels: string[]) {
+  const escapedLabels = labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  const escapedFollowing = followingLabels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  const boundary = escapedFollowing.length
+    ? `(?=\\.\\s+(?:${escapedFollowing.join("|")})\\s*:|\\n|$)`
+    : `(?=\\n|$)`
+  const match = content.match(new RegExp(`(?:^|\\.\\s+)(?:${escapedLabels.join("|")})\\s*:\\s*(.*?)${boundary}`, "iu"))
+
+  return match?.[1]?.trim() ?? ""
+}
+
 function renderVocabularyFallback(source: RagSource) {
   const japanese = lineValue(source.content, "Từ vựng")
   const reading = lineValue(source.content, "Cách đọc")
   const romaji = lineValue(source.content, "Romaji")
-  const meaning = lineValue(source.content, "Nghĩa")
+  const inlineVocabulary = source.content.match(/^(.+?)\s+\((.+?),\s*(.+?)\)\s+means\s+(.+?)\.\s+Example:\s+(.+?)\s+-\s+(.+)$/iu)
+  const meaning = lineValue(source.content, "Nghĩa") || inlineVocabulary?.[4]?.trim() || ""
   const wordType = lineValue(source.content, "Loại từ")
-  const example = lineValue(source.content, "Ví dụ")
-  const translatedExample = lineValue(source.content, "Dịch ví dụ")
+  const example = lineValue(source.content, "Ví dụ") || inlineVocabulary?.[5]?.trim() || ""
+  const translatedExample = lineValue(source.content, "Dịch ví dụ") || inlineVocabulary?.[6]?.trim() || ""
 
   return [
-    `${japanese || source.title} nghĩa là ${meaning || "mình chưa có nghĩa tiếng Việt rõ trong dữ liệu"}.`,
+    `${japanese || inlineVocabulary?.[1]?.trim() || source.title} nghĩa là ${meaning || "mình chưa có nghĩa tiếng Việt rõ trong dữ liệu"}.`,
     "",
-    reading || romaji ? `Cách đọc: ${reading}${romaji ? ` (${romaji})` : ""}` : null,
+    reading || romaji || inlineVocabulary
+      ? `Cách đọc: ${reading || inlineVocabulary?.[2]?.trim()}${
+          romaji || inlineVocabulary?.[3] ? ` (${romaji || inlineVocabulary?.[3]?.trim()})` : ""
+        }`
+      : null,
     wordType ? `Loại từ: ${wordType}` : null,
     example ? `Ví dụ: ${example}` : null,
     translatedExample ? `Dịch: ${translatedExample}` : null,
@@ -407,15 +477,26 @@ function renderVocabularyFallback(source: RagSource) {
 }
 
 function renderGrammarFallback(source: RagSource) {
-  const meaning = lineValue(source.content, "Ý nghĩa")
-  const structure = lineValue(source.content, "Cấu trúc")
-  const note = lineValue(source.content, "Ghi chú")
-  const example = lineValue(source.content, "Ví dụ")
-  const translatedExample = lineValue(source.content, "Dịch ví dụ")
+  const meaning =
+    lineValue(source.content, "Ý nghĩa") ||
+    inlineValue(source.content, [source.title], ["Structure", "Cấu trúc"])
+  const structure =
+    lineValue(source.content, "Cấu trúc") ||
+    inlineValue(source.content, ["Structure"], ["Usage", "Cách dùng", "Ghi chú"])
+  const note =
+    lineValue(source.content, "Ghi chú") ||
+    lineValue(source.content, "Cách dùng") ||
+    inlineValue(source.content, ["Usage"], ["Example", "Ví dụ"])
+  const inlineExample =
+    inlineValue(source.content, ["Example"], [])
+  const [inlineJapanese, inlineVietnamese] = inlineExample.split(/\s+-\s+/, 2)
+  const example = lineValue(source.content, "Ví dụ") || inlineJapanese || ""
+  const translatedExample = lineValue(source.content, "Dịch ví dụ") || inlineVietnamese || ""
 
   return [
-    `${source.title}${meaning ? `: ${meaning}` : ""}`,
+    source.title,
     "",
+    meaning ? `Ý nghĩa: ${meaning}` : null,
     structure ? `Cấu trúc: ${structure}` : null,
     note ? `Cách dùng: ${note}` : null,
     example ? `Ví dụ: ${example}` : null,
@@ -445,21 +526,69 @@ function renderTopSource(source: RagSource) {
   return source.content
 }
 
+export function isSourceRelevantToQuery(message: string, source: RagSource) {
+  const foldVietnamese = (value: string) =>
+    normalize(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+  const searchable = foldVietnamese(`${source.title}\n${source.content}`)
+  const japaneseTerms = splitJapaneseTerms(message)
+
+  if (japaneseTerms.some((term) => term.length > 0 && `${source.title}\n${source.content}`.includes(term))) {
+    return true
+  }
+
+  const ignoredTokens = new Set([
+    "ban",
+    "cau",
+    "cho",
+    "dung",
+    "giai",
+    "gi",
+    "hoc",
+    "khong",
+    "lam",
+    "la",
+    "minh",
+    "mot",
+    "nghia",
+    "nhat",
+    "noi",
+    "them",
+    "thich",
+    "tieng",
+    "toi",
+    "viet",
+    "leo",
+    "luoi",
+    "vui",
+    "tai",
+    "nua",
+    "vai",
+  ])
+  const searchableTokens = new Set(searchable.split(" ").filter(Boolean))
+  const meaningfulTokens = foldVietnamese(message)
+    .split(" ")
+    .filter((token) => token.length >= 3 && !ignoredTokens.has(token))
+
+  return meaningfulTokens.some((token) => searchableTokens.has(token))
+}
+
 export function buildFallbackAnswer(message: string, sources: RagSource[]) {
-  if (!sources.length) {
+  const relevantSources = sources.filter((source) => isSourceRelevantToQuery(message, source))
+
+  if (!relevantSources.length) {
     return [
-      "Mình chưa tìm thấy dữ liệu phù hợp trong kho học hiện tại.",
+      "Mình chưa thể trả lời chắc chắn câu này lúc này vì AI đang tạm bận và kho học không có nguồn đủ khớp.",
       "",
       `Câu hỏi của bạn: ${message}`,
       "",
-      "Bạn có thể hỏi cụ thể hơn bằng tiếng Nhật, hiragana, romaji hoặc tiếng Việt.",
-      'Ví dụ: "学生 nghĩa là gì?", "Giải thích N は N です", hoặc "Bài đọc N5 nào có từ 食べる?".',
+      "Mình sẽ không dùng một nguồn gần giống nhưng sai chủ đề để đoán câu trả lời.",
     ].join("\n")
   }
 
-  const topSource = sources[0]
-  const otherSources = sources.slice(1, 4)
-
+  const topSource = relevantSources[0]
   return [
     renderTopSource(topSource),
     "",
@@ -467,9 +596,5 @@ export function buildFallbackAnswer(message: string, sources: RagSource[]) {
     "- Đọc lại ví dụ tiếng Nhật.",
     "- Tự đặt 1 câu tương tự.",
     "- Hỏi tiếp nếu bạn muốn mình tách nghĩa từng phần.",
-    "",
-    "Nguồn tham khảo:",
-    `- ${sourceTypeLabels[topSource.type]}: ${topSource.title}`,
-    ...otherSources.map((source) => `- ${sourceTypeLabels[source.type]}: ${source.title}`),
   ].join("\n")
 }

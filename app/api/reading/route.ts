@@ -11,6 +11,7 @@ type QuestionItem = {
     text: string
   }>
   rawText: string
+  correctAnswer?: string
 }
 
 type LevelStat = {
@@ -162,6 +163,33 @@ function cleanQuestionLine(line: string) {
   return line.replace(/\s+/g, " ").trim()
 }
 
+function normalizeSearchText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u0111/g, "d")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function isInternalTestArticle(article: { title: string; category: string | null; articleText: string }) {
+  const title = normalizeSearchText(article.title)
+  const category = normalizeSearchText(article.category ?? "")
+  const content = normalizeSearchText(article.articleText)
+  const combined = [title, category, content.slice(0, 1000)].join(" ")
+
+  return (
+    /\btest\b/.test(title) ||
+    /\blocal\b/.test(title) ||
+    /\bimport\b/.test(title) ||
+    combined.includes("test local") ||
+    combined.includes("local import") ||
+    combined.includes("test import")
+  )
+}
+
 function isQuestionNoise(line: string) {
   return /^(Câu hỏi|Nộp bài|Từ vựng|Ngữ pháp|Furigana|\d+\/\d+)$/i.test(line)
 }
@@ -290,7 +318,88 @@ function parseQuestionGroupsByCounter(lines: string[]): QuestionItem[] {
   return questions
 }
 
-function deriveQuestions(rawText: string, fallback: unknown): unknown {
+function normalizeAnswerText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/[　\s"'“”‘’.,!?！？。、，．:：;；()[\]{}]/g, "")
+    .trim()
+}
+
+function countOccurrences(haystack: string, needle: string) {
+  if (!needle) return 0
+
+  let count = 0
+  let index = haystack.indexOf(needle)
+  while (index >= 0) {
+    count += 1
+    index = haystack.indexOf(needle, index + needle.length)
+  }
+
+  return count
+}
+
+function inferCorrectAnswer(question: QuestionItem, articleText: string) {
+  const normalizedArticle = normalizeAnswerText(articleText)
+  const normalizedQuestion = normalizeAnswerText(question.question)
+  const scoredOptions = question.options.map((option, index) => {
+    const normalizedOption = normalizeAnswerText(option.text)
+    const optionWithoutKey = normalizeAnswerText(option.text.replace(/^[A-D]\s*/i, ""))
+    const numericParts = option.text.match(/\d+/g) ?? []
+    let score = 0
+
+    if (normalizedOption && normalizedArticle.includes(normalizedOption)) {
+      score += 10 + countOccurrences(normalizedArticle, normalizedOption)
+    }
+
+    if (
+      optionWithoutKey &&
+      optionWithoutKey !== normalizedOption &&
+      normalizedArticle.includes(optionWithoutKey)
+    ) {
+      score += 8 + countOccurrences(normalizedArticle, optionWithoutKey)
+    }
+
+    for (const numericPart of numericParts) {
+      if (normalizedArticle.includes(numericPart)) score += 5
+      if (normalizedQuestion.includes(numericPart)) score -= 3
+    }
+
+    return {
+      key: option.key.trim().toUpperCase(),
+      score,
+      index,
+    }
+  })
+
+  const best = scoredOptions
+    .filter((option) => /^[A-D]$/.test(option.key))
+    .sort((left, right) => right.score - left.score || left.index - right.index)[0]
+
+  return best?.score && best.score > 0 ? best.key : scoredOptions.find((option) => /^[A-D]$/.test(option.key))?.key
+}
+
+function withInferredAnswers(questions: unknown[], articleText: string) {
+  return questions.map((item) => {
+    if (!item || typeof item !== "object") return item
+
+    const question = item as QuestionItem
+    const correctAnswer = (item as { correctAnswer?: unknown }).correctAnswer
+    if (typeof correctAnswer === "string" && /^[A-D]$/i.test(correctAnswer.trim())) {
+      return {
+        ...question,
+        correctAnswer: correctAnswer.trim().toUpperCase(),
+      }
+    }
+
+    if (!Array.isArray(question.options) || question.options.length === 0) return item
+
+    const inferredAnswer = inferCorrectAnswer(question, articleText)
+    return inferredAnswer ? { ...question, correctAnswer: inferredAnswer } : item
+  })
+}
+
+function deriveQuestions(rawText: string, fallback: unknown, articleText: string): unknown {
   const fallbackQuestions = Array.isArray(fallback) ? fallback : []
   const normalized = rawText.replace(/\s+/g, " ").trim()
   const allLines = rawText
@@ -305,8 +414,25 @@ function deriveQuestions(rawText: string, fallback: unknown): unknown {
       : allLines
   const groupedQuestions = parseQuestionGroups(lines)
 
-  if (groupedQuestions.length > fallbackQuestions.length) return groupedQuestions
-  if (fallbackQuestions.length > 0) return fallbackQuestions
+  const questionsWithPreservedAnswers = groupedQuestions.map((question) => {
+    const matchingFallback = fallbackQuestions.find((item) => {
+      if (!item || typeof item !== "object") return false
+      const fallbackQuestion = (item as { question?: unknown }).question
+      return typeof fallbackQuestion === "string" && cleanQuestionLine(fallbackQuestion) === cleanQuestionLine(question.question)
+    })
+    const correctAnswer =
+      matchingFallback && typeof matchingFallback === "object"
+        ? (matchingFallback as { correctAnswer?: unknown }).correctAnswer
+        : undefined
+
+    return typeof correctAnswer === "string" && correctAnswer.trim()
+      ? { ...question, correctAnswer: correctAnswer.trim() }
+      : question
+  })
+  const questionsWithAnswers = withInferredAnswers(questionsWithPreservedAnswers, articleText)
+
+  if (questionsWithAnswers.length > fallbackQuestions.length) return questionsWithAnswers
+  if (fallbackQuestions.length > 0) return withInferredAnswers(fallbackQuestions, articleText)
 
   const sectionMatch = normalized.match(
     new RegExp("C\\u00e2u h\\u1ecfi\\s+N\\u1ed9p b\\u00e0i\\s+(.+?)\\s+T\\u1eeb v\\u1ef1ng")
@@ -325,7 +451,9 @@ function deriveQuestions(rawText: string, fallback: unknown): unknown {
     rawText: sectionText,
   }
 
-  return fallbackQuestions.length > 0 ? fallbackQuestions : [question]
+  return fallbackQuestions.length > 0
+    ? withInferredAnswers(fallbackQuestions, articleText)
+    : withInferredAnswers([question], articleText)
 }
 
 export async function GET() {
@@ -337,8 +465,10 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      items: articles.map((article) => {
+      items: articles.filter((article) => !isInternalTestArticle(article)).map((article) => {
       const rawText = rawTextFromPayload(article.rawPayload)
+
+      const articleText = deriveArticleText(rawText, article.articleText)
 
       return {
         id: article.id,
@@ -347,12 +477,12 @@ export async function GET() {
         title: article.title,
         level: article.level,
         category: article.category ?? categoryFromPayload(article.rawPayload),
-        articleText: deriveArticleText(rawText, article.articleText),
+        articleText,
         articleBlocks: articleBlocksFromPayload(article.rawPayload),
         imageUrl: article.imageUrl,
         audioUrl: article.audioUrl ?? audioUrlFromPayload(article.rawPayload),
         publishedAt: article.publishedAt?.toISOString() ?? null,
-        questions: deriveQuestions(rawText, article.questions),
+        questions: deriveQuestions(rawText, article.questions, articleText),
         highlights: highlightsFromPayload(article.rawPayload),
         levelStats: normalizeLevelStats(article.levelStats),
         vocabulary: article.vocabulary,

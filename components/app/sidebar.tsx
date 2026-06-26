@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import {
   BookOpen,
+  BookmarkCheck,
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
@@ -34,6 +35,7 @@ const navItems = [
   { href: "/onboarding", labelKey: "nav.onboarding", viLabel: "H\u1ed3 s\u01a1 h\u1ecdc", jaLabel: "\u5b66\u7fd2\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb", icon: ClipboardCheck },
   { href: "/kana", labelKey: "nav.kana", viLabel: "B\u1ea3ng Kana", jaLabel: "\u304b\u306a\u8868", icon: Languages },
   { href: "/reading", labelKey: "nav.reading", viLabel: "B\u00e0i \u0111\u1ecdc song ng\u1eef", jaLabel: "\u30d0\u30a4\u30ea\u30f3\u30ac\u30eb\u8aad\u89e3", icon: Newspaper },
+  { href: "/saved-items", labelKey: "nav.savedItems", viLabel: "\u00d4n t\u1eadp \u0111\u00e3 l\u01b0u", jaLabel: "\u4fdd\u5b58\u3057\u305f\u5fa9\u7fd2", icon: BookmarkCheck },
   { href: "/vocabulary", labelKey: "nav.vocabulary", viLabel: "T\u1eeb v\u1ef1ng", jaLabel: "\u8a9e\u5f59", icon: BookOpen },
   { href: "/grammar", labelKey: "nav.grammar", viLabel: "Ng\u1eef ph\u00e1p", jaLabel: "\u6587\u6cd5", icon: FileText },
   { href: "/quiz", labelKey: "nav.quiz", viLabel: "Quiz", jaLabel: "\u30af\u30a4\u30ba", icon: HelpCircle },

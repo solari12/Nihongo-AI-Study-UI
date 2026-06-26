@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   BookOpen,
   CheckCircle2,
@@ -23,6 +23,7 @@ import { useActivityLog } from "@/hooks/use-activity-log"
 import { useAdminContent } from "@/hooks/use-admin-content"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 import type { GrammarItem, QuizQuestionItem, VocabularyItem } from "@/lib/data/nihongo-study"
+import { isUsefulSavedStudyItem, type SavedStudyItem } from "@/lib/saved-study-items"
 import { cn } from "@/lib/utils"
 
 type QuizState = "setup" | "playing" | "result"
@@ -161,17 +162,68 @@ function buildGrammarStructureQuestions(grammar: GrammarItem[]): QuizQuestionIte
   })
 }
 
+function savedItemDifficulty(level: string): QuizQuestionItem["difficulty"] {
+  if (level === "N5") return "easy"
+  if (level === "N4") return "medium"
+  return "hard"
+}
+
+function buildSavedStudyQuestions(
+  savedItems: SavedStudyItem[],
+  vocabulary: VocabularyItem[],
+  grammar: GrammarItem[]
+): QuizQuestionItem[] {
+  const usefulItems = savedItems.filter(isUsefulSavedStudyItem)
+  const vocabularyMeanings = [
+    ...usefulItems.filter((item) => item.type === "vocabulary").map((item) => item.meaning),
+    ...vocabulary.map((item) => item.vietnamese),
+  ]
+  const grammarMeanings = [
+    ...usefulItems.filter((item) => item.type === "grammar").map((item) => item.meaning),
+    ...grammar.map((item) => item.meaning),
+  ]
+
+  return usefulItems.flatMap((item, index) => {
+    const correct = item.meaning.trim()
+    if (!correct) return []
+
+    const candidates = item.type === "vocabulary" ? vocabularyMeanings : grammarMeanings
+    const distractors = pickDistractors(correct, candidates)
+    if (distractors.length < 2) return []
+
+    const answers = toAnswers(correct, distractors)
+    const correctAnswer = answers.find((answer) => answer.isCorrect)?.id ?? "a"
+    const detail = [item.reading, item.note, item.example].filter(Boolean).join(" · ")
+
+    return [{
+      id: 700000 + index,
+      question:
+        item.type === "vocabulary"
+          ? `“${item.title}” nghĩa là gì?`
+          : `Mẫu “${item.title}” dùng để diễn đạt gì?`,
+      type: item.type,
+      difficulty: savedItemDifficulty(item.level),
+      topic: "Ôn tập đã lưu",
+      answers: answers.map(({ id, text }) => ({ id, text })),
+      correctAnswer,
+      explanation: `${item.title}: ${correct}.${detail ? ` ${detail}` : ""}`,
+    }]
+  })
+}
+
 function buildQuestionPool({
   vocabulary,
   grammar,
-  savedQuiz,
+  seedQuiz,
+  savedItems,
   mode,
   quizType,
   difficulty,
 }: {
   vocabulary: VocabularyItem[]
   grammar: GrammarItem[]
-  savedQuiz: QuizQuestionItem[]
+  seedQuiz: QuizQuestionItem[]
+  savedItems: SavedStudyItem[]
   mode: QuestionMode
   quizType: QuizType
   difficulty: DifficultyFilter
@@ -180,8 +232,12 @@ function buildQuestionPool({
   const shouldUseVocabulary = quizType === "vocabulary" || quizType === "mixed"
   const shouldUseGrammar = quizType === "grammar" || quizType === "mixed"
 
+  if (mode === "auto") {
+    pools.push(...seedQuiz)
+  }
+
   if (mode === "saved" || mode === "auto") {
-    pools.push(...savedQuiz)
+    pools.push(...buildSavedStudyQuestions(savedItems, vocabulary, grammar))
   }
 
   if (shouldUseVocabulary && (mode === "auto" || mode === "meaning")) {
@@ -217,21 +273,49 @@ export default function QuizPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestionItem[]>([])
   const [finalResult, setFinalResult] = useState<QuizResult>({ score: 0, total: 0, percentage: 0 })
+  const [savedItems, setSavedItems] = useState<SavedStudyItem[]>([])
+  const [savedItemsLoaded, setSavedItemsLoaded] = useState(false)
   const { recordQuizAttempt } = useStudyProgress()
   const { content, isLoaded, error } = useAdminContent()
   const { addActivity } = useActivityLog()
+
+  useEffect(() => {
+    const requestedMode = new URLSearchParams(window.location.search).get("mode")
+    if (requestedMode === "saved") setQuestionMode("saved")
+
+    let cancelled = false
+    fetch("/api/saved-study-items", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Không tải được mục đã lưu")
+        return response.json() as Promise<{ items: SavedStudyItem[] }>
+      })
+      .then((data) => {
+        if (!cancelled) setSavedItems(data.items.filter(isUsefulSavedStudyItem))
+      })
+      .catch(() => {
+        if (!cancelled) setSavedItems([])
+      })
+      .finally(() => {
+        if (!cancelled) setSavedItemsLoaded(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const questionPool = useMemo(
     () =>
       buildQuestionPool({
         vocabulary: content.vocabulary,
         grammar: content.grammar,
-        savedQuiz: content.quiz,
+        seedQuiz: content.quiz,
+        savedItems,
         mode: questionMode,
         quizType,
         difficulty,
       }),
-    [content.grammar, content.quiz, content.vocabulary, difficulty, questionMode, quizType]
+    [content.grammar, content.quiz, content.vocabulary, difficulty, questionMode, quizType, savedItems]
   )
 
   const availableCount = questionPool.length
@@ -365,7 +449,7 @@ export default function QuizPage() {
                         <SelectItem value="reading">Cách đọc từ</SelectItem>
                         <SelectItem value="grammar-meaning">Nghĩa ngữ pháp</SelectItem>
                         <SelectItem value="grammar-structure">Cấu trúc ngữ pháp</SelectItem>
-                        <SelectItem value="saved">Câu hỏi seed</SelectItem>
+                        <SelectItem value="saved">Mục đã lưu</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -402,17 +486,18 @@ export default function QuizPage() {
                 </div>
 
                 <Button
+                  data-i18n-managed
                   onClick={startQuiz}
                   className="w-full rounded-full bg-[#702f2a] text-white hover:bg-[#5d2723]"
                   size="lg"
-                  disabled={!isLoaded || selectedCount === 0}
+                  disabled={!isLoaded || !savedItemsLoaded || selectedCount === 0}
                 >
                   <PlayCircle className="mr-2 h-5 w-5" />
                   Bắt đầu {selectedCount ? `${selectedCount} câu` : "làm quiz"}
                 </Button>
 
-                {!isLoaded && <p className="text-center text-sm text-muted-foreground">Đang tải câu hỏi...</p>}
-                {isLoaded && selectedCount === 0 && (
+                {(!isLoaded || !savedItemsLoaded) && <p className="text-center text-sm text-muted-foreground">Đang tải câu hỏi...</p>}
+                {isLoaded && savedItemsLoaded && selectedCount === 0 && (
                   <p className="text-center text-sm text-muted-foreground">
                     Chưa có câu hỏi phù hợp với lựa chọn này. Thử đổi dạng câu hỏi hoặc chọn độ khó "Tất cả".
                   </p>

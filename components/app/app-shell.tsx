@@ -29,7 +29,7 @@ export function AppShell({ children, user: initialUser }: AppShellProps) {
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[#fbf5ee] bg-[url('/assets/wallpaper.png')] bg-cover bg-center bg-fixed">
         <Sidebar
           collapsed={collapsed}
           onCollapsedChange={setCollapsed}

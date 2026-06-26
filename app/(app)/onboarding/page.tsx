@@ -42,7 +42,7 @@ interface LearningPlanPreview {
   needsCheck?: string
   stages: string[]
   topicNote?: string
-  nextRoute: "/placement-test" | "/dashboard" | "/learning-plan"
+  nextRoute: "/placement-test" | "/dashboard" | "/learning-path"
 }
 
 const fallbackTopicLabels = [
@@ -461,7 +461,7 @@ function buildLearningPlanPreview({
     needsCheck: needsPlacement ? "Cần kiểm tra nhanh trước khi chốt lộ trình chính xác." : undefined,
     stages,
     topicNote,
-    nextRoute: needsPlacement ? "/placement-test" : "/learning-plan",
+    nextRoute: needsPlacement ? "/placement-test" : "/learning-path",
   }
 }
 

@@ -25,6 +25,7 @@ import { useRecommendations } from "@/hooks/use-recommendations"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 import { getCompletedGrammarPatternsFromActivities } from "@/lib/grammar/progress"
 import { useI18n, type Locale } from "@/lib/i18n"
+import { buildDailyPlan } from "@/lib/recommendation/daily-plan"
 import type { Recommendation, RecommendationType } from "@/lib/recommendation/recommendation-engine"
 
 const copy = {
@@ -46,6 +47,8 @@ const copy = {
     todayPlanDescription: "Làm theo thứ tự này để học vừa sức trong một buổi.",
     noPlanTitle: "Chưa có dữ liệu để tạo kế hoạch",
     noPlanBody: "Hãy tạo hồ sơ học trước, sau đó Kami sẽ gợi ý bài phù hợp hơn.",
+    dailyDoneTitle: "Đã hoàn thành mục tiêu hôm nay",
+    dailyDoneBody: "Bạn có thể nghỉ hoặc chủ động học thêm nếu vẫn còn năng lượng.",
     start: "Bắt đầu",
     minutes: "phút",
     vocabulary: "Từ vựng",
@@ -97,6 +100,8 @@ const copy = {
     todayPlanDescription: "Follow this order for a manageable study session.",
     noPlanTitle: "Not enough data for a plan yet",
     noPlanBody: "Create your study profile first, then Kami can suggest better lessons.",
+    dailyDoneTitle: "Today's goal is complete",
+    dailyDoneBody: "You can stop here or study more if you still have energy.",
     start: "Start",
     minutes: "minutes",
     vocabulary: "Vocabulary",
@@ -147,6 +152,8 @@ const copy = {
     todayPlanDescription: "この順番なら、一回の学習で進めやすくなります。",
     noPlanTitle: "まだ学習プランを作れません",
     noPlanBody: "まず学習プロフィールを作ると、Kamiが合う教材を選びます。",
+    dailyDoneTitle: "今日の目標を達成しました",
+    dailyDoneBody: "ここで終えても、余裕があれば追加で学んでもかまいません。",
     start: "始める",
     minutes: "分",
     vocabulary: "語彙",
@@ -243,7 +250,12 @@ export default function DashboardPage() {
   )
   const recentStudyDays = new Set(activities.slice(0, 12).map((activity) => activity.createdAt.slice(0, 10))).size
   const hasProfile = profile.completedOnboarding
-  const todayItems = recommendations.slice(0, 4)
+  const dailyPlan = buildDailyPlan({
+    recommendations,
+    activities,
+    dailyMinutes: profile.dailyMinutes,
+  })
+  const todayItems = dailyPlan.items
   const hasSignals = stats.learnedVocabulary > 0 || stats.reviewVocabulary > 0 || stats.quizAttempts > 0
   const setupHref = hasProfile ? "/placement-test" : "/onboarding"
 
@@ -395,8 +407,12 @@ export default function DashboardPage() {
             ) : (
               <div className="rounded-3xl border border-dashed p-8 text-center">
                 <GraduationCap className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-                <h3 className="font-semibold">{text.noPlanTitle}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{text.noPlanBody}</p>
+                <h3 className="font-semibold">
+                  {dailyPlan.isGoalComplete ? text.dailyDoneTitle : text.noPlanTitle}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {dailyPlan.isGoalComplete ? text.dailyDoneBody : text.noPlanBody}
+                </p>
               </div>
             )}
           </CardContent>

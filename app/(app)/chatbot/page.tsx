@@ -1,6 +1,6 @@
 "use client"
 
-import { KeyboardEvent, useEffect, useMemo, useRef, useState } from "react"
+import { KeyboardEvent, UIEvent, useEffect, useMemo, useRef, useState } from "react"
 import { ChatMessage, type ChatQuizState } from "@/components/app/chat-message"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,19 @@ type ChatResponse = {
   assistantMessageId: string
 }
 
+type QuizSubmitResult = {
+  correctCount: number
+  total: number
+  percentage: number
+  answeredCount: number
+  wrongCount: number
+  userAnswers: Record<string, string>
+  submittedAt: string
+  jlptLevel?: string
+  quizId?: string
+  articleId?: string
+}
+
 type ChatAppState = {
   page: "chatbot"
   activeSource?: ActiveChatSource | null
@@ -86,6 +99,8 @@ const suggestedQuestionKeys = [
   "chatbot.suggestion.particles",
   "chatbot.suggestion.plan",
 ] as const
+
+const chatAutoScrollThreshold = 120
 
 function formatTime() {
   return new Date().toLocaleTimeString("vi-VN", {
@@ -159,6 +174,10 @@ function decodeHeaderJson<T>(value: string | null, fallback: T) {
   }
 }
 
+function isNearScrollBottom(element: HTMLElement) {
+  return element.scrollHeight - element.scrollTop - element.clientHeight <= chatAutoScrollThreshold
+}
+
 export default function ChatbotPage() {
   const { t } = useI18n()
   const initialMessages = useMemo<ChatMessageItem[]>(
@@ -182,6 +201,25 @@ export default function ChatbotPage() {
   const [conversations, setConversations] = useState<ChatConversationSummary[]>([])
   const [loadingConversations, setLoadingConversations] = useState(true)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const messagesViewportRef = useRef<HTMLDivElement | null>(null)
+  const shouldStickToBottomRef = useRef(true)
+  const forceScrollToBottomRef = useRef(true)
+
+  function scrollMessagesToBottom(behavior: ScrollBehavior = "smooth") {
+    window.requestAnimationFrame(() => {
+      const viewport = messagesViewportRef.current
+      if (!viewport) return
+
+      viewport.scrollTo({
+        top: viewport.scrollHeight,
+        behavior,
+      })
+    })
+  }
+
+  function handleMessagesScroll(event: UIEvent<HTMLDivElement>) {
+    shouldStickToBottomRef.current = isNearScrollBottom(event.currentTarget)
+  }
 
   async function refreshConversations() {
     const response = await fetch("/api/chat/conversations", { cache: "no-store" })
@@ -198,6 +236,7 @@ export default function ChatbotPage() {
     }>(response)
 
     setConversationId(data.conversation.id)
+    forceScrollToBottomRef.current = true
     setMessages(
       data.messages.map((message) => ({
         id: message.id,
@@ -268,6 +307,14 @@ export default function ChatbotPage() {
     window.sessionStorage.removeItem(CHAT_ACTIVE_SOURCE_STORAGE_KEY)
   }, [activeSource])
 
+  useEffect(() => {
+    if (!forceScrollToBottomRef.current && !shouldStickToBottomRef.current) return
+
+    const behavior = forceScrollToBottomRef.current ? "auto" : "smooth"
+    forceScrollToBottomRef.current = false
+    scrollMessagesToBottom(behavior)
+  }, [messages, isLoading])
+
   const chatStats = useMemo(() => {
     const assistantWithProvider = [...messages]
       .reverse()
@@ -332,6 +379,8 @@ export default function ChatbotPage() {
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController
+    forceScrollToBottomRef.current = true
+    shouldStickToBottomRef.current = true
     setMessages((previous) => [...previous, userMessage])
     setInputValue("")
     setActionMessage("")
@@ -484,13 +533,14 @@ export default function ChatbotPage() {
   }
 
   async function saveFirstSource(message: ChatMessageItem) {
-    const source = message.sources?.find((item) => item.type === "vocabulary" || item.type === "grammar")
+    const source = message.sources?.find((item) => ["news", "vocabulary", "grammar"].includes(item.type))
     if (!source) {
       setActionMessage(t("chatbot.saveSourceMissing"))
       return
     }
 
     if (!window.confirm(`Lưu "${source.title}" vào ôn tập?`)) return
+    const savedType = source.type === "grammar" ? "grammar" : "vocabulary"
 
     const response = await fetch("/api/saved-study-items", {
       method: "POST",
@@ -498,11 +548,12 @@ export default function ChatbotPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: source.type,
+        type: savedType,
         sourceType: "chatbot-agent",
-        sourceId: source.id,
-        itemKey: source.id,
+        sourceId: source.sourceId ?? source.id,
+        itemKey: source.sourceId ?? source.id,
         title: source.title,
+        level: source.type === "news" ? "reading" : undefined,
         note: t("chatbot.saveSourceNote"),
         rawPayload: {
           source,
@@ -517,8 +568,17 @@ export default function ChatbotPage() {
   function createMiniQuiz(message: ChatMessageItem) {
     if (!window.confirm(t("chatbot.createQuizConfirm"))) return
 
-    const sourceTitles = message.sources?.map((source) => source.title).join(", ") || t("chatbot.quizSourceFallback")
-    void handleSend(`${t("chatbot.createQuizPromptPrefix")} ${sourceTitles}. ${t("chatbot.createQuizPromptSuffix")}`)
+    const readingSources = message.sources?.filter((source) => source.type === "news") ?? []
+    const targetSource =
+      activeSource ??
+      readingSources[0] ??
+      message.sources?.find((source) => ["vocabulary", "grammar"].includes(source.type))
+    const targetTitle = targetSource?.title ?? t("chatbot.quizSourceFallback")
+    const prefix = readingSources.length > 1 && !activeSource
+      ? `Hãy tạo mini quiz 5 câu trắc nghiệm từ bài đọc đầu tiên: ${targetTitle}.`
+      : `${t("chatbot.createQuizPromptPrefix")} ${targetTitle}.`
+
+    void handleSend(`${prefix} ${t("chatbot.createQuizPromptSuffix")}`)
   }
 
   async function logChatActivity(message: ChatMessageItem) {
@@ -541,7 +601,24 @@ export default function ChatbotPage() {
     setActionMessage(t("chatbot.activitySaved"))
   }
 
-  async function logQuizActivity(message: ChatMessageItem, result: { correctCount: number; total: number; percentage: number }) {
+  async function logQuizActivity(message: ChatMessageItem, result: QuizSubmitResult) {
+    if (!result.answeredCount || !Object.keys(result.userAnswers).length) {
+      throw new Error("Quiz submit is missing valid answers.")
+    }
+
+    const quizMetadata = [
+      `article_id=${result.articleId ?? "chatbot"}`,
+      `quiz_id=${result.quizId ?? message.id ?? "chatbot-quiz"}`,
+      `total_questions=${result.total}`,
+      `answered_questions=${result.answeredCount}`,
+      `correct_count=${result.correctCount}`,
+      `wrong_count=${result.wrongCount}`,
+      `score_percent=${result.percentage}`,
+      `user_answers=${JSON.stringify(result.userAnswers)}`,
+      `submitted_at=${result.submittedAt}`,
+      `jlpt_level=${result.jlptLevel ?? "unknown"}`,
+    ].join("; ")
+
     const [activityResponse, progressResponse] = await Promise.all([
       fetch("/api/activity", {
         method: "POST",
@@ -550,9 +627,9 @@ export default function ChatbotPage() {
         },
         body: JSON.stringify({
           type: "chatbot_quiz",
-          content: `Kami quiz: ${message.content.slice(0, 180)}`,
+          content: `Kami quiz: ${message.content.slice(0, 180)} | ${quizMetadata}`,
           topic: "Kami",
-          result: `${result.correctCount}/${result.total} ${t("chatbot.correctUnit")}`,
+          result: `${result.correctCount}/${result.total} ${t("chatbot.correctUnit")} (${result.answeredCount}/${result.total} answered)`,
           score: result.percentage,
           durationMinutes: 5,
         }),
@@ -581,6 +658,7 @@ export default function ChatbotPage() {
 
   function startNewChat() {
     setConversationId(null)
+    forceScrollToBottomRef.current = true
     setMessages(initialMessages)
     setInputValue("")
     setActionMessage(t("chatbot.newStarted"))
@@ -634,6 +712,44 @@ export default function ChatbotPage() {
       body: JSON.stringify({ quizState }),
     })
     await readJsonResponse(response)
+  }
+
+  function quickActionsForMessage(message: ChatMessageItem) {
+    const hasQuiz = Boolean(message.quizCards?.length)
+    const hasReadingSource = Boolean(message.sources?.some((source) => source.type === "news"))
+    const hasStudySource = Boolean(message.sources?.some((source) => ["news", "vocabulary", "grammar"].includes(source.type)))
+
+    if (message.role !== "assistant" || message.isStreaming || hasQuiz) {
+      return {
+        showActions: false,
+      }
+    }
+
+    if (hasReadingSource) {
+      return {
+        showActions: true,
+        listenLabel: t("chatbot.action.listenReading"),
+        saveLabel: t("chatbot.action.saveArticle"),
+        createQuizLabel: t("chatbot.action.createQuizFromArticle"),
+        onListen: () => speak(message.content),
+        onSave: () => void saveFirstSource(message),
+        onCreateQuiz: () => createMiniQuiz(message),
+      }
+    }
+
+    if (hasStudySource) {
+      return {
+        showActions: true,
+        saveLabel: t("chatbot.action.saveSource"),
+        createQuizLabel: t("chatbot.action.createQuiz"),
+        onSave: () => void saveFirstSource(message),
+        onCreateQuiz: () => createMiniQuiz(message),
+      }
+    }
+
+    return {
+      showActions: false,
+    }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -778,26 +894,36 @@ export default function ChatbotPage() {
         )}
 
         <Card className="relative flex min-h-0 flex-1 flex-col border-[#ead7c9] bg-white/95 shadow-sm">
-          <ScrollArea className="min-h-0 flex-1 p-4">
+          <ScrollArea
+            className="min-h-0 flex-1 p-4"
+            viewportRef={messagesViewportRef}
+            onViewportScroll={handleMessagesScroll}
+          >
             <div className="space-y-6">
-              {messages.map((message, index) => (
-                <ChatMessage
-                  key={message.id ?? `${message.role}-${index}`}
-                  role={message.role}
-                  content={message.content || (message.provider === "openrouter" ? t("chatbot.answering") : "")}
-                  timestamp={message.timestamp}
-                  sources={message.isStreaming ? undefined : message.sources}
-                  quizCards={message.isStreaming ? undefined : message.quizCards}
-                  quizState={message.quizState}
-                  showActions={!message.isStreaming}
-                  onListen={() => speak(message.content)}
-                  onSave={() => void saveFirstSource(message)}
-                  onCreateQuiz={() => createMiniQuiz(message)}
-                  onLogActivity={() => void logChatActivity(message)}
-                  onQuizSubmit={(result) => logQuizActivity(message, result)}
-                  onQuizStateChange={(state) => void updateQuizState(message, state)}
-                />
-              ))}
+              {messages.map((message, index) => {
+                const quickActions = quickActionsForMessage(message)
+
+                return (
+                  <ChatMessage
+                    key={message.id ?? `${message.role}-${index}`}
+                    role={message.role}
+                    content={message.content || (message.provider === "openrouter" ? t("chatbot.answering") : "")}
+                    timestamp={message.timestamp}
+                    sources={message.isStreaming ? undefined : message.sources}
+                    quizCards={message.isStreaming ? undefined : message.quizCards}
+                    quizState={message.quizState}
+                    showActions={quickActions.showActions}
+                    listenLabel={quickActions.listenLabel}
+                    saveLabel={quickActions.saveLabel}
+                    createQuizLabel={quickActions.createQuizLabel}
+                    onListen={quickActions.onListen}
+                    onSave={quickActions.onSave}
+                    onCreateQuiz={quickActions.onCreateQuiz}
+                    onQuizSubmit={(result) => logQuizActivity(message, result)}
+                    onQuizStateChange={(state) => void updateQuizState(message, state)}
+                  />
+                )
+              })}
               {isLoading && !messages[messages.length - 1]?.provider && (
                 <div className="flex gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">

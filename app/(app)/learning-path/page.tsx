@@ -15,6 +15,7 @@ import { useRecommendations } from "@/hooks/use-recommendations"
 import { useStudyProgress } from "@/hooks/use-study-progress"
 import { getCompletedGrammarPatternsFromActivities } from "@/lib/grammar/progress"
 import { useI18n, type Locale } from "@/lib/i18n"
+import { buildDailyPlan } from "@/lib/recommendation/daily-plan"
 import type { Recommendation, RecommendationType } from "@/lib/recommendation/recommendation-engine"
 
 const paperPanelStyle = {
@@ -66,6 +67,7 @@ const copy = {
     completedTodayDescription: "Các phiên đã xong sẽ không được gợi ý lại làm task chính trong hôm nay.",
     allDoneTitle: "Hôm nay đã đủ nhịp học",
     allDoneDescription: "Bạn đã hoàn thành các phiên chính. Có thể quay lại ôn tập nhẹ hoặc học thêm nếu muốn.",
+    studyMore: "Học thêm",
     minutes: "phút/ngày",
     vocabulary: "Từ vựng",
     grammar: "Ngữ pháp",
@@ -129,6 +131,7 @@ const copy = {
     completedTodayDescription: "Finished sessions will not be suggested again as today's main task.",
     allDoneTitle: "Today's pace is complete",
     allDoneDescription: "You have completed the main sessions. You can review lightly or study more.",
+    studyMore: "Study more",
     minutes: "min/day",
     vocabulary: "Vocabulary",
     grammar: "Grammar",
@@ -191,6 +194,7 @@ const copy = {
     completedTodayDescription: "完了したセッションは、今日の主タスクとして再表示されません。",
     allDoneTitle: "今日の学習ペースは完了",
     allDoneDescription: "主なセッションは完了しました。軽く復習するか、追加で学習できます。",
+    studyMore: "追加で学ぶ",
     minutes: "分/日",
     vocabulary: "語彙",
     grammar: "文法",
@@ -321,7 +325,13 @@ export default function LearningPathPage() {
   const totalVocabulary = content.vocabulary.length || stats.totalVocabulary
   const totalGrammar = content.grammar.length || stats.totalGrammar
   const hasProfile = profile.completedOnboarding
-  const steps = recommendations.slice(0, 5)
+  const dailyPlan = buildDailyPlan({
+    recommendations,
+    activities,
+    dailyMinutes: profile.dailyMinutes,
+    maxItems: 5,
+  })
+  const steps = dailyPlan.items
   const completedTodayActivities = activities.filter(isCompletedToday).slice(0, 4)
   const completedGrammarPatterns = getCompletedGrammarPatternsFromActivities(activities, content.grammar)
   const completedGrammarCount = Math.max(stats.completedGrammar, completedGrammarPatterns.size)
@@ -512,13 +522,13 @@ export default function LearningPathPage() {
             ) : (
               <div className="col-span-full rounded-3xl border border-dashed border-[#d9a492] bg-white/60 p-8 text-center">
                 <Sparkles className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-                <h3 className="font-semibold">{completedTodayActivities.length ? text.allDoneTitle : text.emptyTitle}</h3>
+                <h3 className="font-semibold">{dailyPlan.isGoalComplete ? text.allDoneTitle : text.emptyTitle}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {completedTodayActivities.length ? text.allDoneDescription : text.emptyDescription}
+                  {dailyPlan.isGoalComplete ? text.allDoneDescription : text.emptyDescription}
                 </p>
                 <Button asChild className="mt-4 rounded-full bg-[#9f3f33]">
-                  <Link href={completedTodayActivities.length ? "/vocabulary/session/review-n5-today" : "/onboarding"}>
-                    {completedTodayActivities.length ? text.review : text.createProfile}
+                  <Link href={dailyPlan.isGoalComplete ? "/vocabulary" : "/onboarding"}>
+                    {dailyPlan.isGoalComplete ? text.studyMore : text.createProfile}
                   </Link>
                 </Button>
               </div>

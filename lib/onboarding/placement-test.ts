@@ -212,25 +212,50 @@ function uniqueQuestions(questions: PlacementQuestion[]) {
   })
 }
 
+function getKanaRetention(profile: PlacementProfileInput) {
+  return getMetadataValue(profile.guideCompletedSteps, "profile:kanaRetention:", "unknown")
+}
+
+function getKanaQuestionSet(profile: PlacementProfileInput) {
+  const kanaRetention = getKanaRetention(profile)
+
+  if (kanaRetention === "none" || profile.kanaLevel === "none") {
+    return basicKanaQuestions
+  }
+
+  if (kanaRetention === "low" || profile.kanaLevel === "hiragana") {
+    return uniqueQuestions([basicKanaQuestions[0], kanaSpeedQuestions[1], kanaSpeedQuestions[0]])
+  }
+
+  if (kanaRetention === "medium") {
+    return kanaSpeedQuestions
+  }
+
+  if (kanaRetention === "high" || profile.kanaLevel === "hiragana_katakana") {
+    return [kanaSpeedQuestions[1]]
+  }
+
+  return uniqueQuestions([...basicKanaQuestions, ...kanaSpeedQuestions])
+}
+
 export function buildPlacementQuestions(profile: PlacementProfileInput) {
-  const kanaRetention = getMetadataValue(profile.guideCompletedSteps, "profile:kanaRetention:", "unknown")
+  const kanaRetention = getKanaRetention(profile)
   const isReview = profile.experience === "returning" || profile.guideCompletedSteps.includes("profile:planType:review")
   const needsBasicKana =
     profile.kanaLevel === "none" ||
     kanaRetention === "none" ||
-    kanaRetention === "low" ||
     profile.guideCompletedSteps.includes("profile:needsPlacement:true")
 
-  const kanaSet = needsBasicKana ? basicKanaQuestions : kanaSpeedQuestions
+  const kanaSet = getKanaQuestionSet(profile)
   const vocabularySet = profile.goal === "COMMUNICATION" ? communicationVocabularyQuestions : n5VocabularyQuestions
   const grammarSet = isReview ? grammarQuestions : grammarQuestions.slice(0, 2)
 
   if (profile.goal === "FROM_ZERO" && needsBasicKana) {
-    return uniqueQuestions([...basicKanaQuestions, vocabularySet[0], grammarSet[0]]).slice(0, 4)
+    return uniqueQuestions([...kanaSet, vocabularySet[0], grammarSet[0]]).slice(0, 4)
   }
 
   if (profile.goal === "COMMUNICATION") {
-    return uniqueQuestions([kanaSet[0], ...communicationVocabularyQuestions, grammarSet[0], grammarSet[1]]).slice(0, 5)
+    return uniqueQuestions([...kanaSet, ...communicationVocabularyQuestions, grammarSet[0], grammarSet[1]]).slice(0, 5)
   }
 
   if (isReview) {

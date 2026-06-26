@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Volume2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { CheckCircle2, Clock3, RotateCcw, Trophy, Volume2, XCircle, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +11,14 @@ import { cn } from "@/lib/utils"
 type KanaCell = {
   kana: string
   romaji: string
+}
+
+type KanaQuizMode = "hiragana" | "katakana" | "mixed"
+
+type KanaQuestion = KanaCell & {
+  id: string
+  script: Exclude<KanaQuizMode, "mixed">
+  options: string[]
 }
 
 const gojuonRows: { label: string; hiragana: KanaCell[]; katakana: KanaCell[] }[] = [
@@ -227,6 +235,48 @@ const yoonRows: { label: string; hiragana: KanaCell[]; katakana: KanaCell[] }[] 
   },
 ]
 
+function shuffle<T>(items: T[]) {
+  const next = [...items]
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1))
+    ;[next[index], next[randomIndex]] = [next[randomIndex], next[index]]
+  }
+  return next
+}
+
+function createKanaQuestions(mode: KanaQuizMode, count = 10): KanaQuestion[] {
+  const scripts: Exclude<KanaQuizMode, "mixed">[] = mode === "mixed" ? ["hiragana", "katakana"] : [mode]
+  const pool = scripts.flatMap((script) =>
+    gojuonRows.flatMap((row) =>
+      row[script]
+        .filter((cell) => cell.kana && cell.romaji)
+        .map((cell) => ({ ...cell, script }))
+    )
+  )
+  const romajiPool = [...new Set(pool.map((cell) => cell.romaji))]
+
+  return shuffle(pool)
+    .slice(0, count)
+    .map((cell, index) => {
+      const distractors = shuffle(romajiPool.filter((romaji) => romaji !== cell.romaji)).slice(0, 3)
+      const options = shuffle([cell.romaji, ...distractors])
+
+      // Giữ đáp án đúng như một invariant của câu hỏi, kể cả khi dữ liệu được đổi sau này.
+      if (!options.includes(cell.romaji)) options[0] = cell.romaji
+
+      return {
+        ...cell,
+        id: `${cell.script}-${cell.kana}-${index}`,
+        options,
+      }
+    })
+}
+
+function safeAnswerOptions(question: KanaQuestion) {
+  if (question.options.includes(question.romaji)) return question.options
+  return [question.romaji, ...question.options.filter((option) => option !== question.romaji)].slice(0, 4)
+}
+
 function speak(text: string) {
   if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return
 
@@ -329,6 +379,240 @@ function KanaSection({ script }: { script: "hiragana" | "katakana" }) {
   )
 }
 
+function KanaReactionQuiz() {
+  const [mode, setMode] = useState<KanaQuizMode>("hiragana")
+  const [secondsPerQuestion, setSecondsPerQuestion] = useState<5 | 10>(5)
+  const [status, setStatus] = useState<"idle" | "playing" | "result">("idle")
+  const [questions, setQuestions] = useState<KanaQuestion[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(5)
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
+  const [score, setScore] = useState(0)
+  const transitionTimerRef = useRef<number | null>(null)
+
+  const currentQuestion = questions[currentIndex]
+
+  useEffect(() => {
+    if (status !== "playing" || !currentQuestion || selectedAnswer !== null) return
+
+    const countdownTimer = window.setInterval(() => {
+      setTimeLeft((seconds) => Math.max(0, seconds - 1))
+    }, 1000)
+
+    return () => window.clearInterval(countdownTimer)
+  }, [currentQuestion, selectedAnswer, status])
+
+  useEffect(() => {
+    if (status !== "playing" || !currentQuestion || selectedAnswer !== null || timeLeft > 0) return
+
+    setSelectedAnswer("__timeout__")
+    transitionTimerRef.current = window.setTimeout(() => {
+      if (currentIndex >= questions.length - 1) {
+        setStatus("result")
+        return
+      }
+
+      setCurrentIndex(currentIndex + 1)
+      setSelectedAnswer(null)
+      setTimeLeft(secondsPerQuestion)
+    }, 850)
+  }, [currentIndex, currentQuestion, questions.length, secondsPerQuestion, selectedAnswer, status, timeLeft])
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current)
+    }
+  }, [])
+
+  function startQuiz() {
+    if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current)
+    setQuestions(createKanaQuestions(mode))
+    setCurrentIndex(0)
+    setTimeLeft(secondsPerQuestion)
+    setSelectedAnswer(null)
+    setScore(0)
+    setStatus("playing")
+  }
+
+  function selectAnswer(answer: string) {
+    if (!currentQuestion || selectedAnswer !== null) return
+    setSelectedAnswer(answer)
+    if (answer === currentQuestion.romaji) setScore((value) => value + 1)
+
+    transitionTimerRef.current = window.setTimeout(() => {
+      if (currentIndex >= questions.length - 1) {
+        setStatus("result")
+        return
+      }
+
+      setCurrentIndex(currentIndex + 1)
+      setSelectedAnswer(null)
+      setTimeLeft(secondsPerQuestion)
+    }, 850)
+  }
+
+  if (status === "result") {
+    const percentage = questions.length ? Math.round((score / questions.length) * 100) : 0
+    const message = percentage >= 80 ? "Phản xạ rất tốt!" : percentage >= 60 ? "Khá ổn, luyện thêm một lượt nhé!" : "Cứ từ từ, mắt và não đang làm quen Kana."
+
+    return (
+      <Card className="overflow-hidden border-[#dfb6aa] bg-[#fffdf8]/95 shadow-sm">
+        <CardContent className="flex min-h-[480px] flex-col items-center justify-center px-6 py-12 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#f3c8bd]/55 text-[#8f4742]">
+            <Trophy className="h-10 w-10" />
+          </div>
+          <Badge className="mt-6 bg-[#702f2a] text-white hover:bg-[#702f2a]">Hoàn thành 10 câu</Badge>
+          <h2 className="mt-4 text-3xl font-bold text-[#2a211f]">{score}/{questions.length} câu đúng</h2>
+          <p className="mt-2 text-lg font-semibold text-[#8f4742]">Độ chính xác {percentage}%</p>
+          <p className="mt-3 text-[#6f5952]">{message}</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button className="rounded-full bg-[#702f2a] px-6 text-white hover:bg-[#5d2723]" onClick={startQuiz}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Chơi lại
+            </Button>
+            <Button variant="outline" className="rounded-full border-[#dfb6aa]" onClick={() => setStatus("idle")}>
+              Đổi chế độ
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (status === "playing" && currentQuestion) {
+    const isTimedOut = selectedAnswer === "__timeout__"
+    const progress = ((currentIndex + 1) / questions.length) * 100
+    const timerProgress = (timeLeft / secondsPerQuestion) * 100
+    const answerOptions = safeAnswerOptions(currentQuestion)
+
+    return (
+      <Card className="overflow-hidden border-[#dfb6aa] bg-[#fffdf8]/95 shadow-sm">
+        <div className="h-1.5 bg-[#ead0c6]">
+          <div className="h-full bg-[#d86f75] transition-all duration-300" style={{ width: `${progress}%` }} />
+        </div>
+        <CardContent className="px-5 py-6 sm:px-10 sm:py-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm font-medium text-[#6f5952]">
+            <span>Câu {currentIndex + 1}/{questions.length}</span>
+            <div className={cn("flex items-center gap-2 rounded-full px-3 py-1.5", timeLeft <= 2 ? "bg-red-100 text-red-700" : "bg-[#f3c8bd]/45 text-[#8f4742]")}>
+              <Clock3 className="h-4 w-4" />
+              <span>{timeLeft} giây</span>
+            </div>
+            <span>Điểm: {score}</span>
+          </div>
+
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#ead0c6]/75">
+            <div
+              className={cn("h-full rounded-full transition-all duration-500", timeLeft <= 2 ? "bg-red-500" : "bg-[#315d41]")}
+              style={{ width: `${timerProgress}%` }}
+            />
+          </div>
+
+          <div className="my-8 text-center">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#8f4742]">Kana này đọc là gì?</p>
+            <span className="mt-3 block text-8xl font-bold leading-none text-[#2a211f] sm:text-9xl">{currentQuestion.kana}</span>
+          </div>
+
+          <div className="mx-auto grid max-w-2xl grid-cols-2 gap-3">
+            {answerOptions.map((option) => {
+              const isCorrect = option === currentQuestion.romaji
+              const isSelected = selectedAnswer === option
+              const revealCorrect = selectedAnswer !== null && isCorrect
+
+              return (
+                <Button
+                  key={option}
+                  type="button"
+                  variant="outline"
+                  disabled={selectedAnswer !== null}
+                  onClick={() => selectAnswer(option)}
+                  className={cn(
+                    "h-16 rounded-2xl border-[#dfb6aa] bg-white/80 text-lg font-bold text-[#3f302b] transition",
+                    selectedAnswer === null && "hover:-translate-y-0.5 hover:border-[#d86f75] hover:bg-[#fff5ef]",
+                    revealCorrect && "border-green-500 bg-green-50 text-green-700",
+                    isSelected && !isCorrect && "border-red-500 bg-red-50 text-red-700"
+                  )}
+                >
+                  {revealCorrect && <CheckCircle2 className="mr-2 h-5 w-5" />}
+                  {isSelected && !isCorrect && <XCircle className="mr-2 h-5 w-5" />}
+                  {option}
+                </Button>
+              )
+            })}
+          </div>
+
+          {isTimedOut && (
+            <p className="mt-5 text-center font-medium text-red-600">Hết giờ! Đáp án đúng là “{currentQuestion.romaji}”.</p>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="overflow-hidden border-[#dfb6aa] bg-[#fffdf8]/95 shadow-sm">
+      <CardHeader className="border-b border-[#ead0c6] bg-[#f9ece6]/65">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#702f2a] text-white">
+            <Zap className="h-6 w-6" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl text-[#2a211f]">Phản xạ Kana</CardTitle>
+            <p className="mt-2 text-sm leading-6 text-[#6f5952]">Chọn cách đọc đúng trước khi đồng hồ về 0. Mỗi lượt gồm 10 câu ngẫu nhiên.</p>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-7 p-6 sm:p-8">
+        <div>
+          <p className="mb-3 text-sm font-semibold text-[#4f403b]">Bảng chữ muốn kiểm tra</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {([
+              ["hiragana", "Hiragana", "あ"],
+              ["katakana", "Katakana", "ア"],
+              ["mixed", "Trộn cả hai", "あ・ア"],
+            ] as const).map(([value, label, example]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setMode(value)}
+                className={cn(
+                  "rounded-2xl border p-4 text-left transition",
+                  mode === value ? "border-[#702f2a] bg-[#fff1eb] shadow-sm" : "border-[#dfb6aa] bg-white/70 hover:bg-[#fff8f1]"
+                )}
+              >
+                <span className="block text-2xl font-bold text-[#2a211f]">{example}</span>
+                <span className="mt-1 block text-sm font-medium text-[#6f5952]">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-sm font-semibold text-[#4f403b]">Thời gian mỗi câu</p>
+          <div className="flex gap-3">
+            {([5, 10] as const).map((seconds) => (
+              <Button
+                key={seconds}
+                type="button"
+                variant="outline"
+                onClick={() => setSecondsPerQuestion(seconds)}
+                className={cn("rounded-full border-[#dfb6aa]", secondsPerQuestion === seconds && "border-[#702f2a] bg-[#702f2a] text-white hover:bg-[#5d2723] hover:text-white")}
+              >
+                <Clock3 className="mr-2 h-4 w-4" />
+                {seconds} giây
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <Button size="lg" className="w-full rounded-full bg-[#702f2a] text-white hover:bg-[#5d2723]" onClick={startQuiz}>
+          <Zap className="mr-2 h-5 w-5" />
+          Bắt đầu kiểm tra
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function KanaPage() {
   const [activeTab, setActiveTab] = useState("hiragana")
 
@@ -346,12 +630,15 @@ export default function KanaPage() {
         </section>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-          <TabsList className="grid w-full max-w-md grid-cols-2 rounded-full border border-[#dfb6aa] bg-[#f9ece6]/80 p-1">
+          <TabsList className="grid w-full max-w-xl grid-cols-3 rounded-full border border-[#dfb6aa] bg-[#f9ece6]/80 p-1">
             <TabsTrigger value="hiragana" className="rounded-full data-[state=active]:bg-[#702f2a] data-[state=active]:text-white">
               Hiragana
             </TabsTrigger>
             <TabsTrigger value="katakana" className="rounded-full data-[state=active]:bg-[#702f2a] data-[state=active]:text-white">
               Katakana
+            </TabsTrigger>
+            <TabsTrigger value="reaction" className="rounded-full data-[state=active]:bg-[#702f2a] data-[state=active]:text-white">
+              Phản xạ Kana
             </TabsTrigger>
           </TabsList>
           <TabsContent value="hiragana">
@@ -359,6 +646,11 @@ export default function KanaPage() {
           </TabsContent>
           <TabsContent value="katakana">
             <KanaSection script="katakana" />
+          </TabsContent>
+          <TabsContent value="reaction">
+            <div data-i18n-managed>
+              <KanaReactionQuiz />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useMemo, useState } from "react"
-import { CheckCircle2, Eye, EyeOff, GraduationCap, LockKeyhole, UserPlus } from "lucide-react"
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, GraduationCap, LockKeyhole, UserPlus } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,6 +44,7 @@ export default function RegisterPage() {
     submit: isJapanese ? "\u30a2\u30ab\u30a6\u30f3\u30c8\u4f5c\u6210" : "T\u1ea1o t\u00e0i kho\u1ea3n",
     hasAccount: isJapanese ? "\u3059\u3067\u306b\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u3042\u308a\u307e\u3059\u304b\uff1f" : "\u0110\u00e3 c\u00f3 t\u00e0i kho\u1ea3n?",
     login: isJapanese ? "\u30ed\u30b0\u30a4\u30f3" : "\u0110\u0103ng nh\u1eadp",
+    backToIntro: isJapanese ? "\u7d39\u4ecb\u30da\u30fc\u30b8\u3078\u623b\u308b" : "V\u1ec1 trang gi\u1edbi thi\u1ec7u",
     sideKicker: isJapanese ? "N5\u5b66\u7fd2\u30a2\u30ab\u30a6\u30f3\u30c8\u4f5c\u6210" : "T\u1ea1o t\u00e0i kho\u1ea3n h\u1ecdc N5",
     sideTitle: isJapanese ? "\u3042\u306a\u305f\u306b\u5408\u3046N5\u5b66\u7fd2\u3092\u306f\u3058\u3081\u3088\u3046\u3002" : "B\u1eaft \u0111\u1ea7u N5 theo l\u1ed9 tr\u00ecnh c\u1ee7a ri\u00eang b\u1ea1n.",
     sideDescription: isJapanese
@@ -110,8 +111,19 @@ export default function RegisterPage() {
   return (
     <div
       data-i18n-managed
-      className="grid min-h-screen bg-[#fbf5ee] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]"
+      className="relative grid min-h-screen bg-[#fbf5ee] bg-[url('/assets/wallpaper.png')] bg-cover bg-center lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]"
     >
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="absolute left-4 top-4 z-20 border-[#ead7c9] bg-white/88 text-[#2c211c] shadow-sm backdrop-blur hover:bg-white"
+      >
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {copy.backToIntro}
+        </Link>
+      </Button>
       <section className="hidden border-r border-[#ead7c9] bg-[#fffaf5]/70 lg:flex lg:items-center lg:justify-center lg:p-12">
         <div className="max-w-xl space-y-8">
           <div className="relative overflow-hidden rounded-xl border border-[#ead7c9] bg-white/80 p-4 shadow-sm">

@@ -6,15 +6,37 @@ import { type ActiveChatSource } from "@/lib/chat/active-source"
 import { appendChatConversationMessage, ensureChatConversation } from "@/lib/chat/conversations"
 import { buildProjectAgentContext } from "@/lib/chat/project-agent"
 import { parseChatQuizCards, type ChatQuizCard, type QuizOptionLabel } from "@/lib/chat/quiz"
+import {
+  buildReadingFitReason,
+  detectReadingSubtask,
+  formatReadingTitleLink,
+  type ReadingSubtask,
+} from "@/lib/chat/reading-mode"
+import {
+  buildProjectGodModeAnswer,
+  buildStudentLevelAssessmentAnswer,
+  buildStudentModel,
+  buildStudentModelPromptContext,
+  buildStudentNextActionAnswer,
+} from "@/lib/chat/student-model"
+import { isShortFollowUpReply } from "@/lib/chat/short-followup"
 import { vocabularyData, type VocabularyItem } from "@/lib/data/nihongo-study"
 import { prisma } from "@/lib/prisma"
 import {
   buildChatPrompt,
+  buildKnowledgeChatPrompt,
+  nihongoTutorKnowledgeSystemPrompt,
   nihongoTutorSystemPrompt,
   type ActiveArticleContext,
   type ChatHistoryMessage,
 } from "@/lib/rag/chat-prompt"
-import { buildFallbackAnswer, retrieveSources, retrieveSourcesFromDatabase, type RagSource } from "@/lib/rag/retriever"
+import {
+  buildFallbackAnswer,
+  isSourceRelevantToQuery,
+  retrieveSources,
+  retrieveSourcesFromDatabase,
+  type RagSource,
+} from "@/lib/rag/retriever"
 import { createStudyAgentTools } from "@/lib/rag/study-agent-tools"
 
 type ChatRequest = {
@@ -63,9 +85,18 @@ type AgentIntent =
   | "progress_status"
   | "saved_items_status"
   | "recent_activity"
+  | "level_assessment"
   | "app_navigation_help"
   | "system_capability"
   | "general_chat"
+
+type AgentMode =
+  | "reading_assistant"
+  | "learning_coach"
+  | "quiz_examiner"
+  | "tutor"
+  | "project_assistant"
+  | "fallback"
 
 function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
   if (!Array.isArray(history)) return []
@@ -82,7 +113,7 @@ function sanitizeHistory(history: unknown): ChatHistoryMessage[] {
     })
     .map((item) => ({
       role: item.role,
-      content: item.content.trim().slice(0, 1200),
+      content: item.content.trim().slice(0, 1800),
     }))
     .slice(-6)
 }
@@ -301,7 +332,7 @@ function activeSourceFromSources(sources: ReturnType<typeof responseSources>): A
   if (!newsSource?.sourceId) return undefined
 
   return {
-    type: "news",
+    type: "news" as const,
     id: newsSource.sourceId,
     title: newsSource.title,
   }
@@ -315,6 +346,129 @@ function isUsefulModelText(value: string) {
   if (withoutMarkdown.length < 8) return false
 
   return /[\p{L}\p{N}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(withoutMarkdown)
+}
+
+function affordableOutputTokens(error: unknown) {
+  if (!error || typeof error !== "object") return null
+
+  const candidate = error as {
+    message?: unknown
+    responseBody?: unknown
+    data?: unknown
+    statusCode?: unknown
+  }
+  const details = [
+    typeof candidate.message === "string" ? candidate.message : "",
+    typeof candidate.responseBody === "string" ? candidate.responseBody : "",
+    candidate.data ? JSON.stringify(candidate.data) : "",
+  ].join(" ")
+  const match = details.match(/can only afford\s+(\d+)/i)
+  const parsed = match ? Number.parseInt(match[1], 10) : Number.NaN
+
+  return candidate.statusCode === 402 && Number.isFinite(parsed) ? parsed : null
+}
+
+function apiErrorStatus(error: unknown) {
+  if (!error || typeof error !== "object") return null
+  const statusCode = (error as { statusCode?: unknown }).statusCode
+  return typeof statusCode === "number" ? statusCode : null
+}
+
+function apiErrorText(error: unknown, seen = new Set<unknown>()): string {
+  if (!error || seen.has(error)) return ""
+  if (typeof error === "string") return error
+  if (typeof error !== "object") return String(error)
+
+  seen.add(error)
+  const candidate = error as {
+    message?: unknown
+    responseBody?: unknown
+    data?: unknown
+    errors?: unknown
+    lastError?: unknown
+    cause?: unknown
+    value?: unknown
+  }
+  const parts = [
+    typeof candidate.message === "string" ? candidate.message : "",
+    typeof candidate.responseBody === "string" ? candidate.responseBody : "",
+    candidate.data ? JSON.stringify(candidate.data) : "",
+    candidate.value ? JSON.stringify(candidate.value) : "",
+    Array.isArray(candidate.errors)
+      ? candidate.errors.map((item) => apiErrorText(item, seen)).join(" ")
+      : "",
+    apiErrorText(candidate.cause, seen),
+    apiErrorText(candidate.lastError, seen),
+  ]
+
+  return parts.filter(Boolean).join(" ")
+}
+
+function isDailyFreeModelLimitExceeded(error: unknown) {
+  return /free-models-per-day|free model requests per day/i.test(apiErrorText(error))
+}
+
+function shouldTryFallbackModel(error: unknown) {
+  const status = apiErrorStatus(error)
+  const errorName =
+    error && typeof error === "object" && typeof (error as { name?: unknown }).name === "string"
+      ? (error as { name: string }).name
+      : ""
+  const text = apiErrorText(error)
+  return (
+    errorName === "AbortError" ||
+    errorName === "TimeoutError" ||
+    status === 408 ||
+    status === 409 ||
+    status === 429 ||
+    (status !== null && status >= 500) ||
+    /operation was aborted|aborted|code["']?\s*:?\s*504|missing.*choices|choices.*missing|AI_TypeValidationError|type validation|No object generated|invalid response/i.test(text)
+  )
+}
+
+async function openRouterFetch(input: RequestInfo | URL, init?: RequestInit) {
+  const response = await fetch(input, init)
+  const contentType = response.headers.get("content-type") ?? ""
+  if (!contentType.includes("application/json")) return response
+
+  try {
+    const body = await response.clone().json() as {
+      error?: { message?: unknown; code?: unknown }
+      choices?: unknown
+    }
+
+    if (body?.error) {
+      const code = Number(body.error.code)
+      const message = typeof body.error.message === "string" ? body.error.message : "OpenRouter provider error"
+      const status = code === 504 || /aborted/i.test(message) ? 504 : response.status >= 400 ? response.status : 502
+
+      return new Response(JSON.stringify(body), {
+        status,
+        statusText: message,
+        headers: response.headers,
+      })
+    }
+
+    if (response.ok && !Array.isArray(body?.choices)) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: "OpenRouter response is missing choices[]",
+            code: "missing_choices",
+          },
+        }),
+        {
+          status: 502,
+          statusText: "OpenRouter response is missing choices[]",
+          headers: response.headers,
+        }
+      )
+    }
+  } catch {
+    return response
+  }
+
+  return response
 }
 
 function normalizeIntentText(value: string) {
@@ -476,6 +630,107 @@ function shouldUseActiveArticle(message: string, activeSource: ActiveChatSource 
   return true
 }
 
+function isActiveArticleTopicCheck(message: string) {
+  const normalized = normalizeIntentText(message)
+  return (
+    /\b(co|phai|noi ve|lien quan|ve)\b/.test(normalized) &&
+    /\b(a|ha|khong|ko|k|dung khong|phai khong|chu)\b/.test(normalized)
+  )
+}
+
+function topicFromMessage(message: string) {
+  const normalized = normalizeIntentText(message)
+  const raw = message.toLowerCase()
+
+  if (
+    normalized.includes("world cup") ||
+    normalized.includes("worldcup") ||
+    raw.includes("ワールドカップ") ||
+    raw.includes("w杯")
+  ) {
+    return {
+      label: "World Cup",
+      needles: ["world cup", "worldcup", "ワールドカップ", "w杯"],
+    }
+  }
+
+  return null
+}
+
+function buildActiveArticleTopicCheckAnswer(message: string, article: ActiveArticleContext) {
+  if (!isActiveArticleTopicCheck(message)) return null
+
+  const topic = topicFromMessage(message)
+  if (!topic) return null
+
+  const haystack = `${article.title}\n${article.category ?? ""}\n${article.articleText}`.toLowerCase()
+  const matchedNeedle = topic.needles.find((needle) => haystack.includes(needle.toLowerCase()))
+
+  if (!matchedNeedle) {
+    return `Không thấy bài **${article.title}** nói trực tiếp về **${topic.label}** trong nội dung hiện có.`
+  }
+
+  const relevantSentence = article.articleText
+    .split(/(?<=[。.!?！？])\s*/)
+    .find((sentence) => sentence.toLowerCase().includes(matchedNeedle.toLowerCase()))
+    ?.trim()
+
+  return [
+    `Có. Bài **${article.title}** có nói về **${topic.label}**.`,
+    relevantSentence
+      ? `Trong bài có câu nhắc trực tiếp: ${relevantSentence}`
+      : `Nội dung bài có nhắc trực tiếp đến ${matchedNeedle}.`,
+  ].join("\n\n")
+}
+
+function topicFromMessageStrict(message: string) {
+  const normalized = normalizeIntentText(message)
+  const raw = message.toLowerCase()
+
+  if (
+    normalized.includes("world cup") ||
+    normalized.includes("worldcup") ||
+    raw.includes("\u30ef\u30fc\u30eb\u30c9\u30ab\u30c3\u30d7") ||
+    raw.includes("w\u676f")
+  ) {
+    return {
+      label: "World Cup",
+      needles: ["world cup", "worldcup", "\u30ef\u30fc\u30eb\u30c9\u30ab\u30c3\u30d7", "w\u676f"],
+    }
+  }
+
+  return null
+}
+
+function buildStrictActiveArticleTopicCheckAnswer(message: string, article: ActiveArticleContext) {
+  if (!isActiveArticleTopicCheck(message)) return null
+
+  const topic = topicFromMessageStrict(message)
+  if (!topic) return null
+  if (!article.articleText.trim()) {
+    return `Chưa chắc. Hiện Kami chưa có đủ nội dung của bài **${article.title}** để xác nhận bài này có nói về **${topic.label}** hay không.`
+  }
+
+  const haystack = `${article.title}\n${article.category ?? ""}\n${article.articleText}`.toLowerCase()
+  const matchedNeedle = topic.needles.find((needle) => haystack.includes(needle.toLowerCase()))
+
+  if (!matchedNeedle) {
+    return `Không. Trong dữ liệu hiện có, Kami không thấy bài **${article.title}** nói trực tiếp về **${topic.label}**.`
+  }
+
+  const relevantSentence = article.articleText
+    .split(/(?<=[。.!?！？])\s*/)
+    .find((sentence) => sentence.toLowerCase().includes(matchedNeedle.toLowerCase()))
+    ?.trim()
+
+  return [
+    `Có. Bài **${article.title}** có nói về **${topic.label}**.`,
+    relevantSentence
+      ? `Trong bài có câu nhắc trực tiếp: ${relevantSentence}`
+      : `Nội dung bài có nhắc trực tiếp đến ${matchedNeedle}.`,
+  ].join("\n\n")
+}
+
 function requestedQuizCount(message: string) {
   const normalized = normalizeIntentText(message)
   const digitMatch = normalized.match(/\b([1-9]|10)\b/)
@@ -532,7 +787,6 @@ function isLevelDiagnosticRequest(message: string) {
     normalized.includes("kiem tra trinh do") ||
     normalized.includes("test trinh do") ||
     normalized.includes("kiem tra nang luc") ||
-    normalized.includes("danh gia trinh do") ||
     normalized.includes("kiem tra n5") ||
     normalized.includes("kiem tra n4") ||
     normalized.includes("thi thu") ||
@@ -854,6 +1108,21 @@ function isProgressRequest(message: string) {
   )
 }
 
+function isLevelAssessmentRequest(message: string) {
+  const normalized = normalizeIntentText(message)
+  const asksAssessment =
+    normalized.includes("danh gia trinh do") ||
+    normalized.includes("trinh do hien tai") ||
+    normalized.includes("minh dang o trinh do nao") ||
+    normalized.includes("toi dang o trinh do nao") ||
+    normalized.includes("toi dang n") ||
+    normalized.includes("minh dang n") ||
+    normalized.includes("uoc luong trinh do") ||
+    normalized.includes("xem trinh do")
+
+  return asksAssessment && !isLevelDiagnosticRequest(message)
+}
+
 function isKnowledgeLearningRequest(message: string) {
   const normalized = normalizeIntentText(message)
   const hasJapanese = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(message)
@@ -911,17 +1180,20 @@ function isSystemCapabilityRequest(message: string) {
     normalized.includes("lam duoc nhung gi") ||
     normalized.includes("co the lam gi") ||
     normalized.includes("co the lam duoc") ||
-    normalized.includes("ho tro") ||
-    normalized.includes("du lieu hoc") ||
-    normalized.includes("du lieu he thong") ||
-    normalized.includes("tu con so 0") ||
-    normalized.includes("moi hoc") ||
-    normalized.includes("bat dau hoc") ||
+    normalized.includes("kha nang cua kami") ||
+    normalized.includes("kami co gi") ||
+    normalized.includes("kami la gi") ||
     normalized.includes("project nay") ||
-    normalized.includes("app nay") ||
     normalized.includes("chatbot nay") ||
-    normalized.includes("he thong nay") ||
-    normalized.includes("he thong cua ban")
+    normalized.includes("he thong nay lam duoc gi") ||
+    normalized.includes("he thong cua ban lam duoc gi") ||
+    normalized.includes("trung tam project") ||
+    normalized.includes("trung tam cua project") ||
+    normalized.includes("bo nao") ||
+    normalized.includes("learning brain") ||
+    normalized.includes("orchestrator") ||
+    normalized.includes("god mode") ||
+    normalized.includes("vi than")
   )
 }
 
@@ -936,10 +1208,320 @@ function isNavigationHelpRequest(message: string) {
   )
 }
 
-function detectAgentIntents(message: string, appState: ChatAppState, history: ChatHistoryMessage[]): AgentIntent[] {
-  const intents = new Set<AgentIntent>()
+function mentionsReadingContext(message: string) {
+  const normalized = normalizeIntentText(message)
+  return (
+    normalized.includes("bai nay") ||
+    normalized.includes("bai do") ||
+    normalized.includes("trong bai") ||
+    normalized.includes("tu kho") ||
+    normalized.includes("tu moi") ||
+    normalized.includes("tom tat") ||
+    normalized.includes("noi dung bai") ||
+    normalized.includes("doc hieu") ||
+    normalized.includes("nghe") ||
+    normalized.includes("audio") ||
+    normalized.includes("quiz") ||
+    normalized.includes("tao quiz") ||
+    normalized.includes("quiz tu bai") ||
+    normalized.includes("tao quiz tu bai") ||
+    normalized.includes("cau hoi tu bai") ||
+    normalized.includes("giai thich bai") ||
+    normalized.includes("giai thich doan") ||
+    normalized.includes("doan nay") ||
+    normalized.includes("dich") ||
+    normalized.includes("dich bai")
+  )
+}
+
+function requestedReadingLevel(message: string) {
+  return normalizeIntentText(message).match(/\bn([1-5])\b/)?.[0].toUpperCase() ?? null
+}
+
+function isInternalReadingArticle(article: { title: string; category: string | null; articleText: string }) {
+  const title = normalizeIntentText(article.title)
+  const category = normalizeIntentText(article.category ?? "")
+  const content = normalizeIntentText(article.articleText)
+  const combined = [title, category, content.slice(0, 1000)].join(" ")
+
+  return (
+    /\btest\b/.test(title) ||
+    /\blocal\b/.test(title) ||
+    /\bimport\b/.test(title) ||
+    combined.includes("test local") ||
+    combined.includes("local import") ||
+    combined.includes("test import")
+  )
+}
+
+function readingSourcePayload(article: { id: string; title: string; level: string }, score = 100) {
+  return {
+    id: article.id,
+    sourceId: article.id,
+    type: "news" as const,
+    title: article.title,
+    href: `/reading?article=${encodeURIComponent(article.id)}`,
+    score,
+  }
+}
+
+async function findReadingArticlesForSubtask(message: string, limit: number) {
+  const level = requestedReadingLevel(message)
+  const articles = await prisma.newsArticle.findMany({
+    where: level ? { level } : undefined,
+    orderBy: { createdAt: "desc" },
+    take: 200,
+  })
+
+  return articles
+    .filter((article) => !isInternalReadingArticle(article))
+    .map((article) => {
+      const searchable = normalizeIntentText(`${article.title} ${article.level} ${article.category ?? ""} ${article.articleText}`)
+      const beginnerBoost = level === "N5" && article.level === "N5" ? 50 : 0
+      const lightBoost = /(chuoi|banana|truong hoc|gia dinh|thoi tiet|do an|robot|cong nghe|doi song)/.test(searchable) ? 12 : 0
+      const shortBoost = article.articleText.length < 1200 ? 8 : 0
+      return {
+        article,
+        score: beginnerBoost + lightBoost + shortBoost,
+      }
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+}
+
+async function buildReadingSubtaskAnswer(
+  message: string,
+  subtask: ReadingSubtask,
+  userId: string,
+  conversationId: string | null
+) {
+  if (!subtask) return null
+
+  const matches = await findReadingArticlesForSubtask(message, subtask === "open_reading" ? 1 : 5)
+  if (!matches.length) return null
+
+  if (subtask === "open_reading") {
+    const { article, score } = matches[0]
+    const sources = [readingSourcePayload(article, score)]
+    const activeSource: ActiveChatSource = {
+      type: "news",
+      id: article.id,
+      title: article.title,
+    }
+    const answer = [
+      `Mình mở cho bạn bài ${article.level} này nhé: **${formatReadingTitleLink(article)}**.`,
+      "",
+      buildReadingFitReason(article),
+      "",
+      "Bạn có thể đọc trước, rồi hỏi mình tóm tắt, giải thích từ khó hoặc tạo quiz từ bài này.",
+    ].join("\n")
+    const persisted = await persistConversationTurn({
+      userId,
+      conversationId,
+      message,
+      answer,
+      provider: "fallback",
+      sources,
+    })
+    await logChat({ userId, message, answer, provider: "fallback", sources })
+
+    return {
+      answer,
+      provider: "fallback" as const,
+      isDeterministic: true,
+      sources,
+      activeSource,
+      ...persisted,
+    }
+  }
+
+  const sources = matches.map(({ article, score }) => readingSourcePayload(article, score))
+  const answer = [
+    "Mình gợi ý vài bài đọc phù hợp nhé:",
+    "",
+    ...matches.map(({ article }, index) => `${index + 1}. **${article.title}** (${article.level}) - ${buildReadingFitReason(article)}`),
+    "",
+    "Bạn muốn mở bài nào thì nói tên bài, hoặc bảo mình mở một bài cụ thể cho bạn.",
+  ].join("\n")
+  const activeSource: ActiveChatSource | null =
+    matches.length === 1
+      ? {
+          type: "news",
+          id: matches[0].article.id,
+          title: matches[0].article.title,
+        }
+      : null
+  const persisted = await persistConversationTurn({
+    userId,
+    conversationId,
+    message,
+    answer,
+    provider: "fallback",
+    sources,
+  })
+  await logChat({ userId, message, answer, provider: "fallback", sources })
+
+  return {
+    answer,
+    provider: "fallback" as const,
+    isDeterministic: true,
+    sources,
+    activeSource,
+    ...persisted,
+  }
+}
+
+function previousAssistantOfferedAction(history: ChatHistoryMessage[]) {
+  const previous = latestHistoryContent(history, "assistant") ?? ""
+  const normalized = normalizeIntentText(previous)
+  if (!previous.trim()) return null
+  if (
+    normalized.includes("ban muon") ||
+    normalized.includes("muon minh") ||
+    normalized.includes("minh co the") ||
+    normalized.includes("hoi minh") ||
+    normalized.includes("tao quiz") ||
+    normalized.includes("tom tat") ||
+    normalized.includes("tu kho") ||
+    normalized.includes("ngu phap") ||
+    normalized.includes("tiep")
+  ) {
+    return {
+      raw: previous,
+      normalized,
+    }
+  }
+
+  return null
+}
+
+function shortArticleExcerpt(article: ActiveArticleContext) {
+  return article.articleText
+    .split(/(?<=[。.!?！？])\s*/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(" ")
+}
+
+function buildShortFollowUpText(article: ActiveArticleContext | null, offered: ReturnType<typeof previousAssistantOfferedAction>) {
+  if (!offered) return null
+
+  if (!article) {
+    return "Được nha. Hiện mình chưa thấy bài đọc đang mở, nên bạn mở lại bài hoặc gửi tên bài, rồi mình sẽ tiếp tục đúng phần bạn vừa chọn."
+  }
+
+  const sourceLine = `Mình sẽ bám theo bài **${article.title}**.`
+
+  if (offered.normalized.includes("ngu phap")) {
+    const grammar = article.grammar && article.grammar !== "[]" && article.grammar !== "{}"
+      ? article.grammar.slice(0, 900)
+      : ""
+    return [
+      "Được nha. Mình giải thích vài cấu trúc ngữ pháp dễ gặp trong bài này nhé.",
+      "",
+      sourceLine,
+      grammar
+        ? `Phần ngữ pháp trong bài có thể chú ý:\n${grammar}`
+        : "Hiện bài chưa có danh sách ngữ pháp tách sẵn, nên bạn có thể gửi một câu trong bài mà bạn thấy khó, mình sẽ phân tích cấu trúc câu đó.",
+    ].join("\n")
+  }
+
+  if (offered.normalized.includes("tu kho") || offered.normalized.includes("tu vung")) {
+    const vocabulary = article.vocabulary && article.vocabulary !== "[]" && article.vocabulary !== "{}"
+      ? article.vocabulary.slice(0, 900)
+      : ""
+    return [
+      "Được nha. Mình chọn vài từ đáng chú ý trong bài này để bạn đọc dễ hơn.",
+      "",
+      sourceLine,
+      vocabulary
+        ? `Một số từ/cụm từ trong bài:\n${vocabulary}`
+        : "Bài chưa có danh sách từ vựng tách sẵn. Bạn gửi đoạn/câu muốn hỏi, mình sẽ rút từ khó trực tiếp từ đoạn đó.",
+    ].join("\n")
+  }
+
+  if (offered.normalized.includes("tom tat")) {
+    return [
+      "Được nha. Mình tóm tắt ngắn bài này trước nhé.",
+      "",
+      `Bài **${article.title}** nói về: ${shortArticleExcerpt(article) || "nội dung chính của bài đọc đang mở."}`,
+      "",
+      "Bạn đọc qua phần này trước, rồi mình có thể giải thích từ khó hoặc tạo quiz từ bài.",
+    ].join("\n")
+  }
+
+  if (offered.normalized.includes("quiz")) {
+    return [
+      "Được nha. Mình sẽ tạo quiz từ bài này.",
+      "",
+      `Hãy tạo mini quiz 5 câu trắc nghiệm từ bài đọc **${article.title}**. Có đáp án và giải thích ngắn.`,
+    ].join("\n")
+  }
+
+  return [
+    "Được nha. Mình tiếp tục dựa trên bài đang mở nhé.",
+    "",
+    sourceLine,
+    "Bạn muốn mình đi theo hướng nào trước: tóm tắt bài, giải thích từ khó, giải thích ngữ pháp hay tạo quiz từ bài?",
+  ].join("\n")
+}
+
+async function buildShortFollowUpAnswer({
+  userId,
+  conversationId,
+  message,
+  history,
+  activeSource,
+}: {
+  userId: string
+  conversationId: string | null
+  message: string
+  history: ChatHistoryMessage[]
+  activeSource: ActiveChatSource | null
+}) {
+  if (!isShortFollowUpReply(message)) return null
+  const offered = previousAssistantOfferedAction(history)
+  if (!offered) return null
+
+  const article = activeSource?.type === "news" ? await getActiveArticleContext(activeSource) : null
+  const answer = buildShortFollowUpText(article, offered)
+  if (!answer) return null
+  const sources = article && activeSource
+    ? [
+        {
+          id: activeSource.id,
+          sourceId: activeSource.id,
+          type: "news" as const,
+          title: article.title,
+          href: `/reading?article=${encodeURIComponent(activeSource.id)}`,
+          score: 100,
+        },
+      ]
+    : []
+  const persisted = await persistConversationTurn({
+    userId,
+    conversationId,
+    message,
+    answer,
+    provider: "fallback",
+    sources,
+  })
+  await logChat({ userId, message, answer, provider: "fallback", sources })
+
+  return {
+    answer,
+    provider: "fallback" as const,
+    isDeterministic: true,
+    sources,
+    activeSource: activeSource ?? null,
+    ...persisted,
+  }
+}
+
+function detectAgentMode(message: string, appState: ChatAppState, history: ChatHistoryMessage[]): AgentMode {
+  const activeSource = appState.activeSource ?? null
   const quizCards = activeQuizCards(appState, history)
-  const knowledgeRequest = isKnowledgeLearningRequest(message)
   const wantsCreateQuiz =
     isLevelDiagnosticRequest(message) ||
     isRandomVocabularyQuizRequest(message) ||
@@ -947,18 +1529,55 @@ function detectAgentIntents(message: string, appState: ChatAppState, history: Ch
     isQuizFollowUp(message) ||
     isVagueQuizRequest(message)
 
-  if (!knowledgeRequest && quizCards.length && isQuizAnswerCheckRequest(message)) intents.add("review_quiz")
-  if (wantsCreateQuiz) intents.add("create_quiz")
-  if (isArticleBrowseRequest(message) || isVagueArticleRequest(message) || shouldUseActiveArticle(message, appState.activeSource ?? null)) {
-    intents.add("active_article")
+  // Current user message wins over old history. If the learner says "bai nay"/"trong bai"
+  // while a reading is active, stay in reading mode even if the previous turn was project talk.
+  if (activeSource?.type === "news" && mentionsReadingContext(message)) return "reading_assistant"
+  if (isArticleBrowseRequest(message) || isVagueArticleRequest(message)) return "reading_assistant"
+  if (shouldUseActiveArticle(message, activeSource)) return "reading_assistant"
+
+  if (quizCards.length && (isQuizAnswerCheckRequest(message) || appState.quizState?.submitted)) return "quiz_examiner"
+  if (wantsCreateQuiz) return "quiz_examiner"
+
+  if (isLevelAssessmentRequest(message) || isProgressRequest(message) || isSavedItemsRequest(message) || isRecentActivityRequest(message)) {
+    return "learning_coach"
   }
-  if (!knowledgeRequest && !wantsCreateQuiz && isProgressRequest(message)) intents.add("progress_status")
-  if (!knowledgeRequest && !wantsCreateQuiz && isSavedItemsRequest(message)) intents.add("saved_items_status")
-  if (!knowledgeRequest && !wantsCreateQuiz && isRecentActivityRequest(message)) intents.add("recent_activity")
-  if (isSystemCapabilityRequest(message)) intents.add("system_capability")
-  if (isNavigationHelpRequest(message)) intents.add("app_navigation_help")
-  if (knowledgeRequest && !wantsCreateQuiz) intents.add("knowledge_question")
-  if (!intents.size) intents.add(isCasualOrMetaMessage(message) ? "general_chat" : "knowledge_question")
+
+  if (isSystemCapabilityRequest(message) || isNavigationHelpRequest(message)) return "project_assistant"
+  if (isKnowledgeLearningRequest(message)) return "tutor"
+  if (isCasualOrMetaMessage(message)) return "fallback"
+
+  return "tutor"
+}
+
+function modeSubtasks(mode: AgentMode, message: string, appState: ChatAppState, history: ChatHistoryMessage[]): AgentIntent[] {
+  const intents = new Set<AgentIntent>()
+  const quizCards = activeQuizCards(appState, history)
+  const wantsCreateQuiz =
+    isLevelDiagnosticRequest(message) ||
+    isRandomVocabularyQuizRequest(message) ||
+    isExplicitCreateQuizRequest(message) ||
+    isQuizFollowUp(message) ||
+    isVagueQuizRequest(message)
+
+  if (mode === "reading_assistant") {
+    intents.add("active_article")
+    if (wantsCreateQuiz) intents.add("create_quiz")
+  } else if (mode === "quiz_examiner") {
+    if (quizCards.length && isQuizAnswerCheckRequest(message)) intents.add("review_quiz")
+    intents.add("create_quiz")
+  } else if (mode === "learning_coach") {
+    if (isLevelAssessmentRequest(message)) intents.add("level_assessment")
+    if (isProgressRequest(message)) intents.add("progress_status")
+    if (isSavedItemsRequest(message)) intents.add("saved_items_status")
+    if (isRecentActivityRequest(message)) intents.add("recent_activity")
+  } else if (mode === "project_assistant") {
+    intents.add("system_capability")
+    if (isNavigationHelpRequest(message)) intents.add("app_navigation_help")
+  } else if (mode === "tutor") {
+    intents.add("knowledge_question")
+  } else {
+    intents.add("general_chat")
+  }
 
   return Array.from(intents)
 }
@@ -1065,6 +1684,10 @@ function buildQuizStateAnswer(message: string, appState: ChatAppState, history: 
 }
 
 async function buildProgressAnswer(userId: string, appState: ChatAppState) {
+  const studentModel = await buildStudentModel(userId, appState.activeSource ?? null)
+  return buildStudentNextActionAnswer(studentModel)
+}
+/*
   const progress = await getStudyProgress(userId)
   const quizLine = progress.latestQuiz
     ? `Quiz gần nhất: ${progress.latestQuiz.score}/${progress.latestQuiz.total} (${progress.latestQuiz.percentage}%).`
@@ -1087,6 +1710,331 @@ async function buildProgressAnswer(userId: string, appState: ChatAppState) {
       : "Gợi ý tiếp theo: học thêm 5-10 từ mới hoặc làm một quiz ngắn để hệ thống có thêm dữ liệu đánh giá.",
   ].filter(Boolean).join("\n")
 }
+
+*/
+
+async function buildLevelAssessmentAnswer(userId: string, appState: ChatAppState) {
+  const [progress, profile, placement, quizAttempts, activities, savedItems, chatLogs, articles] = await Promise.all([
+    getStudyProgress(userId),
+    prisma.learnerProfile.findUnique({ where: { userId } }),
+    prisma.placementResult.findUnique({ where: { userId } }),
+    prisma.quizAttempt.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.activityLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    prisma.savedStudyItem.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+    }),
+    prisma.chatLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    prisma.newsArticle.findMany({
+      select: { id: true, title: true, level: true },
+      take: 200,
+    }),
+  ])
+
+  const normalizedArticleByTitle = new Map(articles.map((article) => [normalizeIntentText(article.title), article]))
+  const articleLevels = new Set<string>()
+  if (appState.activeSource?.type === "news") {
+    const activeArticle = articles.find((article) => article.id === appState.activeSource?.id)
+    if (activeArticle?.level) articleLevels.add(activeArticle.level)
+  }
+
+  for (const savedItem of savedItems) {
+    const matchedArticle =
+      articles.find((article) => article.id === savedItem.sourceId || article.id === savedItem.itemKey) ??
+      normalizedArticleByTitle.get(normalizeIntentText(savedItem.title))
+    if (matchedArticle?.level) articleLevels.add(matchedArticle.level)
+  }
+
+  const readingActivities = activities.filter((activity) => {
+    const text = normalizeIntentText(`${activity.type} ${activity.content} ${activity.topic ?? ""}`)
+    return text.includes("reading") || text.includes("bai doc") || text.includes("bai bao") || text.includes("todaii")
+  })
+  for (const activity of readingActivities) {
+    const text = normalizeIntentText(`${activity.content} ${activity.topic ?? ""}`)
+    const matchedArticle = articles.find((article) => text.includes(normalizeIntentText(article.title)))
+    if (matchedArticle?.level) articleLevels.add(matchedArticle.level)
+  }
+
+  const audioListenCount = activities.filter((activity) => {
+    const text = normalizeIntentText(`${activity.type} ${activity.content} ${activity.result ?? ""}`)
+    return text.includes("audio") || text.includes("nghe")
+  }).length
+  const readingHelpCount = chatLogs.filter((log) => {
+    const text = normalizeIntentText(`${log.message} ${log.answer}`)
+    return (
+      text.includes("bai nay") ||
+      text.includes("trong bai") ||
+      text.includes("bai doc") ||
+      text.includes("doc hieu") ||
+      text.includes("todaii")
+    )
+  }).length
+
+  const averageQuiz = progress.averageQuizScore
+  const latestQuiz = quizAttempts[0]
+  const hasN4Signal = articleLevels.has("N4") || articleLevels.has("N3")
+  const dataSignals = [
+    progress.learnedVocabulary > 0,
+    quizAttempts.length > 0,
+    readingActivities.length > 0 || articleLevels.size > 0,
+    savedItems.length > 0,
+    placement !== null,
+    readingHelpCount > 0,
+  ].filter(Boolean).length
+
+  let estimatedLevel = "N5"
+  if (placement?.level === "absolute_beginner") {
+    estimatedLevel = "N5 mới bắt đầu"
+  } else if (placement?.level === "early_n5") {
+    estimatedLevel = "N5"
+  } else if (placement?.level === "n5_review") {
+    estimatedLevel = hasN4Signal || averageQuiz >= 80 ? "N5 vững / đầu N4" : "N5 khá"
+  } else if (hasN4Signal && averageQuiz >= 70) {
+    estimatedLevel = "đầu N4"
+  } else if (averageQuiz >= 80 && progress.learnedVocabulary >= 80) {
+    estimatedLevel = "N5 khá vững"
+  } else if (averageQuiz >= 60 || progress.learnedVocabulary >= 30) {
+    estimatedLevel = "N5"
+  } else if (dataSignals <= 1) {
+    estimatedLevel = "N5/đầu N5"
+  }
+
+  const confidence =
+    dataSignals >= 4 ? "khá có cơ sở" : dataSignals >= 2 ? "sơ bộ" : "rất sơ bộ"
+
+  const opening =
+    dataSignals >= 3
+      ? `Đánh giá ${confidence}: hiện bạn có vẻ đang ở khoảng **${estimatedLevel}**.`
+      : `Hiện mình chưa đủ dữ liệu để đánh giá chính xác, nhưng dựa trên lịch sử gần đây, bạn có vẻ đang ở khoảng **${estimatedLevel}**.`
+
+  const evidence = [
+    placement
+      ? `Placement test: ${placement.score}/${placement.total} (${placement.percentage}%), mức hệ thống ghi nhận là ${placement.level}.`
+      : "Placement test: chưa có hoặc chưa hoàn tất.",
+    `Quiz: ${quizAttempts.length} lượt, điểm trung bình ${averageQuiz}%.` +
+      (latestQuiz ? ` Lần gần nhất: ${latestQuiz.score}/${latestQuiz.total} (${latestQuiz.percentage}%).` : ""),
+    `Từ vựng đã học trong app: ${progress.learnedVocabulary}/${progress.totalVocabulary}.`,
+    `Bài đọc đã ghi nhận: ${readingActivities.length}.` +
+      (articleLevels.size ? ` Level bài đã mở/lưu: ${Array.from(articleLevels).sort().join(", ")}.` : " Chưa thấy level bài đọc được ghi rõ."),
+    `Lượt nghe audio đã ghi nhận: ${audioListenCount}.`,
+    `Số lần hỏi trợ giúp liên quan bài đọc: ${readingHelpCount}.`,
+  ]
+
+  const nextStep =
+    estimatedLevel.includes("N4")
+      ? "Bước tiếp theo: làm thêm một quiz N5/N4 ngắn và đọc 1 bài N4 để kiểm tra xem bạn có giữ được độ hiểu ổn định không."
+      : "Bước tiếp theo: làm một quiz N5 ngắn và đọc thêm 1 bài N5/N4 nhẹ để Kami có thêm dữ liệu phân biệt N5 vững hay đầu N4."
+
+  return [
+    opening,
+    "",
+    "Mình dựa trên các tín hiệu này:",
+    ...evidence.map((item) => `- ${item}`),
+    "",
+    profile
+      ? `Mục tiêu hồ sơ hiện tại: ${profile.goal}, thời lượng học ${profile.dailyMinutes} phút/ngày.`
+      : "Hồ sơ học tập: chưa có dữ liệu onboarding đầy đủ.",
+    nextStep,
+  ].join("\n")
+}
+
+async function buildFriendlyLevelAssessmentAnswer(userId: string, appState: ChatAppState) {
+  const studentModel = await buildStudentModel(userId, appState.activeSource ?? null)
+  return buildStudentLevelAssessmentAnswer(studentModel)
+}
+/*
+  const [progress, profile, placement, quizAttempts, activities, savedItems, chatLogs, articles] = await Promise.all([
+    getStudyProgress(userId),
+    prisma.learnerProfile.findUnique({ where: { userId } }),
+    prisma.placementResult.findUnique({ where: { userId } }),
+    prisma.quizAttempt.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.activityLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    prisma.savedStudyItem.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+    }),
+    prisma.chatLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    prisma.newsArticle.findMany({
+      select: { id: true, title: true, level: true },
+      take: 200,
+    }),
+  ])
+
+  const normalizedArticleByTitle = new Map(articles.map((article) => [normalizeIntentText(article.title), article]))
+  const articleLevels = new Set<string>()
+  if (appState.activeSource?.type === "news") {
+    const activeArticle = articles.find((article) => article.id === appState.activeSource?.id)
+    if (activeArticle?.level) articleLevels.add(activeArticle.level)
+  }
+
+  for (const savedItem of savedItems) {
+    const matchedArticle =
+      articles.find((article) => article.id === savedItem.sourceId || article.id === savedItem.itemKey) ??
+      normalizedArticleByTitle.get(normalizeIntentText(savedItem.title))
+    if (matchedArticle?.level) articleLevels.add(matchedArticle.level)
+  }
+
+  const readingActivities = activities.filter((activity) => {
+    const text = normalizeIntentText(`${activity.type} ${activity.content} ${activity.topic ?? ""}`)
+    return text.includes("reading") || text.includes("bai doc") || text.includes("bai bao") || text.includes("todaii")
+  })
+  for (const activity of readingActivities) {
+    const text = normalizeIntentText(`${activity.content} ${activity.topic ?? ""}`)
+    const matchedArticle = articles.find((article) => text.includes(normalizeIntentText(article.title)))
+    if (matchedArticle?.level) articleLevels.add(matchedArticle.level)
+  }
+
+  const audioListenCount = activities.filter((activity) => {
+    const text = normalizeIntentText(`${activity.type} ${activity.content} ${activity.result ?? ""}`)
+    return text.includes("audio") || text.includes("nghe")
+  }).length
+  const readingHelpCount = chatLogs.filter((log) => {
+    const text = normalizeIntentText(`${log.message} ${log.answer}`)
+    return (
+      text.includes("bai nay") ||
+      text.includes("trong bai") ||
+      text.includes("bai doc") ||
+      text.includes("doc hieu") ||
+      text.includes("todaii")
+    )
+  }).length
+
+  const averageQuiz = progress.averageQuizScore
+  const latestQuiz = quizAttempts[0]
+  const hasN4Signal = articleLevels.has("N4") || articleLevels.has("N3")
+  const dataSignals = [
+    progress.learnedVocabulary > 0,
+    quizAttempts.length > 0,
+    readingActivities.length > 0 || articleLevels.size > 0,
+    savedItems.length > 0,
+    placement !== null,
+    readingHelpCount > 0,
+  ].filter(Boolean).length
+
+  let estimatedLevel = "N5"
+  if (placement?.level === "absolute_beginner") {
+    estimatedLevel = "N5 mới bắt đầu"
+  } else if (placement?.level === "early_n5") {
+    estimatedLevel = "N5"
+  } else if (placement?.level === "n5_review") {
+    estimatedLevel = hasN4Signal || averageQuiz >= 80 ? "N5 vững / đầu N4" : "N5 khá"
+  } else if (hasN4Signal && averageQuiz >= 70) {
+    estimatedLevel = "đầu N4"
+  } else if (averageQuiz >= 80 && progress.learnedVocabulary >= 80) {
+    estimatedLevel = "N5 khá vững"
+  } else if (averageQuiz >= 60 || progress.learnedVocabulary >= 30) {
+    estimatedLevel = "N5"
+  } else if (dataSignals <= 1) {
+    estimatedLevel = "N5/đầu N5"
+  }
+
+  const confidence =
+    dataSignals >= 4 ? "Đánh giá này khá có cơ sở" : dataSignals >= 2 ? "Đây là đánh giá sơ bộ" : "Đây là đánh giá tạm thời"
+  const opening =
+    dataSignals >= 3
+      ? `Dựa trên dữ liệu học gần đây, mình đánh giá bạn đang ở khoảng **${estimatedLevel}**. ${confidence}.`
+      : `Hiện Kami chưa đủ dữ liệu để đánh giá thật chính xác, nhưng dựa trên những gì đã ghi nhận gần đây, bạn có vẻ đang ở khoảng **${estimatedLevel}**. ${confidence}.`
+
+  const observations: string[] = []
+
+  if (placement) {
+    observations.push(
+      `Bạn làm placement test đạt ${placement.percentage}%, nên Kami có một mốc ban đầu để ước lượng nền hiện tại.`
+    )
+  } else {
+    observations.push("Bạn chưa có placement test rõ ràng, nên phần ước lượng trình độ vẫn cần thêm một bài kiểm tra ngắn để chắc hơn.")
+  }
+
+  if (quizAttempts.length && latestQuiz) {
+    const quizTone =
+      averageQuiz >= 80
+        ? "Điểm quiz của bạn đang khá tốt"
+        : averageQuiz >= 60
+          ? "Điểm quiz của bạn đang ở mức ổn, nhưng vẫn còn chỗ để củng cố"
+          : "Điểm quiz hiện tại cho thấy bạn còn một số lỗ hổng cần ôn lại"
+    observations.push(
+      `${quizTone}; lần gần nhất bạn đạt ${latestQuiz.percentage}%, còn trung bình các lượt gần đây khoảng ${averageQuiz}%.`
+    )
+  } else {
+    observations.push("Kami chưa thấy nhiều kết quả quiz, nên chưa đánh giá chắc được phần từ vựng/ngữ pháp qua điểm số.")
+  }
+
+  if (progress.learnedVocabulary > 0) {
+    observations.push("Bạn đã bắt đầu tích lũy từ vựng trong app; đây là tín hiệu tốt cho nền N5 nếu bạn duy trì ôn đều.")
+  } else {
+    observations.push("Phần từ vựng trong app chưa có nhiều dấu vết học, nên Kami chưa thể đo chắc vốn từ hiện tại của bạn.")
+  }
+
+  if (readingActivities.length || articleLevels.size) {
+    const levels = Array.from(articleLevels).sort()
+    observations.push(
+      levels.length
+        ? `Bạn đã có tương tác với bài đọc ở mức ${levels.join(", ")}, nên Kami có thêm dữ liệu để nhìn phần đọc hiểu.`
+        : "Bạn đã bắt đầu mở bài đọc, nhưng hệ thống chưa gắn đủ level bài đọc để phân biệt mức đọc hiểu thật rõ."
+    )
+  } else {
+    observations.push("Hệ thống chưa ghi nhận bài đọc hoàn thành, nên Kami cần thêm dữ liệu đọc hiểu để đánh giá chắc hơn.")
+  }
+
+  if (audioListenCount > 0) {
+    observations.push("Bạn đã có dữ liệu nghe audio, giúp Kami nhìn thêm một chút về kỹ năng nghe.")
+  } else {
+    observations.push("Bạn chưa có nhiều dữ liệu luyện nghe, nên phần nghe cần được kiểm tra thêm.")
+  }
+
+  if (readingHelpCount > 0) {
+    observations.push("Bạn có hỏi trợ giúp khi đọc bài, điều này bình thường và hữu ích; Kami sẽ theo dõi thêm những điểm bạn hay mắc khi đọc.")
+  }
+
+  const levelBoundary =
+    estimatedLevel.includes("N4") || hasN4Signal || averageQuiz >= 80
+      ? "Bạn đang đi đúng hướng, nhưng Kami chưa đủ dữ liệu để kết luận bạn đã vững N5 hay mới chạm đầu N4."
+      : "Bạn đang đi đúng hướng ở vùng N5, nhưng Kami cần thêm quiz và bài đọc để biết bạn đang ở đầu N5 hay đã khá vững."
+  const goalLine = profile
+    ? `Với mục tiêu học hiện tại và nhịp ${profile.dailyMinutes} phút mỗi ngày, bạn nên ưu tiên học đều hơn là tăng độ khó quá nhanh.`
+    : "Khi bạn hoàn tất hồ sơ học tập, Kami sẽ cá nhân hóa đánh giá sát hơn với mục tiêu của bạn."
+  const nextSteps = estimatedLevel.includes("N4") || averageQuiz >= 80
+    ? "Bước tiếp theo phù hợp nhất là làm thêm một quiz N5/N4 ngắn, đọc một bài N4 đơn giản, rồi nghe audio của bài đó để kiểm tra xem bạn có giữ được độ hiểu ổn định không."
+    : "Bước tiếp theo phù hợp nhất là làm một quiz N5 ngắn, đọc một bài N5 nhẹ và nghe audio của bài đó. Nếu điểm quiz tiếp tục tốt, bạn có thể thử một bài N4 đơn giản."
+
+  return [
+    opening,
+    "",
+    observations.join(" "),
+    "",
+    `${levelBoundary} ${goalLine}`,
+    "",
+    nextSteps,
+  ].join("\n")
+}
+
+*/
 
 async function buildJlptGoalPlanAnswer(userId: string) {
   const progress = await getStudyProgress(userId)
@@ -1163,13 +2111,26 @@ async function buildRecentActivityAnswer(userId: string, appState: ChatAppState)
   return lines.join("\n")
 }
 
-async function buildSystemCapabilityAnswer(appState: ChatAppState) {
+async function buildSystemCapabilityAnswer(userId: string, appState: ChatAppState) {
   const [vocabularyTotal, grammarTotal, quizTotal, readingTotal] = await Promise.all([
     prisma.vocabulary.count(),
     prisma.grammar.count(),
     prisma.quizQuestion.count(),
     prisma.newsArticle.count(),
   ])
+  const studentModel = await buildStudentModel(userId, appState.activeSource ?? null)
+
+  return buildProjectGodModeAnswer(
+    studentModel,
+    {
+      vocabulary: vocabularyTotal,
+      grammar: grammarTotal,
+      quiz: quizTotal,
+      reading: readingTotal,
+    },
+    appState.page,
+    appState.activeSource?.title
+  )
 
   return [
     "Mình hiểu. Nếu bạn bắt đầu từ con số 0 để thi N5, app này nên dùng như một bộ học có AI kèm sát bên, không phải chỉ là chatbot hỏi đáp.",
@@ -1219,14 +2180,50 @@ function buildNavigationHelpAnswer(appState: ChatAppState) {
   ].join("\n")
 }
 
-async function buildAgentContext(userId: string, appState: ChatAppState, intents: AgentIntent[]) {
+function buildProviderFailureFallbackAnswer({
+  agentMode,
+  activeArticle,
+}: {
+  agentMode: AgentMode
+  activeArticle?: ActiveArticleContext | null
+}) {
+  if (agentMode === "reading_assistant" && activeArticle) {
+    return [
+      "Model AI đang phản hồi không ổn định một chút, nhưng mình vẫn có thể bám theo bài đang mở.",
+      "",
+      `Với bài **${activeArticle.title}**, bạn có thể hỏi mình theo một trong các hướng sau: tóm tắt bài, giải thích từ khó, giải thích ngữ pháp hoặc tạo quiz từ bài.`,
+      "Nếu bạn vừa yêu cầu một phần cụ thể, gửi lại ngắn gọn như `tóm tắt`, `từ khó`, `ngữ pháp` hoặc `quiz` nhé.",
+    ].join("\n")
+  }
+
+  if (agentMode === "learning_coach") {
+    return "Model AI đang tạm lỗi, nhưng mình vẫn giữ được dữ liệu học của bạn. Bạn có thể hỏi lại ngắn gọn như `hôm nay học gì tiếp` hoặc `đánh giá trình độ của tôi`, mình sẽ trả lời theo tiến độ gần đây."
+  }
+
+  if (agentMode === "quiz_examiner") {
+    return "Model AI đang tạm lỗi, nhưng phần quiz trong app vẫn dùng được. Nếu bạn đã nộp bài, kết quả trên quiz card vẫn là nguồn chính; nếu muốn tạo quiz mới, hãy gửi lại `tạo 5 câu quiz` kèm chủ đề hoặc bài đọc."
+  }
+
+  return "Model AI đang phản hồi không ổn định. Bạn gửi lại câu hỏi ngắn hơn một chút nhé; nếu đang học bài đọc, hãy hỏi theo kiểu `tóm tắt bài này`, `giải thích từ khó` hoặc `tạo quiz từ bài này`."
+}
+
+async function buildAgentContext(userId: string, appState: ChatAppState, intents: AgentIntent[], mode: AgentMode) {
   const lines = [
     "Du lieu he thong da xem:",
+    `- Agent mode: ${mode}`,
     `- UI page: ${appState.page}`,
     `- Active source: ${appState.activeSource ? `${appState.activeSource.type}:${appState.activeSource.title}` : "khong co"}`,
     `- Latest sources: ${appState.latestSources.map((source) => `${source.type}:${source.title}`).join(", ") || "khong co"}`,
     `- Latest action: ${appState.lastActionMessage || "khong co"}`,
   ]
+  const needsStudentModel = intents.some((intent) =>
+    ["progress_status", "level_assessment", "system_capability", "recent_activity", "app_navigation_help"].includes(intent)
+  )
+
+  if (needsStudentModel) {
+    const studentModel = await buildStudentModel(userId, appState.activeSource ?? null)
+    lines.push(buildStudentModelPromptContext(studentModel))
+  }
 
   if (appState.latestAssistantQuiz?.cards.length) {
     lines.push(`- Active quiz: ${appState.latestAssistantQuiz.cards.length} cau; submitted=${Boolean(appState.quizState?.submitted)}`)
@@ -1260,10 +2257,11 @@ async function buildDeterministicAgentAnswer(userId: string, message: string, ap
   }
 
   const parts: string[] = []
+  if (intents.includes("level_assessment")) parts.push(await buildFriendlyLevelAssessmentAnswer(userId, appState))
   if (intents.includes("progress_status")) parts.push(await buildProgressAnswer(userId, appState))
   if (intents.includes("saved_items_status")) parts.push(await buildSavedItemsAnswer(userId, appState))
   if (intents.includes("recent_activity")) parts.push(await buildRecentActivityAnswer(userId, appState))
-  if (intents.includes("system_capability")) parts.push(await buildSystemCapabilityAnswer(appState))
+  if (intents.includes("system_capability")) parts.push(await buildSystemCapabilityAnswer(userId, appState))
   if (intents.includes("app_navigation_help") && !intents.includes("knowledge_question")) parts.push(buildNavigationHelpAnswer(appState))
 
   return parts.length ? parts.join("\n\n") : null
@@ -1517,7 +2515,34 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Message is too long" }, { status: 413 })
   }
 
-  const agentIntents = detectAgentIntents(message, appState, history)
+  const agentMode = detectAgentMode(message, appState, history)
+  const agentIntents = modeSubtasks(agentMode, message, appState, history)
+  const readingSubtask = agentMode === "reading_assistant" ? detectReadingSubtask(message) : null
+
+  if (readingSubtask) {
+    const readingAnswer = await buildReadingSubtaskAnswer(
+      message,
+      readingSubtask,
+      user.id,
+      requestConversationId
+    )
+
+    if (readingAnswer) {
+      return NextResponse.json(readingAnswer)
+    }
+  }
+
+  const shortFollowUpAnswer = await buildShortFollowUpAnswer({
+    userId: user.id,
+    conversationId: requestConversationId,
+    message,
+    history,
+    activeSource: effectiveActiveSource ?? null,
+  })
+
+  if (shortFollowUpAnswer) {
+    return NextResponse.json(shortFollowUpAnswer)
+  }
 
   if (isVagueArticleRequest(message) && !effectiveActiveSource && !isArticleBrowseRequest(message) && !isQuizFollowUp(message)) {
     const answer = buildClarifyingArticleAnswer()
@@ -1683,6 +2708,42 @@ export async function POST(request: NextRequest) {
     })
   }
 
+  const deterministicAgentAnswer = await buildDeterministicAgentAnswer(
+    user.id,
+    message,
+    appState,
+    history,
+    agentIntents
+  )
+
+  if (deterministicAgentAnswer) {
+    const sourcePayload: ReturnType<typeof responseSources> = []
+    const persisted = await persistConversationTurn({
+      userId: user.id,
+      conversationId: requestConversationId,
+      message,
+      answer: deterministicAgentAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
+    await logChat({
+      userId: user.id,
+      message,
+      answer: deterministicAgentAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
+
+    return NextResponse.json({
+      answer: deterministicAgentAnswer,
+      provider: "fallback",
+      isDeterministic: true,
+      sources: sourcePayload,
+      activeSource: effectiveActiveSource ?? null,
+      ...persisted,
+    })
+  }
+
   const contextualMessage = buildContextualMessage(message, history)
   const diagnosticRequest = isLevelDiagnosticRequest(message)
   const articleBrowseRequest = isArticleBrowseRequest(message)
@@ -1696,14 +2757,22 @@ export async function POST(request: NextRequest) {
     isQuizFollowUp(message) ||
     isExplicitCreateQuizRequest(message) ||
     isVagueQuizRequest(message)
-  const projectAgent = diagnosticRequest
+  const isSimpleKnowledgeRequest =
+    agentIntents.length === 1 && agentIntents[0] === "knowledge_question"
+  const projectAgent = diagnosticRequest || isSimpleKnowledgeRequest
     ? { promptContext: "", sources: [], activeSource: null }
     : await buildProjectAgentContext(retrievalMessage, user.id)
-  const agentContext = await buildAgentContext(user.id, appState, [])
-  const activeArticle = !diagnosticRequest && shouldUseActiveArticle(message, effectiveActiveSource)
+  const agentContext = isSimpleKnowledgeRequest
+    ? ""
+    : await buildAgentContext(user.id, appState, agentIntents, agentMode)
+  const shouldForceActiveReading =
+    agentMode === "reading_assistant" &&
+    effectiveActiveSource?.type === "news" &&
+    mentionsReadingContext(message)
+  const activeArticle = !diagnosticRequest && (shouldForceActiveReading || shouldUseActiveArticle(message, effectiveActiveSource))
     ? await getActiveArticleContext(effectiveActiveSource)
     : null
-  const primarySources = diagnosticRequest
+  const primarySources = diagnosticRequest || isSimpleKnowledgeRequest
     ? []
     : activeArticle && effectiveActiveSource
       ? [
@@ -1719,7 +2788,7 @@ export async function POST(request: NextRequest) {
         ]
       : await retrieveSourcesFromDatabase(
           retrievalMessage,
-          6,
+          3,
           articleBrowseRequest
             ? { preferredTypes: ["news"], requireTypes: ["news"], requireJapaneseTermMatch: true }
             : undefined
@@ -1738,32 +2807,72 @@ export async function POST(request: NextRequest) {
   const shouldExcludeActive = shouldExcludeActiveArticle(message, effectiveActiveSource)
   let sources = Array.from(dedupedSources.values())
     .filter((source) => !shouldExcludeActive || source.sourceId !== effectiveActiveSource?.id)
-    .slice(0, 8)
+    .slice(0, 3)
 
-  if (!sources.length && !articleBrowseRequest && !diagnosticRequest) {
-    sources = retrieveSources(retrievalMessage, 6)
+  if (!sources.length && !articleBrowseRequest && !diagnosticRequest && !isSimpleKnowledgeRequest) {
+    sources = retrieveSources(retrievalMessage, 3)
   }
 
-  const prompt = buildChatPrompt(
-    contextualMessage.promptMessage,
-    sources,
-    diagnosticRequest ? [] : history,
-    activeArticle,
-    [agentContext, projectAgent.promptContext].filter(Boolean).join("\n\n"),
-    shouldParseQuizCards
+  const promptSources = isSimpleKnowledgeRequest
+    ? sources.filter((source) => isSourceRelevantToQuery(contextualMessage.retrievalQuery, source))
+    : sources
+  const prompt = isSimpleKnowledgeRequest
+    ? buildKnowledgeChatPrompt(contextualMessage.promptMessage, promptSources, history)
+    : buildChatPrompt(
+        contextualMessage.promptMessage,
+        promptSources,
+        diagnosticRequest ? [] : history,
+        activeArticle,
+        [agentContext, projectAgent.promptContext].filter(Boolean).join("\n\n"),
+        shouldParseQuizCards,
+        agentMode
+      )
+  const sourcePayload = responseSources(
+    promptSources.filter((source) => isSourceRelevantToQuery(contextualMessage.retrievalQuery, source))
   )
-  const sourcePayload = responseSources(sources)
   const responseActiveSource = activeArticle && effectiveActiveSource
     ? effectiveActiveSource
     : articleBrowseRequest
       ? activeSourceFromSources(sourcePayload) ?? null
       : projectAgent.activeSource ?? activeSourceFromSources(sourcePayload) ?? effectiveActiveSource
+
+  const activeArticleTopicAnswer = activeArticle
+    ? buildStrictActiveArticleTopicCheckAnswer(message, activeArticle)
+    : null
+
+  if (activeArticleTopicAnswer) {
+    const persisted = await persistConversationTurn({
+      userId: user.id,
+      conversationId: requestConversationId,
+      message,
+      answer: activeArticleTopicAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
+    await logChat({
+      userId: user.id,
+      message,
+      answer: activeArticleTopicAnswer,
+      provider: "fallback",
+      sources: sourcePayload,
+    })
+
+    return NextResponse.json({
+      answer: activeArticleTopicAnswer,
+      provider: "fallback",
+      isDeterministic: true,
+      sources: sourcePayload,
+      activeSource: responseActiveSource ?? null,
+      ...persisted,
+    })
+  }
+
   const apiKey = process.env.OPENROUTER_API_KEY
 
   if (!apiKey) {
     const answer = diagnosticRequest
       ? await buildDiagnosticQuizFallbackAnswer(message)
-      : buildFallbackAnswer(message, sources)
+      : buildFallbackAnswer(message, promptSources)
     const quizCards = quizCardsPayload(answer, shouldParseQuizCards)
     const persisted = await persistConversationTurn({
       userId: user.id,
@@ -1796,32 +2905,101 @@ export async function POST(request: NextRequest) {
     apiKey,
     baseURL: "https://openrouter.ai/api/v1",
     name: "openrouter",
+    fetch: openRouterFetch,
     headers: {
       "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
       "X-OpenRouter-Title": "Nihongo AI Study",
     },
   })
-  const tools = createStudyAgentTools(user)
-  const toolChoice = diagnosticRequest ? { type: "tool" as const, toolName: "getDiagnosticQuiz" as const } : "auto"
+  const shouldUseTools =
+    diagnosticRequest ||
+    agentIntents.some((intent) =>
+      ["create_quiz", "progress_status", "saved_items_status", "recent_activity", "active_article"].includes(intent)
+    )
+  const tools = shouldUseTools ? createStudyAgentTools(user) : undefined
+  const toolChoice = diagnosticRequest
+    ? { type: "tool" as const, toolName: "getDiagnosticQuiz" as const }
+    : shouldUseTools
+      ? "auto" as const
+      : undefined
 
   try {
-    const maxOutputTokens = Number.parseInt(process.env.OPENROUTER_MAX_OUTPUT_TOKENS ?? "700", 10)
-    const result = await generateText({
-      model: openrouter.chat(process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini"),
-      system: nihongoTutorSystemPrompt,
-      prompt,
-      tools,
-      toolChoice,
-      stopWhen: stepCountIs(6),
-      temperature: 0.25,
-      maxOutputTokens: Number.isFinite(maxOutputTokens) ? maxOutputTokens : 700,
-    })
+    const configuredMaxOutputTokens = Number.parseInt(process.env.OPENROUTER_MAX_OUTPUT_TOKENS ?? "350", 10)
+    const maxOutputTokens = Number.isFinite(configuredMaxOutputTokens) ? configuredMaxOutputTokens : 350
+    const configuredModelTimeoutMs = Number.parseInt(process.env.OPENROUTER_MODEL_TIMEOUT_MS ?? "30000", 10)
+    const modelTimeoutMs = Number.isFinite(configuredModelTimeoutMs)
+      ? Math.max(5000, configuredModelTimeoutMs)
+      : 30000
+    const systemPrompt = isSimpleKnowledgeRequest
+      ? nihongoTutorKnowledgeSystemPrompt
+      : nihongoTutorSystemPrompt
+    const primaryModel = process.env.OPENROUTER_MODEL ?? "google/gemma-4-31b-it:free"
+    const configuredFallbackModels = (
+      process.env.OPENROUTER_FALLBACK_MODELS ??
+      "qwen/qwen3-next-80b-a3b-instruct:free,openrouter/free"
+    )
+      .split(",")
+      .map((model) => model.trim())
+      .filter(Boolean)
+    const modelCandidates = Array.from(new Set([primaryModel, ...configuredFallbackModels]))
+    const generateAnswer = (modelId: string, outputTokens: number) =>
+      generateText({
+        model: openrouter.chat(modelId),
+        system: systemPrompt,
+        prompt,
+        tools,
+        toolChoice,
+        stopWhen: stepCountIs(6),
+        temperature: 0.25,
+        maxOutputTokens: outputTokens,
+        maxRetries: 0,
+        abortSignal: AbortSignal.timeout(modelTimeoutMs),
+      })
+    let result: Awaited<ReturnType<typeof generateAnswer>> | null = null
+    let lastError: unknown
+
+    for (const [index, modelId] of modelCandidates.entries()) {
+      try {
+        result = await generateAnswer(modelId, maxOutputTokens)
+        break
+      } catch (error) {
+        if (isDailyFreeModelLimitExceeded(error)) throw error
+        const affordableTokens = affordableOutputTokens(error)
+
+        if (affordableTokens && affordableTokens < maxOutputTokens) {
+          const retryOutputTokens = Math.max(1, Math.min(350, affordableTokens - 16))
+          console.warn(
+            `[chat] OpenRouter output budget reduced from ${maxOutputTokens} to ${retryOutputTokens} tokens.`
+          )
+          try {
+            result = await generateAnswer(modelId, retryOutputTokens)
+            break
+          } catch (retryError) {
+            if (isDailyFreeModelLimitExceeded(retryError)) throw retryError
+            lastError = retryError
+          }
+        } else {
+          lastError = error
+        }
+
+        if (index < modelCandidates.length - 1 && shouldTryFallbackModel(lastError)) {
+          console.warn(
+            `[chat] Model ${modelId} unavailable (${apiErrorStatus(lastError) ?? "timeout"}); trying ${modelCandidates[index + 1]}.`
+          )
+          continue
+        }
+
+        throw lastError
+      }
+    }
+
+    if (!result) throw lastError ?? new Error("No OpenRouter model returned a result")
 
     const answer = isUsefulModelText(result.text)
       ? result.text
       : diagnosticRequest
         ? await buildDiagnosticQuizFallbackAnswer(message)
-        : buildFallbackAnswer(message, sources)
+        : buildProviderFailureFallbackAnswer({ agentMode, activeArticle })
     const quizCards = quizCardsPayload(answer, shouldParseQuizCards)
     const persisted = await persistConversationTurn({
       userId: user.id,
@@ -1851,9 +3029,17 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.warn("[chat] OpenRouter unavailable, using fallback answer.", error)
-    const fallbackAnswer = diagnosticRequest
-      ? await buildDiagnosticQuizFallbackAnswer(message)
-      : buildFallbackAnswer(message, sources)
+    const quotaExceeded = isDailyFreeModelLimitExceeded(error)
+    const fallbackAnswer = quotaExceeded
+      ? [
+          "Bạn đã dùng hết lượt AI miễn phí của OpenRouter trong hôm nay.",
+          "",
+          "Hãy thử lại sau khi quota được đặt lại, hoặc nâng cấp/nạp credit để tiếp tục dùng model AI.",
+          "Tin nhắn bị lỗi này không được tính là một câu trả lời AI thành công.",
+        ].join("\n")
+      : diagnosticRequest
+        ? await buildDiagnosticQuizFallbackAnswer(message)
+        : buildFallbackAnswer(message, promptSources)
     const quizCards = quizCardsPayload(fallbackAnswer, shouldParseQuizCards)
     const persisted = await persistConversationTurn({
       userId: user.id,
@@ -1861,7 +3047,7 @@ export async function POST(request: NextRequest) {
       message,
       answer: fallbackAnswer,
       provider: "fallback",
-      sources: sourcePayload,
+      sources: quotaExceeded ? [] : sourcePayload,
       quizCards,
     })
 
@@ -1870,13 +3056,15 @@ export async function POST(request: NextRequest) {
       message,
       answer: fallbackAnswer,
       provider: "fallback",
-      sources: sourcePayload,
+      sources: quotaExceeded ? [] : sourcePayload,
     })
 
     return NextResponse.json({
       answer: fallbackAnswer,
       provider: "fallback",
-      sources: sourcePayload,
+      isDeterministic: quotaExceeded,
+      quotaExceeded,
+      sources: quotaExceeded ? [] : sourcePayload,
       quizCards,
       activeSource: responseActiveSource ?? null,
       ...persisted,

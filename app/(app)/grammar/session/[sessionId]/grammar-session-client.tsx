@@ -145,16 +145,22 @@ export function GrammarSessionClient({ sessionId, grammarItems }: GrammarSession
   useEffect(() => {
     if (!isComplete || loggedCompletion) return
 
+    const understoodPatterns = items
+      .filter((item) => results[item.id] === "understood")
+      .map((item) => item.pattern)
+
     addActivity({
       type: "grammar_session",
-      content: `${session.title}: ${understoodCount}/${items.length} mẫu đã hiểu`,
-      topic: items[0]?.pattern ?? "Ngữ pháp N5",
+      content: `${session.title}: ${understoodCount}/${items.length} mẫu đã hiểu${
+        understoodPatterns.length ? ` (${understoodPatterns.join(", ")})` : ""
+      }`,
+      topic: understoodPatterns[0] ?? items[0]?.pattern ?? "Ngữ pháp N5",
       result: "completed",
       score: understoodCount,
       durationMinutes: session.estimatedMinutes,
     })
     setLoggedCompletion(true)
-  }, [addActivity, isComplete, items.length, loggedCompletion, session, understoodCount])
+  }, [addActivity, isComplete, items, loggedCompletion, results, session, understoodCount])
 
   function resetCardState() {
     setIsFlipped(false)

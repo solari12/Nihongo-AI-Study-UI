@@ -407,12 +407,25 @@ function extractVocabulary() {
   return Array.from(cards).map((card) => {
     const text = card.textContent?.replace(/\s+/g, " ").trim() ?? ""
     const level = text.match(/\bN[1-5]\b/)?.[0] ?? null
+    const japaneseElement = card.querySelector(".one-click-trans")
+    const word = japaneseElement ? textWithoutReadingsFromNode(japaneseElement) : ""
+    const reading = japaneseElement
+      ? Array.from(japaneseElement.querySelectorAll("rt")).map((element) => visibleText(element)).join("")
+      : ""
+    const rows = Array.from(card.children)
+    const detailSpans = rows.at(-1) ? Array.from(rows.at(-1).querySelectorAll("span")) : []
+    const meaning = visibleText(detailSpans[0])
+    const partOfSpeech = visibleText(detailSpans.at(-1))
 
     return {
       text,
       level,
+      word,
+      reading,
+      meaning,
+      partOfSpeech: partOfSpeech === meaning ? "" : partOfSpeech,
     }
-  })
+  }).filter((item) => item.word)
 }
 
 function extractGrammar() {
@@ -424,12 +437,23 @@ function extractGrammar() {
     const lines = unique((card.textContent ?? "").split("\n"))
     const text = lines.join(" ").replace(/\s+/g, " ").trim()
     const level = text.match(/\bN[1-5]\b/)?.[0] ?? null
+    const directRows = Array.from(card.children)
+    const headingRow = directRows[0]
+    const detailRow = directRows[1]
+    const patternElement = headingRow?.querySelector("span")
+    const pattern = visibleText(patternElement)
+    const detailSpans = detailRow ? Array.from(detailRow.querySelectorAll("span")) : []
+    const description = visibleText(detailSpans[0])
+    const example = visibleText(detailSpans.at(-1))
 
     return {
       text,
       level,
+      pattern,
+      description,
+      example: example === description ? "" : example,
     }
-  })
+  }).filter((item) => item.pattern && !/không xuất hiện|khong xuat hien/i.test(item.text))
 }
 
 function cleanQuestionLine(line) {
@@ -632,8 +656,19 @@ function parseVisibleQuestionCard() {
       const textElement = Array.from(optionRoot.querySelectorAll("span"))
         .find((element) => cleanQuestionLine(element.textContent ?? "") !== key)
       const text = textElement ? textWithoutReadingsFromNode(textElement) : ""
-      const optionClassName = String(optionRoot.getAttribute("class") ?? "")
-      const isCorrect = /bg-smt-green|text-smt-green|border-smt-green/i.test(optionClassName)
+      const optionSignals = [optionRoot, ...optionRoot.querySelectorAll("[class], [data-state], [aria-label]")]
+        .map((element) =>
+          [
+            element.getAttribute("class"),
+            element.getAttribute("data-state"),
+            element.getAttribute("aria-label"),
+            element.getAttribute("title"),
+          ]
+            .filter(Boolean)
+            .join(" ")
+        )
+        .join(" ")
+      const isCorrect = /bg-smt-green|text-smt-green|border-smt-green|correct|success|answer-right/i.test(optionSignals)
 
       return text ? { key, text, isCorrect } : null
     })
@@ -928,6 +963,27 @@ function questionTotalFromPage() {
   return totals.length ? Math.max(...totals) : null
 }
 
+function questionIndexButtons(expectedTotal) {
+  if (!expectedTotal) return []
+
+  const root = questionSectionRoot()
+  const candidates = visibleElements(root, "[tabindex='0'], button")
+    .map((element) => ({
+      element,
+      index: Number(cleanQuestionLine(element.textContent ?? "")),
+    }))
+    .filter(({ index }) => Number.isInteger(index) && index >= 1 && index <= expectedTotal)
+
+  const byIndex = new Map()
+  for (const candidate of candidates) {
+    if (!byIndex.has(candidate.index)) byIndex.set(candidate.index, candidate.element)
+  }
+
+  return Array.from(byIndex.entries())
+    .sort(([left], [right]) => left - right)
+    .map(([index, element]) => ({ index, element }))
+}
+
 async function extractQuestions() {
   const visibleQuestion = parseVisibleQuestionCard()
   if (visibleQuestion) {
@@ -942,6 +998,18 @@ async function extractQuestions() {
     }
 
     saveVisibleQuestion()
+
+    const indexedButtons = questionIndexButtons(expectedTotal)
+    if (indexedButtons.length >= expectedTotal) {
+      for (let index = 1; index <= expectedTotal; index += 1) {
+        const target = questionIndexButtons(expectedTotal).find((item) => item.index === index)
+        if (!target) continue
+
+        target.element.click()
+        await wait(500)
+        saveVisibleQuestion()
+      }
+    }
 
     for (let step = 0; step < maxSteps && questionsByIndex.size < expectedTotal; step += 1) {
       const current = parseVisibleQuestionCard()
@@ -1044,7 +1112,14 @@ async function crawlTodaii() {
     return
   }
 
-  alert(`Imported TODAII article: ${result.body.articleId}. Crawl debug txt downloaded.`)
+  const questionCount = Number(result.body.questionCount ?? 0)
+  const correctAnswerCount = Number(result.body.correctAnswerCount ?? 0)
+  const answerStatus =
+    questionCount > 0 && correctAnswerCount === questionCount
+      ? `Answers: ${correctAnswerCount}/${questionCount}.`
+      : `WARNING: answers only ${correctAnswerCount}/${questionCount}. Open answer details and crawl again.`
+
+  alert(`Imported TODAII article: ${result.body.articleId}. ${answerStatus} Crawl debug txt downloaded.`)
 }
 
 crawlTodaii().catch((error) => {

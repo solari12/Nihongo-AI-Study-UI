@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect, useRef } from "react"
 import {
   BookOpen,
   Check,
@@ -15,6 +15,7 @@ import {
   ListChecks,
   MessageSquare,
   Plus,
+  RotateCcw,
   Search,
   Trash2,
 } from "lucide-react"
@@ -61,6 +62,13 @@ type QuestionItem = {
 type StudyItem = {
   text?: string
   level?: string | null
+  word?: string
+  reading?: string
+  meaning?: string
+  partOfSpeech?: string
+  pattern?: string
+  description?: string
+  example?: string
 }
 
 type VocabularyDisplayItem = {
@@ -139,6 +147,16 @@ function articlePreview(article: ReadingArticle) {
 }
 
 function parseVocabularyItem(item: StudyItem): VocabularyDisplayItem {
+  if (item.word?.trim()) {
+    return {
+      word: item.word.trim(),
+      reading: item.reading?.trim() ?? "",
+      level: item.level ?? null,
+      meaning: item.meaning?.trim() ?? "",
+      partOfSpeech: item.partOfSpeech?.trim() ?? "",
+    }
+  }
+
   const text = compactText(item)
   const partOfSpeechMatch = text.match(/(danh từ|động từ|tính từ|trạng từ|liên từ|thán từ|trợ từ)$/i)
   const partOfSpeech = partOfSpeechMatch?.[0] ?? ""
@@ -147,11 +165,19 @@ function parseVocabularyItem(item: StudyItem): VocabularyDisplayItem {
   const level = item.level ?? levelMatch?.[0] ?? null
 
   if (!levelMatch) {
+    const withoutPartOfSpeech = partOfSpeech ? text.slice(0, -partOfSpeech.length) : text
+    const legacyMatch = withoutPartOfSpeech.match(/^([一-龯ぁ-んァ-ンー々]+)(.*)$/)
+    const japaneseText = legacyMatch?.[1]?.trim() ?? text
+    const meaning = legacyMatch?.[2]?.trim() ?? ""
+    const readingMatch = japaneseText.match(/[ぁ-んァ-ンー]+$/)
+    const reading = readingMatch?.[0] ?? ""
+    const word = reading ? japaneseText.slice(0, -reading.length).trim() : japaneseText
+
     return {
-      word: text,
-      reading: "",
+      word: word || japaneseText,
+      reading,
       level,
-      meaning: "",
+      meaning,
       partOfSpeech,
     }
   }
@@ -172,6 +198,15 @@ function parseVocabularyItem(item: StudyItem): VocabularyDisplayItem {
 }
 
 function parseGrammarItem(item: StudyItem): GrammarDisplayItem {
+  if (item.pattern?.trim()) {
+    return {
+      pattern: item.pattern.trim(),
+      level: item.level ?? null,
+      description: item.description?.trim() ?? "",
+      example: item.example?.trim() ?? "",
+    }
+  }
+
   const text = compactText(item)
   const levelMatch = text.match(/N[1-5]/)
   const level = item.level ?? levelMatch?.[0] ?? null
@@ -328,6 +363,37 @@ export function ReadingPageClient() {
   const [deletingArticleId, setDeletingArticleId] = useState<string | null>(null)
   const { activeUser } = useAuth()
   const isAdmin = activeUser?.role === "admin"
+  const loggedReadingArticleIdsRef = useRef<Set<string>>(new Set())
+  const loggedAudioArticleIdsRef = useRef<Set<string>>(new Set())
+
+  function logReadingActivity(article: ReadingArticle, kind: "reading" | "reading_audio") {
+    if (!activeUser) return
+    if (kind === "reading" && loggedReadingArticleIdsRef.current.has(article.id)) return
+    if (kind === "reading_audio" && loggedAudioArticleIdsRef.current.has(article.id)) return
+
+    if (kind === "reading") loggedReadingArticleIdsRef.current.add(article.id)
+    if (kind === "reading_audio") loggedAudioArticleIdsRef.current.add(article.id)
+
+    void fetch("/api/activity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: kind,
+        content:
+          kind === "reading"
+            ? `Đã mở bài đọc: ${article.title}`
+            : `Đã nghe audio bài đọc: ${article.title}`,
+        topic: article.level,
+        result: article.category ?? article.provider,
+        durationMinutes: kind === "reading" ? 5 : 1,
+      }),
+    }).catch(() => {
+      if (kind === "reading") loggedReadingArticleIdsRef.current.delete(article.id)
+      if (kind === "reading_audio") loggedAudioArticleIdsRef.current.delete(article.id)
+    })
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -418,12 +484,19 @@ export function ReadingPageClient() {
   // Lấy dữ liệu bài đọc hiện tại
   const selectedArticle = filteredArticles.find((article) => article.id === selectedId) ?? filteredArticles[0] ?? null
   const articleId = selectedArticle?.id ?? ""
+
+  useEffect(() => {
+    if (!selectedArticle) return
+    logReadingActivity(selectedArticle, "reading")
+  }, [selectedArticle?.id, activeUser?.id])
   
   const questions = asArray<QuestionItem>(selectedArticle?.questions)
   const totalQuestions = questions.length
   
   const vocabulary = asArray<StudyItem>(selectedArticle?.vocabulary)
-  const grammar = asArray<StudyItem>(selectedArticle?.grammar)
+  const grammar = asArray<StudyItem>(selectedArticle?.grammar).filter(
+    (item) => !/không xuất hiện|khong xuat hien/i.test(compactText(item))
+  )
   const levelStats = selectedArticle?.levelStats ?? []
   const highlightTerms = useMemo(() => {
     const crawledHighlights = uniqueHighlightTerms(selectedArticle?.highlights ?? [])
@@ -531,6 +604,29 @@ export function ReadingPageClient() {
         ...prev.submitted,
         [articleId]: true,
       },
+    }))
+  }
+
+  const restartQuiz = () => {
+    if (!articleId) return
+
+    setQuiz((prev) => ({
+      ...prev,
+      answers: Object.fromEntries(
+        Object.entries(prev.answers).filter(([key]) => !key.startsWith(`${articleId}:`))
+      ),
+      submitted: {
+        ...prev.submitted,
+        [articleId]: false,
+      },
+      currentIndex: {
+        ...prev.currentIndex,
+        [articleId]: 0,
+      },
+    }))
+    setQuestionIndexByArticle((current) => ({
+      ...current,
+      [articleId]: 0,
     }))
   }
 
@@ -734,7 +830,13 @@ export function ReadingPageClient() {
               <div className="p-4 md:p-6">
                 {selectedArticle.audioUrl && (
                   <div className="mb-5 rounded-lg border border-[#e5e5df] bg-[#fbfbf8] p-3">
-                    <audio controls preload="metadata" className="h-10 w-full" src={selectedArticle.audioUrl}>
+                    <audio
+                      controls
+                      preload="metadata"
+                      className="h-10 w-full"
+                      src={selectedArticle.audioUrl}
+                      onPlay={() => logReadingActivity(selectedArticle, "reading_audio")}
+                    >
                       TrÃ¬nh duyá»‡t cá»§a báº¡n chÆ°a há»— trá»£ phÃ¡t audio.
                     </audio>
                   </div>
@@ -919,13 +1021,15 @@ export function ReadingPageClient() {
 
                   <div className="flex flex-col items-center gap-4 pt-1">
                     <Button
+                      data-i18n-managed
                       type="button"
                       size="lg"
-                      disabled={isSubmitted || totalQuestions === 0}
+                      disabled={totalQuestions === 0}
                       className="bg-[#171923] px-5 text-white shadow-sm hover:bg-[#111318] disabled:bg-muted disabled:text-muted-foreground"
-                      onClick={submitQuiz}
+                      onClick={isSubmitted ? restartQuiz : submitQuiz}
                     >
-                      {isSubmitted ? "\u0110\u00e3 n\u1ed9p" : "N\u1ed9p b\u00e0i"}
+                      {isSubmitted && <RotateCcw className="mr-2 h-4 w-4" />}
+                      {isSubmitted ? "Làm lại" : "Nộp bài"}
                     </Button>
 
                     <div className="flex items-center justify-center gap-5">

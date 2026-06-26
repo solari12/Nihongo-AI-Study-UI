@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
-import { BookOpen, Eye, EyeOff, LockKeyhole, Sparkles } from "lucide-react"
+import { ArrowLeft, BookOpen, Eye, EyeOff, LockKeyhole, Sparkles } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,6 +36,7 @@ export default function LoginPage() {
     loginError: isJapanese ? "\u30ed\u30b0\u30a4\u30f3\u3067\u304d\u307e\u305b\u3093\u3002" : "Kh\u00f4ng th\u1ec3 \u0111\u0103ng nh\u1eadp.",
     noAccount: isJapanese ? "\u30a2\u30ab\u30a6\u30f3\u30c8\u304c\u3042\u308a\u307e\u305b\u3093\u304b\uff1f" : "Ch\u01b0a c\u00f3 t\u00e0i kho\u1ea3n?",
     register: isJapanese ? "\u767b\u9332" : "\u0110\u0103ng k\u00fd",
+    backToIntro: isJapanese ? "\u7d39\u4ecb\u30da\u30fc\u30b8\u3078\u623b\u308b" : "V\u1ec1 trang gi\u1edbi thi\u1ec7u",
     sideTitle: isJapanese
       ? "\u81ea\u5206\u306e\u30da\u30fc\u30b9\u3067N5\u3092\u7d9a\u3051\u3088\u3046\u3002"
       : "Ti\u1ebfp t\u1ee5c l\u1ed9 tr\u00ecnh N5 c\u1ee7a ri\u00eang b\u1ea1n.",
@@ -79,8 +80,19 @@ export default function LoginPage() {
   return (
     <div
       data-i18n-managed
-      className="grid min-h-screen bg-[#fbf5ee] bg-[url('/assets/paper-card-bg-clean.png')] bg-cover bg-center lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
+      className="relative grid min-h-screen bg-[#fbf5ee] bg-[url('/assets/wallpaper.png')] bg-cover bg-center lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
     >
+      <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="absolute left-4 top-4 z-20 border-[#ead7c9] bg-white/88 text-[#2c211c] shadow-sm backdrop-blur hover:bg-white"
+      >
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {copy.backToIntro}
+        </Link>
+      </Button>
       <section className="relative flex items-center justify-center px-6 py-10">
         <Image
           src="/assets/Flower.png"

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { Brain, CheckCircle2, Home, RotateCcw, Sparkles } from "lucide-react"
+import { ArrowLeft, Brain, CheckCircle2, Home, RotateCcw, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -116,6 +116,15 @@ export default function PlacementTestPage() {
     setTestState("playing")
   }
 
+  const goBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back()
+      return
+    }
+
+    router.push("/onboarding")
+  }
+
   if (testState === "result") {
     const activeResult = result.completed ? result : placement
 
@@ -195,6 +204,10 @@ export default function PlacementTestPage() {
             <Button asChild>
               <Link href="/learning-path">Xem lộ trình AI</Link>
             </Button>
+            <Button variant="outline" onClick={goBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Quay lại
+            </Button>
             <Button variant="outline" onClick={restart}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Làm lại test
@@ -214,6 +227,10 @@ export default function PlacementTestPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
+        <Button variant="ghost" className="mb-3 -ml-3" onClick={goBack}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Quay lại
+        </Button>
         <Badge variant="outline" className="mb-3">Bước 2/2</Badge>
         <h1 className="text-2xl font-bold">Kiểm tra đầu vào</h1>
         <p className="mt-1 text-muted-foreground">{placementContext}</p>

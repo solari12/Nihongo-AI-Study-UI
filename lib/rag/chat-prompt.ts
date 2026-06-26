@@ -36,17 +36,31 @@ Nguyên tắc trả lời:
 - Khi có câu tiếng Nhật, giữ nguyên chữ Nhật và giải thích bằng tiếng Việt.
 - Luôn tạo câu trả lời hoàn chỉnh cho người học; không chỉ liệt kê tiêu đề nguồn hoặc tên tool.
 - Không bịa nguồn. Cuối câu trả lời có mục "Nguồn tham khảo" nếu có nguồn.
+- Nếu dữ liệu từ vựng/ngữ pháp/câu hỏi rỗng, thiếu hoặc là mảng rỗng, hãy bỏ qua mục đó; không hiển thị [] hoặc {} cho người học.
+- Với câu hỏi xác nhận về bài đọc như "bài này nói về ... à/không?", phải trả lời trực tiếp bằng "Có", "Không" hoặc "Chưa chắc" ngay câu đầu. Chỉ nói "Có" khi dữ liệu bài thật sự có chi tiết hỗ trợ; nếu thiếu dữ liệu hoặc không đủ chắc thì nói "Chưa chắc".
 - Khi nguồn bài đọc/news có link nội bộ, chỉ đưa link nội bộ dạng Markdown [tên bài](/reading?article=<id>). Không đưa link TODAII/sourceUrl ra câu trả lời trừ khi người học yêu cầu link gốc. Tuyệt đối không viết thành https://reading?article=...
 - Chỉ tạo quiz/trắc nghiệm khi người học yêu cầu rõ ràng. Nếu người học chỉ xin bài đọc, tóm tắt, từ vựng, ngữ pháp, hoặc link bài báo, không được tự sinh câu hỏi quiz.
-- Nếu đã dùng công cụ, có thể thêm mục "Dữ liệu đã xem" ngắn gọn.
+- Không hiển thị mục "Dữ liệu đã xem" trừ khi người học hỏi rõ Kami đã dựa vào dữ liệu nào. Nếu cần nhắc nguồn, hãy nói tự nhiên, ví dụ: "Mình đã chọn một bài phù hợp với trình độ N5."
+`.trim()
+
+export const nihongoTutorKnowledgeSystemPrompt = `
+Bạn là Kami, trợ lý dạy tiếng Nhật cho người Việt.
+- Trả lời đúng câu hỏi hiện tại, ngắn gọn và dễ hiểu cho người mới.
+- Nếu có nguồn phù hợp, ưu tiên dùng nguồn đó làm dữ kiện.
+- Nếu không có nguồn phù hợp, được dùng kiến thức tiếng Nhật nền của bạn để trả lời. Chỉ nói không chắc khi thực sự không chắc; không từ chối chỉ vì kho dữ liệu trống.
+- Với ngữ pháp: nêu ý nghĩa, cấu trúc, cách dùng và ví dụ Nhật - Việt.
+- Với từ vựng: nêu nghĩa, cách đọc, loại từ và ví dụ Nhật - Việt.
+- Hiểu lời đính chính của người học; không lặp lại đáp án cũ khi họ nói "ý là", "không phải" hoặc sửa câu hỏi.
+- Câu trả lời trước của Kami chỉ là ngữ cảnh, không phải nguồn sự thật. Nếu nó mâu thuẫn với câu hỏi hiện tại, hãy sửa lại thay vì tiếp tục theo hướng sai.
+- Không chỉ lặp tiêu đề nguồn và không bịa thông tin.
 `.trim()
 
 function formatHistory(history: ChatHistoryMessage[]) {
   if (!history.length) return "Chưa có hội thoại trước đó."
 
   return history
-    .slice(-6)
-    .map((item) => `${item.role === "user" ? "Người học" : "Trợ lý"}: ${item.content}`)
+    .slice(-3)
+    .map((item) => `${item.role === "user" ? "Người học" : "Trợ lý"}: ${item.content.slice(0, 600)}`)
     .join("\n")
 }
 
@@ -56,6 +70,7 @@ function formatSources(sources: RagSource[]) {
   }
 
   return sources
+    .slice(0, 3)
     .map(
       (source, index) => `
 Nguồn ${index + 1}
@@ -64,7 +79,7 @@ Tiêu đề: ${source.title}
 ${source.href ? `Link nội bộ: ${source.href}` : ""}
 Điểm khớp: ${source.score}
 Nội dung:
-${source.content}
+${source.content.slice(0, 800)}
 `.trim()
     )
     .join("\n\n")
@@ -80,7 +95,7 @@ Cấp độ: ${article.level}
 Danh mục: ${article.category ?? "Không rõ"}
 
 Nội dung bài báo:
-${article.articleText}
+${article.articleText.slice(0, 3500)}
 
 Từ vựng trong bài:
 ${article.vocabulary || "Không có dữ liệu từ vựng riêng."}
@@ -94,6 +109,8 @@ ${article.questions || "Không có câu hỏi có sẵn."}
 Quy tắc khi có bài báo active:
 - Nếu người học hỏi "bài này", "bài đó", tóm tắt, từ khó, ngữ pháp, dịch, giải thích đoạn, hoặc tạo bài tập/câu hỏi, hãy bám sát bài báo active này.
 - Không tự chuyển sang nguồn ngữ pháp/từ vựng khác nếu câu hỏi vẫn đang nói về bài báo.
+- Nếu người học hỏi kiểu xác nhận "bài này có/phải/nói về ... không/à?", câu đầu tiên phải trả lời thẳng "Có" hoặc "Không", rồi dẫn 1 chi tiết trong bài để giải thích. Không được chỉ nói "đã tìm thấy bài" hoặc chỉ liệt kê nguồn.
+- Nếu nội dung bài không đủ để xác nhận, câu đầu tiên phải là "Chưa chắc", rồi nói thiếu dữ liệu nào.
 - Nếu tạo quiz, hãy tạo câu hỏi đọc hiểu hoặc câu hỏi từ vựng/ngữ pháp rút ra từ bài báo này.
 `.trim()
 }
@@ -123,7 +140,8 @@ export function buildChatPrompt(
   history: ChatHistoryMessage[] = [],
   activeArticle?: ActiveArticleContext | null,
   projectContext = "",
-  includeQuizInstructions = false
+  includeQuizInstructions = false,
+  agentMode = "fallback"
 ) {
   return `
 Hội thoại gần đây:
@@ -132,9 +150,20 @@ ${formatHistory(history)}
 Câu hỏi hiện tại của người học:
 ${message}
 
+Agent mode hiện tại: ${agentMode}
+
 ${formatActiveArticle(activeArticle)}
 
 ${projectContext}
+
+AI learning orchestrator rules:
+- Kami is the AI learning orchestrator of this app, not just a chat assistant.
+- Role routing: answer as tutor for Japanese knowledge, coach for level/progress, examiner for quiz, learning planner for next-step requests, and project assistant for app/project questions.
+- Respect the provided Agent mode. Routing priority is current user message > workflow state > activeSource > studentModel > latestSources > history. Never let old history override a clear current reading question.
+- If Agent mode is reading_assistant and there is an active reading source, answer about that reading first. Do not switch to project capability/god-mode just because earlier history discussed the project.
+- If a Student Model snapshot is present, use it as the learner state. Do not print it as raw dashboard data; convert it into friendly Vietnamese study feedback.
+- Closed learning loop: lesson -> explanation -> quiz when requested -> grading -> saved history/activity -> refreshed Student Model -> next recommended action.
+- For "Kami lam duoc gi", "trung tam project", "god mode", or similar capability questions, answer only with real system capabilities: RAG over vocabulary/grammar/readings, active source awareness, quiz creation/grading, saved learning history when the UI/API records it, preliminary level assessment, and next-step planning. Do not claim admin data can be edited without permission/confirmation.
 
 Quy tắc agent trong app:
 - Nếu "Dữ liệu hệ thống đã xem" có thông tin về UI, quiz, progress, saved items, activity hoặc active source, xem đó là nguồn sự thật về trạng thái app.
@@ -150,4 +179,53 @@ ${includeQuizInstructions ? quizUiFormatInstructions() : ""}
 Hãy trả lời câu hỏi hiện tại dựa trên nguồn tham khảo. Nếu nguồn không đủ, vẫn hỗ trợ người học bằng cách chỉ ra thiếu dữ liệu và gợi ý câu hỏi tốt hơn.
 Không được trả lời chỉ bằng danh sách nguồn; phải giải thích trực tiếp câu hỏi của người học.
 `.trim()
+}
+
+export function buildKnowledgeChatPrompt(
+  message: string,
+  sources: RagSource[],
+  history: ChatHistoryMessage[] = []
+) {
+  const normalizedMessage = message
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+  const needsReferenceContext =
+    /(cau|vi du|muc)\s*(thu|so)\s*\d+|khong phai|y toi la|o tren|vua roi|cai do|cau do/.test(
+      normalizedMessage
+    )
+  const historyBudget = needsReferenceContext ? 3200 : 900
+  const historyCandidates = history.slice(needsReferenceContext ? -5 : -3)
+  const selectedHistory: string[] = []
+  let usedHistoryCharacters = 0
+
+  for (const item of [...historyCandidates].reverse()) {
+    const label = item.role === "user" ? "Người học" : "Kami"
+    const remaining = historyBudget - usedHistoryCharacters
+    if (remaining <= 0) break
+    const entry = `${label}: ${item.content.slice(0, remaining)}`
+    selectedHistory.unshift(entry)
+    usedHistoryCharacters += entry.length
+  }
+
+  const recentHistory = selectedHistory.join("\n\n")
+  const compactSources = sources
+    .slice(0, 2)
+    .map(
+      (source, index) =>
+        `Nguồn ${index + 1} (${source.type}) - ${source.title}:\n${source.content.slice(0, 600)}`
+    )
+    .join("\n\n")
+
+  return [
+    recentHistory ? `Ngữ cảnh gần nhất:\n${recentHistory}` : "",
+    `Câu hỏi hiện tại:\n${message}`,
+    `Dữ liệu học đã tìm thấy:\n${compactSources || "Không có nguồn phù hợp."}`,
+    compactSources
+      ? "Hãy trả lời trực tiếp và bám nguồn phù hợp. Nếu người học đang sửa ý, ưu tiên ý mới nhất."
+      : "Kho học không có nguồn phù hợp. Hãy dùng kiến thức tiếng Nhật nền để trả lời trực tiếp; không từ chối chỉ vì thiếu nguồn RAG.",
+  ]
+    .filter(Boolean)
+    .join("\n\n")
 }
